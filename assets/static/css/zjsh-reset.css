@@ -1,0 +1,51 @@
+blockquote, body, button, dd, dl, dt, fieldset, legend, form, h1, h2, h3, h4, h5, h6, ul, ol, li, p, pre, td, th, textarea
+{
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+}
+li
+{
+  list-style: none;
+}
+a, button
+{
+  outline: none;
+  star:expression_r(this.onFocus=this.blur());
+  text-decoration: none;
+}
+
+*[id*='ads']
+{
+  width: 0 !important;
+  height: 0 !important;
+  opacity: 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  z-index: -9999 !important;
+}
+
+.flex-row
+{
+  display: box;              /* OLD - Android 4.4- */
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
+  -webkit-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  -webkit-align-items: center;
+  align-items: center;
+}
+
+.txt-over-hide
+{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
