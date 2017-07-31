@@ -106,12 +106,15 @@ export default {
     }
   },
   mounted() {
-    let editAddrData = this.$route.params.addr_info;
-    for(let key in this.AddressAddedInfo) {
-      this.AddressAddedInfo[key] = editAddrData[key];
+    if (this.$route.params.addr_info) {
+      let editAddrData = this.$route.params.addr_info;
+
+      // 将AddressAddedInfo中存在的信息进行保存
+      for (let key in this.AddressAddedInfo) {
+        this.AddressAddedInfo[key] = editAddrData[key];
+      }
+      this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
     }
-    this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
-    // this.AddressAddedInfo.Tag = Number(this.AddressAddedInfo.Gender) > 0 ? this.AddressAddedInfo.Gender : '0';
     this.getAddressTags();
   },
   methods: {
