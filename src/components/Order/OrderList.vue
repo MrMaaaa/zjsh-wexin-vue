@@ -336,8 +336,10 @@ export default {
           // 定位到需要修改状态的订单
           this.orderList.map(value => {
             if(value.OrderId === res.data.Body.Order.OrderId) {
+              // 目前需要修改订单列表的状态按钮显示、支付状态
               value.OrderBtnInfo = res.data.Body.Order.OrderBtnInfo;
               value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+              value.PayStatus = res.data.Body.Order.PayStatus;
             }
           });
         } else {
@@ -353,6 +355,9 @@ export default {
           this.orderList.splice(i, 1);
           break;
         }
+      }
+      if(this.orderList.length <= 1) {
+        this.getOrderList();
       }
     },
     isShowOperationBtns(OrderBtnInfo) {
