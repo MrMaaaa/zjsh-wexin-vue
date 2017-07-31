@@ -61,17 +61,20 @@ export default {
 
           // 红包分类
           let date = new Date();
-          couponList.forEach((value, index) => {
+          couponList.map((value, index) => {
             // 只显示首页服务品类对应的id
             if (date.getTime() > value.EndTime + '000') {
               // 已过期红包
+              value.couponTypeByVue = '2';
               this.couponListOverdued.push(value);
             } else {
               if (value.IsUsed === '1') {
                 // 已使用红包
+                value.couponTypeByVue = '1';
                 this.couponListUsed.push(value);
               } else {
                 // 未使用红包
+                value.couponTypeByVue = '0';
                 this.couponListNoUsed.push(value);
               }
             }

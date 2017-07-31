@@ -1,7 +1,7 @@
 <template>
 <div class="wrapper">
   <div class="user-group">
-    <div class="user-section user-info flex-row" v-if="this.userInfo.nickName">
+    <div class="user-section user-info flex-row" v-if="this.userInfo.phoneNumber">
       <img class="user-avatar" :src="userInfo.avatar">
 
       <div class="section-info">

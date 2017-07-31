@@ -1,5 +1,8 @@
 <template>
-<li class="list-item flex-row">
+<!--
+couponTypeByVue: 0:未使用 1:已使用 2:已过期
+-->
+<li class="list-item flex-row" :class="{ gray: couponItem.couponTypeByVue === '1' || couponItem.couponTypeByVue === '2' }">
   <div class="left">
     <p class="item-discount">{{ couponItem.CouponDetails[0].DiscountAmount }}</p>
 
@@ -18,6 +21,9 @@
 
     <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
   </div>
+
+  <img v-if="couponItem.couponTypeByVue === '1'" class="item-status" src="../../assets/images/coupon_overdued.png">
+  <img v-if="couponItem.couponTypeByVue === '2'" class="item-status" src="../../assets/images/coupon_overdued.png">
 </li>
 </template>
 
@@ -170,9 +176,37 @@ export default {
       font-size: 11px;
     }
   }
+  .item-status
+  {
+    width: 2.08rem;
+    margin-right: 0.106667rem;
+  }
 }
 .list-item.gray
 {
   background-image: url(../../assets/images/coupon_bg_gray.png);
+  .left
+  {
+    .item-discount
+    {
+      color: #ccc;
+    }
+    .item-limit-discount
+    {
+      color: #cdcdcd;
+    }
+  }
+  .right
+  {
+    .item-title
+    {
+      color: #ccc;
+    }
+    .item-limit-service,
+    .item-limit-date
+    {
+      color: #cdcdcd;
+    }
+  }
 }
 </style>
