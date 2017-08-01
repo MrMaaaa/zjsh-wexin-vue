@@ -35,6 +35,8 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
+  transform: translateZ(0);
+  z-index: 9999999;
 
   width: 100%;
   height: 100%;

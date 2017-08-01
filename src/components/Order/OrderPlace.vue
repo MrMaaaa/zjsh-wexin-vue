@@ -167,6 +167,7 @@ export default {
   async mounted() {
     await this.getCouponList();
     await this.getServiceDetail();
+    this.getUserAddress();
     // if(Common.getCookie('ZJSH_WX_Replace') == '10') {
     //   try {
     //     Common.setCookie('ZJSH_WX_Replace', '', 30, '/');
@@ -322,6 +323,27 @@ export default {
       } else {
         this.CouponSelected.NoUse = '1';
       }
+    },
+    getUserAddress() {
+      axios.post(API.GetAddress, qs.stringify({
+        Token: this.Token
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then((res) => {
+        this.isLoading = false;
+        if (res.data.Meta.ErrorCode === '0') {
+          if(res.data.Body.length > 1) {
+            this.OrderInfo.Address = res.data.Body[0];
+          }
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(function(error) {
+        this.isLoading = false;
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
     },
     amountReduce() {
       this.OrderInfo.Amount -= this.countStep;

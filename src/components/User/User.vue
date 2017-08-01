@@ -6,7 +6,7 @@
 
       <div class="section-info">
         <span class="user-name">{{ userInfo.nickName }}</span>
-        <span class="user-phone">{{ userInfo.phoneNumber }}</span> 
+        <span class="user-phone">{{ userInfo.phoneNumber }}</span>
       </div>
     </div>
 
@@ -71,7 +71,7 @@
     </router-link>
   </div>
 
-  <div class="user-group" v-if="this.userInfo.nickName">
+  <div class="user-group" v-if="this.userInfo.phoneNumber">
     <a class="user-section logout" @click="logout">退出登录</a>
   </div>
 </div>

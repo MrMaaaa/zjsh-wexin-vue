@@ -34,7 +34,7 @@ export default {
       }
       // 该方法已被替换，但为避免兼容问题，仍然保留这些内容↑↑↑↑↑↑↑↑↑↑
     } else {
-      this.routerTo({ name: 'order_place' }, true);
+      this.$router.go(-1);
     }
 
     var iframe = document.getElementById("iframe");

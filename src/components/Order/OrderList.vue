@@ -410,14 +410,6 @@ export default {
     clearStr(str) {
       return (str == null || str == undefined) ? '' : str;
     },
-    payCountdown(time) {
-      if( time == 0) {
-        return '';
-      }
-      let minute = Math.floor(time / 60);
-      let second = time % 60;
-      return minute.toString().padStart(2, '0') + ':' + second.toString().padStart(2, '0');
-    },
   },
   components: {
     InfiniteLoading,

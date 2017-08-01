@@ -92,7 +92,7 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).then((res)=> {
-        this.isLoading = true;
+        this.isLoading = false;
         if (res.data.Meta.ErrorCode == '0') {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.$store.commit('SetToken', res.data.Body.Token);
@@ -102,7 +102,7 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch((error)=> {
-        this.isLoading = true;
+        this.isLoading = false;
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     }

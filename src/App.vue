@@ -28,10 +28,10 @@ export default {
     }
   },
   created() {
-    // 从缓存中获取Token, UserId, DefaultAddressId, OrderIdForPay
+    // 从缓存中获取Token, UserId, OrderIdForPay
     this.$store.commit('SetToken', Common.getCookie('ZJSH_WX_Token'));
     this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));
-    this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
+    // this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
     this.$store.commit('SetOrderIdForPay', Common.getCookie('ZJSH_WX_OrderIdForPay'));
 
     // 设置全局请求头

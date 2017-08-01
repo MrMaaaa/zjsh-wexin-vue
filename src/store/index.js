@@ -15,7 +15,11 @@ export default new Vuex.Store({
     UserId: '',
     OpenId: '',// 微信用户标识
     PhoneNumber: '',
+
+    // 获取默认地址，默认为上一次下单地址（未生效）
+    // 目前获取第一条地址即可，因此该参数暂时无效
     DefaultAddressId: '',
+
     ThreeServiceId: '12', // 详情页跳转下单页对应服务三级id
     ThreeServiceName: '油烟机清洗', // 详情页跳转下单页对应服务三级name
     OrderIdForPay: '', // 支付页面的订单id
