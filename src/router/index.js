@@ -33,7 +33,6 @@ const ROUTER_TO_TITLE = {
   '/menu/order/order_service_time': '选择服务时间',
   '/menu/user': '我的信息',
   '/menu/user/user_coupon': '我的红包',
-  '/login': '登录',
   '/menu/about': '关于我们',
   '/menu/connect_us': '联系我们',
   '/address/address_list': '服务地址',
@@ -130,11 +129,12 @@ var router = new Router({
 
 router.beforeEach((to, from, next) => {
   // 对不同的路由设置不同的title
-  document.title = ROUTER_TO_TITLE[to.path] || ROUTER_TO_TITLE['/menu/index'];
   if(document.getElementById('module_login') && document.getElementById('module_login').classList.contains('active')) {
     document.getElementById('module_login') && document.getElementById('module_login').classList.remove('active');
+    document.title = ROUTER_TO_TITLE[from.path] || ROUTER_TO_TITLE['/menu/index'];
     next(false);
   } else {
+    document.title = ROUTER_TO_TITLE[to.path] || ROUTER_TO_TITLE['/menu/index'];
     next();
   }
   // next();

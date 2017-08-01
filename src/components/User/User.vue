@@ -161,6 +161,13 @@ export default {
     },
     login() {
       document.getElementById('module_login').classList.add('active');
+      var WVJBIframe = document.createElement('iframe');
+      document.title = '登录';
+      WVJBIframe.style.display = 'none';
+      document.documentElement.appendChild(WVJBIframe);
+      setTimeout(function() {
+        document.documentElement.removeChild(WVJBIframe)
+      }, 0);
     },
     logout() {
       window._vds.push(['setCS1', 'user_id', '']);
