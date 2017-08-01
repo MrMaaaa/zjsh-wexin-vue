@@ -50,6 +50,8 @@ export default {
       });
     },
     routerTo(item) {
+      this.$store.commit('SetThreeServiceId', item.ServiceId);
+      this.$store.commit('SetThreeServiceName', item.ServiceName);
       this.$router.push({
         name: 'service_detail',
         query: {
