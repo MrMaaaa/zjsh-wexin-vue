@@ -1,6 +1,6 @@
 <template>
 <div class="wrapper">
-<iframe class="iframe-detail-page" scrolling="yes" frameborder="no" border="0" marginwidth="0" marginheight="0" :src="detail_url"></iframe>
+<iframe class="iframe-detail-page" scrolling="yes" id="iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" :src="detail_url"></iframe>
 
 <div class="subumit">
   <a class="btn-submit" @click="subumitForWx">立即预约</a>
@@ -35,6 +35,12 @@ export default {
       // 该方法已被替换，但为避免兼容问题，仍然保留这些内容↑↑↑↑↑↑↑↑↑↑
     } else {
       this.routerTo({ name: 'order_place' }, true);
+    }
+
+    var iframe = document.getElementById("iframe");
+
+    iframe.onload = () => {
+      document.getElementById("iframe").contentWindow.document.getElementById('now_submit').style.visibility = 'hidden';
     }
   },
   methods: {
