@@ -97,7 +97,7 @@ export default {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
-          this.$router.go(-1);
+          this.$router.go(0);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }

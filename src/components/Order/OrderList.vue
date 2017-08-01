@@ -57,7 +57,7 @@ export default {
       await axios.post(API.GetOrderListEx, qs.stringify({
         Token: this.Token,
         PageIndex: this.orderPageIndex,
-        PageSize: '10',
+        PageSize: '20',
         Type: '0',
       }), {
         header: {
@@ -84,10 +84,10 @@ export default {
                 //   }, 1000);
                 // }
                 // 只有当存在符合条件的订单时关闭loading
-                if (this.orderPageIndex > 1) {
+                this.orderList.push(value);
+                if (this.orderList.length > 1) {
                   this.isLoading = false;
                 }
-                this.orderList.push(value);
               }
             });
             this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
