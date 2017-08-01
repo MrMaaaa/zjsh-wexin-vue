@@ -115,7 +115,7 @@ export default {
           this.userInfo.nickName = res.data.Body.Info.NickName;
           this.userInfo.phoneNumber = res.data.Body.Info.PhoneNumber;
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);
@@ -132,7 +132,7 @@ export default {
         if(res.data.Meta.ErrorCode === '0') {
           this.userInfo.balance = res.data.Body.SettlementBalance;
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);
@@ -153,7 +153,7 @@ export default {
             }
           });
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);

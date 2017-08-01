@@ -60,13 +60,15 @@
     <div class="row flex-row">
       <span class="left">商务合作邮箱</span>
 
-      <span class="right">lidanyang@homepaas.com</span>
+      <a class="right" href="mailto:lidanyang@homepaas.com">lidanyang@homepaas.com</a>
     </div>
+
+    <div class="row-split"></div>
 
     <div class="row flex-row">
       <span class="left">意见反馈邮箱</span>
 
-      <span class="right">lidanyang@homepaas.com</span>
+      <a class="right" href="mailto:lidanyang@homepaas.com">lidanyang@homepaas.com</a>
     </div>
   </div>
 </div>
