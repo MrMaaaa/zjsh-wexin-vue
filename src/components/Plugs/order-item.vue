@@ -38,7 +38,7 @@
   </div>
 
   <div class="item-operation flex-row" v-if="orderItem.OrderBtnInfo.IsShowBtnInfo">
-    <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime == 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
+    <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime <= 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
     <div class="remain-pay-time hide"></div>
 
     <div class="operation-btns flex-row">
@@ -66,7 +66,6 @@ export default {
     // 设置支付倒计时
     if(this.orderItem.ResidualTime) {
       this.orderItem.payCountdownInterval = setInterval(() => {
-        console.log(1)
         this.orderItem.ResidualTime--;
         if(this.orderItem.ResidualTime == 0) {
           $emit('order-cancel-dialog', this.orderItem.OrderId);
@@ -109,6 +108,13 @@ export default {
       return minute.toString().padStart(2, '0') + '分' + second.toString().padStart(2, '0') + '秒';
     },
   },
+  watch: {
+    orderItem() {
+      if(!this.orderItem.ResidualTime || this.orderItem.ResidualTime <= 0) {
+        clearInterval(this.orderItem.payCountdownInterval);
+      }
+    }
+  }
 }
 </script>
 

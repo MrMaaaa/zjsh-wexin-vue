@@ -172,7 +172,13 @@ export default {
     logout() {
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
-      this.$router.go(0);
+      this.userInfo = {
+        nickName: '',
+        phoneNumber: '',
+        avatar: DefaultAvatar,
+        balance: '0',
+        couponCount: 0,
+      };
     },
   },
   computed: {

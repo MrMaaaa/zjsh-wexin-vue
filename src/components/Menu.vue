@@ -1,6 +1,8 @@
 <template>
   <div>
-    <router-view class="router-view"></router-view>
+    <keep-alive>
+      <router-view class="router-view"></router-view>
+    </keep-alive>
 
     <footer class="menu flex-row">
       <router-link :to="{ name: 'index' }" class="menu-item menu-item1" active-class="active">

@@ -93,11 +93,15 @@ export default {
         }
       }).then((res)=> {
         this.isLoading = false;
-        if (res.data.Meta.ErrorCode == '0') {
+        if (res.data.Meta.ErrorCode === '0') {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
-          this.$router.go(0);
+          document.getElementById('module_login').classList.remove('active');
+          setTimeout(() => {
+            // this.$router.go(0);
+            window.location.reload();
+          }, 500);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }

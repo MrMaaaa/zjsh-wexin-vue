@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <transition name="bounce">
-      <router-view class="router-view"></router-view>
+      <keep-alive>
+        <router-view class="router-view"></router-view>
+      </keep-alive>
     </transition>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>

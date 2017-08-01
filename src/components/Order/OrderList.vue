@@ -340,6 +340,7 @@ export default {
               value.OrderBtnInfo = res.data.Body.Order.OrderBtnInfo;
               value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
               value.PayStatus = res.data.Body.Order.PayStatus;
+              value.ResidualTime = res.data.Body.Order.ResidualTime;
             }
           });
         } else {

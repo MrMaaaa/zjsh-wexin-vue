@@ -51,7 +51,7 @@ export default {
     subumitForWx() {
       // ios下会导致iframe中的fixed元素不相对于父页面来定位，因此在详情页下方放置一个按钮用来填补缺失
       // 使用此按钮就无需在iframe中添加调用父页面方法
-      this.routerTo({ name: 'order_place' }, true);
+      this.routerTo({ name: 'order_place' }, false);
     },
     routerTo(option={'name':'order_place'}, isReplace=false) {
       if (isReplace) {
