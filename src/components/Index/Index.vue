@@ -1,6 +1,5 @@
 <template>
 <div class="wrapper">
-  <router-link :to="{ name: 'order_place' }" style="font-size: 14px; padding: 0.266667rem;">直接跳转到下单页</router-link>
   <section class="category" v-for="recommendItem in recommendList">
     <header class="category-title">{{ recommendItem.Title }}</header>
 

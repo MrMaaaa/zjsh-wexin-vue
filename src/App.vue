@@ -1,9 +1,7 @@
 <template>
   <div id="app">
     <transition name="bounce">
-      <keep-alive>
-        <router-view class="router-view"></router-view>
-      </keep-alive>
+      <router-view class="router-view"></router-view>
     </transition>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
@@ -36,6 +34,11 @@ export default {
     // this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
     this.$store.commit('SetOrderIdForPay', Common.getCookie('ZJSH_WX_OrderIdForPay'));
 
+    // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
+    if(this.OpenId == '') {
+      this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
+    }
+
     // 设置全局请求头
     axios.defaults.headers.common['zjsh_version'] = this.zjsh_version;
 
@@ -48,12 +51,16 @@ export default {
         //   path: '/login'
         // });
         this.openLogin();
+      } else if(response.config.data.includes('Token') && JSON.parse(response.request.response).Meta.ErrorCode !== "2004" && JSON.parse(response.request.response).Meta.ErrorCode !== "10"){
+        this.$store.commit('SetIsLogin', '1');
       }
       return response;
     }, error => Promise.reject(error));
   },
   mounted() {
-    this.getOpenId();
+    if(this.OpenId == '') {
+      this.getOpenId();
+    }
   },
   methods: {
     valueFromUrl(key) {
@@ -94,7 +101,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['Token', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus'])
+    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus'])
   },
   components: {
     MLogin

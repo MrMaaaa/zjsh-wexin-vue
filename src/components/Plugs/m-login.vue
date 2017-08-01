@@ -99,7 +99,7 @@ export default {
           this.$store.commit('SetUserId', res.data.Body.UserId);
           document.getElementById('module_login').classList.remove('active');
           setTimeout(() => {
-            // this.$router.go(0);
+            // 这里建议使用this.$router.go(0)来进行数据重绘，这样不会引起页面刷新
             window.location.reload();
           }, 500);
         } else {
@@ -142,6 +142,7 @@ $animate_duration: .5s;
   margin-top: 1.386667rem;
   padding-left: 0.586667rem;
   font-size: 24px;
+
   transition: color $animate_duration;
   &.disable
   {

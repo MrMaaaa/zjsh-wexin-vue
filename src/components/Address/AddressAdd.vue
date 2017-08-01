@@ -169,10 +169,9 @@ $row-height: 1.2rem;
 .address-input
 {
   display: block;
-  height: $row-height;
-  line-height: $row-height;
+  height: 0.64rem;
   margin: 0;
-  padding: 0;
+  padding: 0.28rem 0;
   border: none;
   outline: none;
   color: #333639;

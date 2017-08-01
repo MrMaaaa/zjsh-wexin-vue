@@ -50,6 +50,9 @@ export default {
   },
   mounted() {
     this.getCouponList();
+    if(this.orderList.length == 0) {
+      this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+    }
     // this.getOrderList();
   },
   methods: {
@@ -254,7 +257,7 @@ export default {
       this.orderIdProcess = orderInfo.OrderId;
       let couponId = '';
       let couponMax = this.getCouponMaxAmount(orderInfo.Service.ServiceId);
-      let p = orderInfo.Total * orderInfo.Price;
+      let p = orderInfo.TotalPrice;
       if(couponMax) {
         p -= couponMax.CouponDetails[0].DiscountAmount;
         couponId = couponMax.Id;
@@ -370,11 +373,12 @@ export default {
       }
     },
     addZero(str, digit = 2) {
-      if(''.padStart) {
-        return str.toString().padStart(digit, '0');
-      } else {
-        return Number(str) < 10 ? '0' + Number : str;
-      }
+      // if(String.padStart) {
+      //   return str.toString().padStart(digit, '0');
+      // } else {
+      //   return Number(str) < 10 ? '0' + Number : str;
+      // }
+      return Number(str) < 10 ? '0' + Number : str;
     },
     // routerToPay(item) {
     //   this.$store.commit('SetOrderIdForPay', item.OrderId);

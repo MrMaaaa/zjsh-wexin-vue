@@ -220,11 +220,9 @@ $splitLineColor: #e4eaee;
 .address-input
 {
   display: block;
-  width: 100%;
-  height: $row-height;
-  line-height: $row-height;
+  height: 0.64rem;
   margin: 0;
-  padding: 0;
+  padding: 0.28rem 0;
   border: none;
   outline: none;
   color: #333639;

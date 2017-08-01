@@ -216,15 +216,9 @@ export default {
         this.bgLoading = '2';
         if (res.data.Meta.ErrorCode === '0') {
           this.serviceList = res.data.Body.Service.SubItems;
-          if(this.OrderInfo.FourServiceId !== '') {
-            this.serviceList.map((value, index) => {
-              if(value.ServiceId === this.OrderInfo.FourServiceId) {
-                this.selectType(value, index);
-              }
-            })
-          } else {
-            this.selectType(this.serviceList[0], 0);
-          }
+
+          // 默认显示第一个服务品类
+          this.selectType(this.serviceList[0], 0);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -391,7 +385,7 @@ export default {
         this.minCount = Number(item.MinCount);
 
         // 初始化数量
-        this.OrderInfo.Amount = this.OrderInfo.Amount || this.minCount;
+        this.OrderInfo.Amount = this.minCount;
 
         // 判断是否可增减
         this.amountCheck();
@@ -485,7 +479,16 @@ export default {
 
 
             // 如果需要使用红包，需要在传入的总金额中减去红包的金额
-            let p = this.OrderInfo.CouponSelected.NoUse === '1' ? String(this.OrderInfo.Price * this.OrderInfo.Amount) : String(this.OrderInfo.Price * this.OrderInfo.Amount - this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount);
+
+            // 原始总价
+            let p = Number(this.OrderInfo.Amount * this.OrderInfo.Price);
+
+            // 减去一元保险
+            p += this.OrderInfo.IsClaims == '1' ? 1 : 0;
+
+            // 减去红包折扣
+            p -= this.OrderInfo.CouponSelected.NoUse === '1' ? 0 : Number(this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount);
+
             this.orderPay(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
           } else {
             this.alert(res.data.Meta.ErrorMsg);
@@ -650,7 +653,7 @@ export default {
       if(a.indexOf('.') === -1) {
         return amount + '.00';
       } else {
-        a.split('.')[0] + '.' + a.split('.')[1].length === 1 ? a.split('.')[1] + '0' : a.split('.')[1];
+        return a.split('.')[0] + '.' + (a.split('.')[1].length === 1 ? a.split('.')[1] + '0' : a.split('.')[1]);
       }
     }
   }

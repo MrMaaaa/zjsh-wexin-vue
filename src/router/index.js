@@ -33,7 +33,7 @@ const ROUTER_TO_TITLE = {
   '/menu/order/order_service_time': '选择服务时间',
   '/menu/user': '我的信息',
   '/menu/user/user_coupon': '我的红包',
-  '/menu/about': '关于我们',
+  '/menu/about': '关于助家生活',
   '/menu/connect_us': '联系我们',
   '/address/address_list': '服务地址',
   '/address/address_add': '添加服务地址',
@@ -132,12 +132,24 @@ router.beforeEach((to, from, next) => {
   if(document.getElementById('module_login') && document.getElementById('module_login').classList.contains('active')) {
     document.getElementById('module_login') && document.getElementById('module_login').classList.remove('active');
     document.title = ROUTER_TO_TITLE[from.path] || ROUTER_TO_TITLE['/menu/index'];
+
+    // input失去焦点
+    let inputs = document.getElementsByTagName('input');
+    for (let i = 0; i < inputs.length; i++) {
+      inputs[i].blur();
+    }
+
     next(false);
   } else {
-    document.title = ROUTER_TO_TITLE[to.path] || ROUTER_TO_TITLE['/menu/index'];
-    next();
+    if(to.path === '/menu/index/detail' && from.path === '/menu/index/detail') {
+      next({
+        name: '/menu/index'
+      });
+    } else {
+      document.title = ROUTER_TO_TITLE[to.path] || ROUTER_TO_TITLE['/menu/index'];
+      next();
+    }
   }
-  // next();
 })
 
 export default router;

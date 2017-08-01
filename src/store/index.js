@@ -16,12 +16,18 @@ export default new Vuex.Store({
     OpenId: '',// 微信用户标识
     PhoneNumber: '',
 
+    // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0
+    IsLogin: '0',
+
+    // 详情页url，避免后退导致详情页无法加载
+    DetailUrlForDetailPage: '',
+
     // 获取默认地址，默认为上一次下单地址（未生效）
     // 目前获取第一条地址即可，因此该参数暂时无效
     DefaultAddressId: '',
 
-    ThreeServiceId: '12', // 详情页跳转下单页对应服务三级id
-    ThreeServiceName: '油烟机清洗', // 详情页跳转下单页对应服务三级name
+    ThreeServiceId: '', // 详情页跳转下单页对应服务三级id
+    ThreeServiceName: '', // 详情页跳转下单页对应服务三级name
     OrderIdForPay: '', // 支付页面的订单id
     OrderInfo: { // 下单页提交订单信息
       FourServiceId: '', // 四级服务id
@@ -90,6 +96,7 @@ export default new Vuex.Store({
       return state.UserId = data;
     },
     SetOpenId(state, data = '') {
+      Common.setCookie('ZJSH_WX_OpenId', data, 1, '/');
       return state.OpenId = data;
     },
     SetDefaultAddressId(state, data = '') {
@@ -98,6 +105,12 @@ export default new Vuex.Store({
     },
     SetPhoneNumber(state, data = '') {
       return state.PhoneNumber = data;
+    },
+    SetIsLogin(state, data = '') {
+      return state.IsLogin = data;
+    },
+    SetDetailUrlForDetailPage(state, data = '') {
+      return state.DetailUrlForDetailPage = data;
     },
     SetThreeServiceId(state, data = '') {
       return state.ThreeServiceId = data;
