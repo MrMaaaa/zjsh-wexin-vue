@@ -27,6 +27,7 @@ export default {
 .router-view
 {
   background-color: #fff;
+  padding-top: 0.6rem;
 }
 .logo
 {

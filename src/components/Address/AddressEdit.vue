@@ -19,6 +19,8 @@
             <span class="txt-selector">女士</span>
           </div>
         </div>
+
+        <img class="input-clear" @click="AddressAddedInfo.Contact=''" src="../../assets/images/input_delete.png">
       </div>
     </div>
 
@@ -27,6 +29,8 @@
 
       <div class="info">
         <input class="address-input" type="tel" v-model="AddressAddedInfo.PhoneNumber" maxlength="11" placeholder="您的联系电话">
+
+        <img class="input-clear" @click="AddressAddedInfo.PhoneNumber=''" src="../../assets/images/input_delete.png">
       </div>
     </div>
 
@@ -38,6 +42,8 @@
         <router-link :to="{ name: 'address_select' }" v-else class="address-input txt-over-hide">{{ AddressAddedInfo.Address1 }}</router-link>
         <div class="split-line"></div>
         <input class="address-input" type="text" v-model="AddressAddedInfo.Address2" placeholder="详细地址（如1单元203室…）">
+
+        <img class="input-clear bottom" @click="AddressAddedInfo.Address2=''" src="../../assets/images/input_delete.png">
       </div>
     </div>
   </section>
@@ -134,28 +140,38 @@ export default {
       });
     },
     saveAddress() {
-      this.isLoading = true;
-      axios.post(API.EditAddress, qs.stringify({
-        Token: this.Token,
-        Address: this.AddressAddedInfo
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then((res) => {
-        this.isLoading = false;
-        if (res.data.Meta.ErrorCode == '0') {
-          this.$router.replace({
-            name: 'address_list'
-          });
-        } else {
+      if(this.AddressAddedInfo.Contact === '') {
+        this.alert(this.ALERT_MSG.ADDRESS_ERROR.NAME_EMPTY);
+      } else if (this.AddressAddedInfo.PhoneNumber === '') {
+        this.alert(this.ALERT_MSG.ADDRESS_ERROR.PHONE_EMPTY);
+      } else if (this.AddressAddedInfo.Address1 === '') {
+        this.alert(this.ALERT_MSG.ADDRESS_ERROR.ADDRESS_EMPTY);
+      } else if (this.AddressAddedInfo.Address2 === '') {
+        this.alert(this.ALERT_MSG.ADDRESS_ERROR.ADDRESS_EMPTY);
+      } else if(this.isSaved) {
+        this.isLoading = true;
+        axios.post(API.EditAddress, qs.stringify({
+          Token: this.Token,
+          Address: this.AddressAddedInfo
+        }), {
+          header: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }).then((res) => {
           this.isLoading = false;
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(function(error) {
-        this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
-      });
+          if (res.data.Meta.ErrorCode === '0') {
+            this.$router.replace({
+              name: 'address_list'
+            });
+          } else {
+            this.isLoading = false;
+            this.alert(res.data.Meta.ErrorMsg);
+          }
+        }).catch(function(error) {
+          this.isLoading = false;
+          this.alert(this.ALERT_MSG.NET_ERROR);
+        });
+      }
     },
     deleteAddress() {
       this.isLoading = true;
@@ -204,6 +220,7 @@ $splitLineColor: #e4eaee;
 .address-input
 {
   display: block;
+  width: 100%;
   height: $row-height;
   line-height: $row-height;
   margin: 0;
@@ -258,6 +275,7 @@ $splitLineColor: #e4eaee;
     }
     .info
     {
+      position: relative;
       width: 1px;
       height: 100%;
       flex-grow: 1;
@@ -285,6 +303,19 @@ $splitLineColor: #e4eaee;
             vertical-align: middle;
           }
         }
+      }
+      .input-clear
+      {
+        position: absolute;
+        right: 0.346667rem;
+        top: 0.373333rem;
+        width: 0.426667rem;
+        height: 0.426667rem;
+      }
+      .input-clear.bottom
+      {
+        top: none;
+        top: 1.573333rem;
       }
     }
   }
@@ -375,11 +406,11 @@ $splitLineColor: #e4eaee;
     color: #fff;
     text-align: center;
     font-size: 16px;
-    &.disable
-    {
-      background-color: rgba(86,201,255,.3);
-      pointer-events: none;
-    }
+    // &.disable
+    // {
+    //   background-color: rgba(86,201,255,.3);
+    //   pointer-events: none;
+    // }
   }
 }
 </style>

@@ -57,6 +57,13 @@ export default new Vuex.Store({
       SEND_CAPTCHA: '验证码发送成功，请注意查收',
       PAY_SUCESS: '支付成功',
       PAY_ERROR: '支付失败',
+      ADDRESS_ERROR: {
+        NAME_EMPTY: '请填写您的姓名',
+        SEX_EMPTY: '请选择您的性别',
+        PHONE_EMPTY: '请填写你的手机号',
+        PHONE_ERROR: '请填写正确的手机号',
+        ADDRESS_EMPTY: '请填写您的详细地址',
+      }
     },
 
     // 如何使用下面的两个过滤列表：ThreeServiceIdFilterList.includes(' ' + id + ' ')【或者判断indexOf是否大于-1】

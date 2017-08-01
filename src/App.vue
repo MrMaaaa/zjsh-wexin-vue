@@ -5,11 +5,17 @@
     </transition>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
+
+    <section id="module_login">
+      <a class="module-close"></a>
+      <m-login></m-login>
+    </section>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import MLogin from './components/Plugs/m-login.vue';
 import API from './config/backend';
 import axios from 'axios';
 import qs from 'qs';
@@ -34,10 +40,12 @@ export default {
     // 设置拦截器，当接口返回2004时跳转到登录页
     // 拦截器例外：“我的”页面
     axios.interceptors.response.use(response => {
-      if ( !this.interceptorsExceptList.includes(this.$route.name) && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
-        this.$router.push({
-          path: '/login'
-        });
+      //if (!this.interceptorsExceptList.includes(this.$route.name) && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
+      if (!this.interceptorsExceptList.includes(this.$route.name) && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
+        // this.$router.push({
+        //   path: '/login'
+        // });
+        this.openLogin();
       }
       return response;
     }, error => Promise.reject(error));
@@ -72,10 +80,16 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
+    openLogin() {
+      document.getElementById('module_login').classList.add('active');
+    }
   },
   computed: {
     ...mapState(['Token', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus'])
   },
+  components: {
+    MLogin
+  }
 }
 </script>
 
@@ -116,5 +130,22 @@ body,
     -webkit-transform: translate3d(100%,0,0);
     transform: translate3d(-100%,0,0);
   }
+}
+#module_login
+{
+  position: fixed;
+  top: 100%;
+  left: 0;
+  z-index: 9999;
+  transform: translateZ(0);
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  transition: all .5s;
+}
+#module_login.active
+{
+  top: 0;
+  transition: all .5s;
 }
 </style>

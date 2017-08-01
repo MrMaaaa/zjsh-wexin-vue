@@ -6,17 +6,17 @@
 
       <div class="section-info">
         <span class="user-name">{{ userInfo.nickName }}</span>
-        <span class="user-phone">{{ userInfo.phoneNumber }}</span>
+        <span class="user-phone">{{ userInfo.phoneNumber }}</span> 
       </div>
     </div>
 
-    <router-link :to="{ name: 'login' }" class="user-section user-info login flex-row" v-else>
+    <a @click="login" class="user-section user-info login flex-row" v-else>
       <img class="user-avatar" src="../../assets/images/user_default.png">
 
       <div class="section-info">
         <span class="user-name">快速登录</span>
       </div>
-    </router-link>
+    </a>
   </div>
 
   <div class="user-group">
@@ -158,6 +158,9 @@ export default {
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
+    },
+    login() {
+      document.getElementById('module_login').classList.add('active');
     },
     logout() {
       window._vds.push(['setCS1', 'user_id', '']);

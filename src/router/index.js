@@ -22,7 +22,27 @@ import UserCoupon from '@/components/User/UserCoupon';
 
 Vue.use(Router);
 
-export default new Router({
+// 路由-标题映射表
+const ROUTER_TO_TITLE = {
+  '/menu/index': '搜上门服务，用助家生活',
+  '/menu/index/detail': '服务详情',
+  '/menu/order': '订单列表',
+  '/menu/order/order_place': '下单页',
+  '/menu/order/order_pay_status': '订单信息',
+  '/menu/order/order_pay': '订单支付',
+  '/menu/order/order_service_time': '选择服务时间',
+  '/menu/user': '我的信息',
+  '/menu/user/user_coupon': '我的红包',
+  '/login': '登录',
+  '/menu/about': '关于我们',
+  '/menu/connect_us': '联系我们',
+  '/address/address_list': '服务地址',
+  '/address/address_add': '添加服务地址',
+  '/address/address_edit': '修改服务地址',
+  '/address/address_select': '修改服务地址',
+}
+
+var router = new Router({
   routes: [{
     path: '',
     redirect: '/menu/index'
@@ -44,7 +64,7 @@ export default new Router({
     }, {
       path: 'user',
       name: 'user',
-      component: User
+      component: User,
     }]
   }, {
     path: '/menu/index/detail',
@@ -107,3 +127,17 @@ export default new Router({
     component: UserCoupon,
   }]
 });
+
+router.beforeEach((to, from, next) => {
+  // 对不同的路由设置不同的title
+  document.title = ROUTER_TO_TITLE[to.path] || ROUTER_TO_TITLE['/menu/index'];
+  if(document.getElementById('module_login') && document.getElementById('module_login').classList.contains('active')) {
+    document.getElementById('module_login') && document.getElementById('module_login').classList.remove('active');
+    next(false);
+  } else {
+    next();
+  }
+  // next();
+})
+
+export default router;
