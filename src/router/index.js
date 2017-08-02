@@ -19,7 +19,7 @@ import OrderServiceTime from '@/components/Order/OrderServiceTime';
 import OrderCouponSelect from '@/components/Order/OrderCouponSelect';
 import User from '@/components/User/User';
 import UserCoupon from '@/components/User/UserCoupon';
-
+import Wang from '@/components/wang/Wang';
 Vue.use(Router);
 
 // 路由-标题映射表
@@ -124,6 +124,10 @@ var router = new Router({
     path: '/menu/user/user_coupon',
     name: 'user_coupon',
     component: UserCoupon,
+  },{
+    path: '/wang/:id',
+    name: 'wang',
+    component: Wang,
   }]
 });
 
