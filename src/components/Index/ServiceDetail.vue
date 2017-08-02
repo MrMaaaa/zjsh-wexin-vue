@@ -92,7 +92,7 @@
 
         <div class="region-content flex-row">
           <div class="content-icon">
-              <img src="/assets/static/images/heart.png">
+              <img :src="imgUrl + 'heart.png'">
           </div>
 
 
@@ -105,7 +105,7 @@
 
         <div class="region-content flex-row">
             <div class="content-icon">
-                <img src="/assets/static/images/safe.png">
+                <img :src="imgUrl + 'safe.png'">
             </div>
 
             <div class="content-info">
@@ -133,6 +133,7 @@ export default {
   name: "service_detail",
   data() {
     return {
+      imgUrl: data.imgUrl,
       pageData: data[this.$route.params.id],
       serviceList: [],
     }
