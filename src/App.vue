@@ -51,11 +51,12 @@ export default {
         //   path: '/login'
         // });
         this.openLogin();
-      } else if(response.config.data.includes('Token') && JSON.parse(response.request.response).Meta.ErrorCode !== "2004" && JSON.parse(response.request.response).Meta.ErrorCode !== "10"){
-        this.$store.commit('SetIsLogin', '1');
       }
       return response;
     }, error => Promise.reject(error));
+
+    // 检测Token是否有效
+    this.vertifyToken();
   },
   mounted() {
     if(this.OpenId == '') {
@@ -98,6 +99,19 @@ export default {
       setTimeout(function() {
         document.documentElement.removeChild(WVJBIframe)
       }, 0);
+    },
+    vertifyToken() {
+      axios.post(API.VerifyToken, qs.stringify({
+        Token: this.Token,
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          this.$store.commit('SetIsLogin', '1');
+        }
+      });
     }
   },
   computed: {

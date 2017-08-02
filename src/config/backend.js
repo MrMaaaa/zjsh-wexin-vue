@@ -9,6 +9,9 @@ export default {
   // 发送验证码
   "SendCaptcha": wap + "api/v3/Helper/SendCaptcha",
 
+  // 通过Token获取用户信息
+  "VerifyToken": wap + "api/v3/helper/VerifyToken",
+
   // 快捷登录
   "QuickLogin": wap + "api/v3/Wap/QuickLogin",
 

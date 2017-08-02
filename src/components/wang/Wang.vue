@@ -150,25 +150,9 @@ body
 
   background-color: #eaeff3;
 }
-#app{
-	width: 100%; height: 100%!important; overflow: scroll;
-}
-.flex-row
+#app
 {
-  display: box;              /* OLD - Android 4.4- */
-  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
-  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
-  display: -ms-flexbox;      /* TWEENER - IE 10 */
-  display: -webkit-flex;     /* NEW - Chrome */
-  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
-  -webkit-flex-wrap: nowrap;
-  flex-wrap: nowrap;
-  -webkit-flex-direction: row;
-  flex-direction: row;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  align-items: center;
+	width: 100%; height: 100%!important; overflow: scroll;
 }
 .section
 {

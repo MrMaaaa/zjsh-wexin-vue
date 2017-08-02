@@ -100,7 +100,8 @@ export default {
           document.getElementById('module_login').classList.remove('active');
           setTimeout(() => {
             // 这里建议使用this.$router.go(0)来进行数据重绘，这样不会引起页面刷新
-            window.location.reload();
+            //window.location.reload();
+            this.$router.go(0);
           }, 500);
         } else {
           this.alert(res.data.Meta.ErrorMsg);

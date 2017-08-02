@@ -51,15 +51,25 @@ export default {
     routerTo(item) {
       this.$store.commit('SetThreeServiceId', item.ServiceId);
       this.$store.commit('SetThreeServiceName', item.ServiceName);
+
+      // iframe
+      // this.$router.push({
+      //   name: 'service_detail',
+      //   query: {
+      //     service_id: item.ServiceId
+      //   },
+      //   params: {
+      //     detail_url: item.DetailUrl
+      //   }
+      // })
+
+      // 自定义模块
       this.$router.push({
         name: 'service_detail',
-        query: {
-          service_id: item.ServiceId
-        },
         params: {
-          detail_url: item.DetailUrl
+          id: item.ServiceId
         }
-      })
+      });
     }
   },
   computed: {

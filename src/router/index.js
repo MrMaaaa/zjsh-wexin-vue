@@ -66,7 +66,7 @@ var router = new Router({
       component: User,
     }]
   }, {
-    path: '/menu/index/detail',
+    path: '/menu/index/detail/:id',
     name: 'service_detail',
     component: ServiceDetail
   }, {
