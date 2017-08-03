@@ -336,7 +336,7 @@ export default {
       }).then((res) => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          if(res.data.Body.length > 1) {
+          if(res.data.Body.length >= 1) {
             if(!this.OrderInfo.Address.Id) {
               this.OrderInfo.Address = res.data.Body[0];
             }
