@@ -9,7 +9,7 @@ export default new Vuex.Store({
     zjsh_version: '3.5.0',
 
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'user',
+    interceptorsExceptList: 'user index',
 
     Token: '',
     UserId: '',
@@ -79,7 +79,7 @@ export default new Vuex.Store({
     // 如何使用下面的两个过滤列表：ThreeServiceIdFilterList.includes(' ' + id + ' ')【或者判断indexOf是否大于-1】
     // 注意：必须加上id前后的空格才能保证正确判断
     ThreeServiceIdFilterList: ' 2 3 4 12 13 15 ', // 首页对应的三级服务id
-    FourServiceIdFilterList: ' 5 733 734 735 316 317 297 298 299 300 301 302 307 308 ', // 首页对应的四级服务id
+    FourServiceIdFilterList: ' 5 733 734 735 316 317 297 298 299 300 301 302 307 308 815 814 ', // 首页对应的四级服务id
 
     // 全局弹框配置
     AlertMsg: '', // 弹出信息
@@ -113,9 +113,11 @@ export default new Vuex.Store({
       return state.DetailUrlForDetailPage = data;
     },
     SetThreeServiceId(state, data = '') {
+      Common.setCookie('ZJSH_WX_ThreeServiceId', data, 1, '/');
       return state.ThreeServiceId = data;
     },
     SetThreeServiceName(state, data = '') {
+      Common.setCookie('ZJSH_WX_ThreeServiceName', encodeURIComponent(data), 1, '/');
       return state.ThreeServiceName = data;
     },
     SetOrderIdForPay(state, data = '') {
@@ -123,7 +125,7 @@ export default new Vuex.Store({
       return state.OrderIdForPay = data;
     },
     SetOrderInfo(state, data) {
-      Common.setCookie('ZJSH_WX_OrderInfo', JSON.stringify(data), 30, '/');
+      Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');
       return state.OrderInfo = data;
     },
     SetAddressAddedInfo(state, data) {

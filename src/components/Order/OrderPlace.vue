@@ -78,7 +78,7 @@
   </section>
 
   <section class="section discount">
-    <ul class="discount-list">
+    <ul class="discount-list" v-if="activityList.length > 0">
       <li class="list-item-discount">-￥{{ discountAmount | amountFormat }}</li>
       <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
     </ul>
@@ -218,7 +218,15 @@ export default {
           this.serviceList = res.data.Body.Service.SubItems;
 
           // 默认显示第一个服务品类
-          this.selectType(this.serviceList[0], 0);
+          if(this.OrderInfo.FourServiceId) {
+            res.data.Body.Service.SubItems.map((value, index) => {
+              if (value.ServiceId === this.OrderInfo.FourServiceId) {
+                this.selectType(this.serviceList[index], index);
+              }
+            });
+          } else {
+            this.selectType(this.serviceList[0], 0);
+          }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -329,7 +337,9 @@ export default {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           if(res.data.Body.length > 1) {
-            this.OrderInfo.Address = res.data.Body[0];
+            if(!this.OrderInfo.Address.Id) {
+              this.OrderInfo.Address = res.data.Body[0];
+            }
           }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
@@ -467,16 +477,6 @@ export default {
             // 订单支付页所用数据
             this.$store.commit('SetOrderInfo', this.OrderInfo);
             this.$store.commit('SetOrderIdForPay', res.data.Body.OrderId);
-
-
-            // ***************
-            // Common.setCookie('ZJSH_WX_Replace', '10', 30, '/');
-            // Common.setCookie('ZJSH_WX_OrderInfo', JSON.stringify(this.OrderInfo), 30, '/');
-
-            // let url = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=code&scope=snsapi_base#wechat_redirect';
-            // window.location.replace(url);
-            // ***************
-
 
             // 如果需要使用红包，需要在传入的总金额中减去红包的金额
 

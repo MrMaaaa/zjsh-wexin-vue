@@ -47,16 +47,21 @@ export default {
     }
   },
   mounted() {
-    if(window.parent !== window.self) {
+    if (window.parent !== window.self) {
       let parentToken = window.parent.GetTokenFromParentWindow();
-      this.$store.commit('SetToken', parentToken);
+      this.getAddressList(parentToken);
+    } else {
+      this.getAddressList();
     }
-    this.getAddressList();
   },
   methods: {
-    getAddressList() {
+    getAddressList(addToken) {
+      if(addToken) {
+        this.Token = addToken;
+        this.$store.commit('SetToken', addToken);
+      }
       axios.post(API.GetAddress, qs.stringify({
-        Token: this.Token
+        Token: addToken || this.Token
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'

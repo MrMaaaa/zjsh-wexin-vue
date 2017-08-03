@@ -96,12 +96,14 @@ export default {
 <style scoped lang="scss">
 .wrapper
 {
-  background-color: #fff;
+  background-color: #eef2f5;
   .coupon-no-use
   {
     padding: 0.32rem;
     color: #333639;
     font-size: 14px;
+
+    background-color: #fff;
     img
     {
       width: 0.586667rem;
@@ -109,6 +111,8 @@ export default {
   }
   .coupon-list
   {
+    margin-top: 0.32rem;
+    background-color: #fff;
     overflow: hidden;
   }
   .coupon-empty

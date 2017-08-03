@@ -39,13 +39,13 @@ export default {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).then((res) => {
-        if (res.data.Meta.ErrorCode == '0') {
+        if (res.data.Meta.ErrorCode === '0') {
           this.recommendList = res.data.Body.RecommendBlock.slice(0, 2);
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          // this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch((error)=> {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        // this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
     routerTo(item) {
@@ -73,7 +73,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['ALERT_MSG'])
+    ...mapState(['ALERT_MSG']),
   }
 }
 </script>

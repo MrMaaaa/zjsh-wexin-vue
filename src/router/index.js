@@ -31,6 +31,7 @@ const ROUTER_TO_TITLE = {
   '/menu/order/order_pay_status': '订单信息',
   '/menu/order/order_pay': '订单支付',
   '/menu/order/order_service_time': '选择服务时间',
+  '/menu/order/order_coupon_select': '使用红包',
   '/menu/user': '我的信息',
   '/menu/user/user_coupon': '我的红包',
   '/menu/about': '关于助家生活',

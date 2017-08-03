@@ -8,7 +8,7 @@
 
     <section id="module_login">
       <a class="module-close"></a>
-      <m-login></m-login>
+      <m-login @user-login="reflashPage"></m-login>
     </section>
   </div>
 </template>
@@ -33,6 +33,8 @@ export default {
     this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));
     // this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
     this.$store.commit('SetOrderIdForPay', Common.getCookie('ZJSH_WX_OrderIdForPay'));
+    this.$store.commit('SetThreeServiceId', Common.getCookie('ZJSH_WX_ThreeServiceId'));
+    this.$store.commit('SetThreeServiceName', decodeURIComponent(Common.getCookie('ZJSH_WX_ThreeServiceName')));
 
     // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
     if(this.OpenId == '') {
@@ -56,11 +58,15 @@ export default {
     }, error => Promise.reject(error));
 
     // 检测Token是否有效
-    this.vertifyToken();
+    if (window.parent === window.self) {
+      this.vertifyToken();
+    }
   },
   mounted() {
-    if(this.OpenId == '') {
-      this.getOpenId();
+    if (window.parent === window.self) {
+      if (this.OpenId == '') {
+        this.getOpenId();
+      }
     }
   },
   methods: {
@@ -112,6 +118,9 @@ export default {
           this.$store.commit('SetIsLogin', '1');
         }
       });
+    },
+    reflashPage() {
+      // this.$router.go(0);
     }
   },
   computed: {

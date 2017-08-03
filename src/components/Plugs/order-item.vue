@@ -104,8 +104,10 @@ export default {
         return '';
       }
       let minute = Math.floor(time / 60);
+      minute = minute < 10 ? '0' + minute : minute;
       let second = time % 60;
-      return minute.toString().padStart(2, '0') + '分' + second.toString().padStart(2, '0') + '秒';
+      second = second < 10 ? '0' + second : second;
+      return minute + '分' + second + '秒';
     },
   },
   watch: {

@@ -18,7 +18,7 @@
             <tr v-for="item in serviceList">
               <td>{{ item.ServiceName }}</td>
               <td>{{ item.DepositAmount | clearDeposit }}</td>
-              <td>{{ item.Price }}元</td>
+              <td>{{ item.Price }}元/{{ item.Unit }}</td>
             </tr>
           </tbody>
         </table>
@@ -544,6 +544,7 @@ body
   position: fixed;
   bottom: 0;
   left: 0;
+  transform: translateZ(0);
 
   width: 100%;
   padding: 15px 25px;

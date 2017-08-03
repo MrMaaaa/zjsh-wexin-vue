@@ -72,8 +72,9 @@ export default {
     },
     dateSelect(event, item, index) {
       event.target.scrollIntoView(false);
+      console.log(item);
       this.dateIndex = Number(index);
-      this.selDate = item.Date.split(' ')[1];
+      this.selDate = item.Date.split(' ')[0];
       this.timeList = this.dateList[index].TimeRange2;
     },
     timeSelect(item, index) {

@@ -13,7 +13,7 @@
 
     <div class="login-row flex-row">
       <img class="icon-header" src="../../assets/images/register_captcha.png">
-      <input v-model="captcha" id="captcha" type="number" placeholder="请输入验证码" maxlength="4">
+      <input v-model="captcha" id="captcha" type="tel" placeholder="请输入验证码" maxlength="4">
     </div>
   </section>
 
@@ -97,11 +97,12 @@ export default {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
+          this.$emit('user-login');
           document.getElementById('module_login').classList.remove('active');
           setTimeout(() => {
             // 这里建议使用this.$router.go(0)来进行数据重绘，这样不会引起页面刷新
-            //window.location.reload();
-            this.$router.go(0);
+            window.location.reload();
+            // this.$router.go(0);
           }, 500);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
