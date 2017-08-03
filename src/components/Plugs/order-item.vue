@@ -47,6 +47,7 @@
       <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
       <!-- <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a> -->
       <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1' && orderItem.ResidualTime" @click="$emit('order-pay', orderItem)">立即支付</a>
+      <a class="btn oppo" href="tel:4008-262-056">联系客服</a>
     </div>
   </div>
 </li>

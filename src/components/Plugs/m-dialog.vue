@@ -6,8 +6,8 @@
       <div class="content">{{ DialogConfig.DialogContent }}</div>
 
       <div class="btns flex-row">
-        <a class="btn" href="javascript: void(0)" @click="cancel">{{ DialogConfig.DialogBtns[0] }}</a>
-        <a class="btn confirm" href="javascript: void(0)" v-show="DialogConfig.DialogBtns[1]" @click="confirm">{{ DialogConfig.DialogBtns[1] }}</a>
+        <a class="btn" :href="DialogConfig.DialogBtnsHref && DialogConfig.DialogBtnsHref[0]" @click="cancel">{{ DialogConfig.DialogBtns[0] }}</a>
+        <a class="btn confirm" :href="DialogConfig.DialogBtnsHref && DialogConfig.DialogBtnsHref[1]" v-show="DialogConfig.DialogBtns[1]" @click="confirm">{{ DialogConfig.DialogBtns[1] }}</a>
       </div>
     </div>
   </div>

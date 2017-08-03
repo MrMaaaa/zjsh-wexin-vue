@@ -172,6 +172,7 @@ export default {
     logout() {
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
+      this.$store.commit('SetIsLogin', '0');
       this.userInfo = {
         nickName: '',
         phoneNumber: '',

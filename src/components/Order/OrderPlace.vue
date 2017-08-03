@@ -130,6 +130,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import OrderServiceTime from './OrderServiceTime';
 import API from '../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
@@ -159,37 +160,29 @@ export default {
         isOpenAlert: false,
         isUsed: true
       },
+      thisThreeServiceId: '', // 用来和vuex中的id作比较
       isLoading: true,
       bgLoading: '1',
       txtLoading: '正在获取服务信息…',
     }
   },
   async mounted() {
+    this.thisThreeServiceId = this.ThreeServiceId;
     await this.getCouponList();
     await this.getServiceDetail();
     this.getUserAddress();
-    // if(Common.getCookie('ZJSH_WX_Replace') == '10') {
-    //   try {
-    //     Common.setCookie('ZJSH_WX_Replace', '', 30, '/');
-    //     this.Code = this.valueFromUrl('code');
-    //     alert('new code:' + this.valueFromUrl('code'));
-    //     this.$store.commit('SetCode', this.valueFromUrl('code'));
-    //     let orderInfo = Common.getCookie('ZJSH_WX_OrderInfo');
-    //     orderInfo = JSON.parse(orderInfo);
-    //     this.OrderInfo = orderInfo;
-    //     let p = orderInfo.Amount * orderInfo.Price;
-    //     let couponId = '';
-    //     if (orderInfo.CouponSelected.NoUse === '0') {
-    //       p -= orderInfo.CouponSelected.CouponDetails[0].DiscountAmount;
-    //       couponId = orderInfo.CouponSelected.Id;
-    //     }
-    //     this.orderPay(Common.getCookie('ZJSH_WX_OrderIdForPay'), p, couponId);
-    //   } catch(e) {
-    //     alert(e);
-    //   }
-    // } else {
-    //   alert('code:' + this.Code);
-    // }
+  },
+  activated() {
+    if(this.thisThreeServiceId !== this.ThreeServiceId) {
+      this.thisThreeServiceId = this.ThreeServiceId;
+      this.serviceList.splice(0);
+      this.getServiceDetail();
+    }
+
+    // 防止网络问题导致没有刷新
+    if(this.serviceList.length == 0) {
+      this.getServiceDetail();
+    }
   },
   methods: {
     oneSafeAlert() {
@@ -219,11 +212,16 @@ export default {
 
           // 默认显示第一个服务品类
           if(this.OrderInfo.FourServiceId) {
+            let isMatch = false;
             res.data.Body.Service.SubItems.map((value, index) => {
               if (value.ServiceId === this.OrderInfo.FourServiceId) {
                 this.selectType(this.serviceList[index], index);
+                isMatch = true;
               }
             });
+            if(!isMatch) {
+              this.selectType(this.serviceList[0], 0);
+            }
           } else {
             this.selectType(this.serviceList[0], 0);
           }
@@ -563,61 +561,6 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
-    // orderPay() {
-    //   this.isLoading = true;
-    //   this.txtLoading = '';
-    //   axios.post(API.GetWxpaySign, qs.stringify({
-    //     Token: this.Token,
-    //     OrderId: this.OrderIdForPay,
-    //     PayFrom: '0', // 0: 微信公众号 1: app
-    //     WxCode: this.Code,
-    //     WxPay: String(this.OrderInfo.Price * this.OrderInfo.Amount),
-    //     BalancePay: '0',
-    //     CouponId: this.CouponSelected.Id,
-    //   }), {
-    //     header: {
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    //   }).then(res => {
-    //     this.isLoading = false;
-    //     if (res.data.Meta.ErrorCode === '0') {
-    //       function onBridgeReady() {
-    //         WeixinJSBridge.invoke(
-    //           'getBrandWCPayRequest', {
-    //             "appId": res.data.Body.WxpaySign.appid,
-    //             "timeStamp": res.data.Body.WxpaySign.timestamp,
-    //             "nonceStr": res.data.Body.WxpaySign.noncestr,
-    //             "package": res.data.Body.WxpaySign.package,
-    //             "signType": "MD5",
-    //             "paySign": res.data.Body.WxpaySign.sign
-    //           },
-    //           function(res) {
-    //             if (res.err_msg == "get_brand_wcpay_request:ok") {
-    //               alert('支付成功');
-    //             } else if (res.err_msg == "get_brand_wcpay_request:cancel") {
-    //               alert('支付失败');
-    //             }
-    //           }
-    //         );
-    //       }
-    //       if (typeof WeixinJSBridge == "undefined") {
-    //         if (document.addEventListener) {
-    //           document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-    //         } else if (document.attachEvent) {
-    //           document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-    //           document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-    //         }
-    //       } else {
-    //         onBridgeReady();
-    //       }
-    //     } else {
-    //       this.alert(res.data.Meta.ErrorMsg);
-    //     }
-    //   }).catch(error => {
-    //     this.isLoading = false;
-    //     this.alert(this.ALERT_MSG.NET_ERROR);
-    //   });
-    // },
     routeTo(option={name:''}, isReplace=false) {
       // 保存订单信息
       this.$store.commit('SetOrderInfo', this.OrderInfo);
@@ -656,7 +599,10 @@ export default {
         return a.split('.')[0] + '.' + (a.split('.')[1].length === 1 ? a.split('.')[1] + '0' : a.split('.')[1]);
       }
     }
-  }
+  },
+  components: {
+    OrderServiceTime,
+  },
 }
 </script>
 
@@ -753,6 +699,7 @@ export default {
       outline: none;
       background-color: #f3f3f3;
       text-align: center;
+      font-size: 14px;
     }
   }
   &.one-safe

@@ -137,6 +137,7 @@ export default {
       {
         display: block;
         width: 100%;
+        cursor: pointer;
       }
       .item-name
       {

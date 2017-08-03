@@ -5,9 +5,9 @@
       <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" v-for="item in orderList"></order-item>
     </ul>
 
-    <infinite-loading :on-infinite="getOrderList"  ref="infiniteLoading">
+    <!-- <infinite-loading :on-infinite="getOrderList"  ref="infiniteLoading">
       <span class="no-result" slot="no-more">没有更多订单了</span>
-    </infinite-loading>
+    </infinite-loading> -->
   </div>
 
   <div class="order-list-empty" v-show="orderList.length === 0">
@@ -42,33 +42,88 @@ export default {
         DialogContent: '确定取消订单吗？', // 对话框内容
         DialogBtns: ['取消', '确定'], // 对话框按钮文本
       },
-      dialogType: '0', // 对话框类型 0:取消订单 1:删除订单
+      dialogType: '0', // 对话框类型 0:取消订单 1:删除订单 2:确认订单
       orderIdProcess: '', // 要处理的订单id
       isLoading: true,
       loadingBgStyle: '1',
     }
   },
-  mounted() {
+  activated() {
     this.getCouponList();
-    if(this.orderList.length == 0) {
-      this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-    }
-    // this.getOrderList();
+    this.getOrderList();
+    // if(this.orderList.length == 0) {
+    //   // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+    // }
   },
   methods: {
-    async getOrderList() {
-      await axios.post(API.GetOrderListEx, qs.stringify({
+    // async getOrderList() {
+    //   await axios.post(API.GetOrderListEx, qs.stringify({
+    //     Token: this.Token,
+    //     PageIndex: this.orderPageIndex,
+    //     PageSize: '10',
+    //     Type: '0',
+    //   }), {
+    //     header: {
+    //       'Content-Type': 'application/x-www-form-urlencoded'
+    //     }
+    //   }).then((res) => {
+    //     if (res.data.Meta.ErrorCode === '0') {
+    //       this.orderPageIndex++;
+    //       if(res.data.Body.OrderList.length > 0) {
+    //         // 只显示定价类订单
+    //         res.data.Body.OrderList.map(value => {
+    //           // 只显示首页服务中的订单
+    //           if(this.FourServiceIdFilterList.includes(' ' + value.Service.ServiceId + ' ')) {
+    //             // 判断是否显示底部按钮组
+    //             value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+
+    //             // 设置支付倒计时
+    //             // if(value.ResidualTime) {
+    //             //   value.payCountdownInterval = setInterval(() => {
+    //             //     value.ResidualTime--;
+    //             //     if(value.ResidualTime == 0) {
+    //             //       clearInterval(value.payCountdownInterval);
+    //             //     }
+    //             //   }, 1000);
+    //             // }
+    //             // 只有当存在符合条件的订单时关闭loading
+    //             this.orderList.push(value);
+    //             if (this.orderList.length > 1) {
+    //               this.isLoading = false;
+    //             }
+    //           }
+    //         });
+    //         // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
+    //       } else {
+    //         this.isLoading = false;
+    //         // this.$refs.infiniteLoading.$emit('$InfiniteLoading:complete');
+    //       }
+    //     } else {
+    //       this.isLoading = false;
+    //       this.alert(res.data.Meta.ErrorMsg);
+    //     }
+    //   }).catch((error) => {
+    //     this.isLoading = false;
+    //     this.alert(this.ALERT_MSG.NET_ERROR);
+    //   });
+    // },
+
+
+    // 目前只显示前10条订单数据
+    getOrderList() {
+      axios.post(API.GetOrderListEx, qs.stringify({
         Token: this.Token,
-        PageIndex: this.orderPageIndex,
-        PageSize: '20',
+        PageIndex: '1',
+        PageSize: '10',
         Type: '0',
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).then((res) => {
+        this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          this.orderPageIndex++;
+          this.orderList.splice(0);
           if(res.data.Body.OrderList.length > 0) {
             // 只显示定价类订单
             res.data.Body.OrderList.map(value => {
@@ -76,27 +131,9 @@ export default {
               if(this.FourServiceIdFilterList.includes(' ' + value.Service.ServiceId + ' ')) {
                 // 判断是否显示底部按钮组
                 value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
-
-                // 设置支付倒计时
-                // if(value.ResidualTime) {
-                //   value.payCountdownInterval = setInterval(() => {
-                //     value.ResidualTime--;
-                //     if(value.ResidualTime == 0) {
-                //       clearInterval(value.payCountdownInterval);
-                //     }
-                //   }, 1000);
-                // }
-                // 只有当存在符合条件的订单时关闭loading
                 this.orderList.push(value);
-                if (this.orderList.length > 1) {
-                  this.isLoading = false;
-                }
               }
             });
-            this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-          } else {
-            this.isLoading = false;
-            this.$refs.infiniteLoading.$emit('$InfiniteLoading:complete');
           }
         } else {
           this.isLoading = false;

@@ -33,7 +33,7 @@ export default {
       couponListNoUsed: [],
     }
   },
-  mounted() {
+  activated() {
     this.getCouponList();
   },
   methods: {

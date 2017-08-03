@@ -1,7 +1,9 @@
 <template>
   <div id="app">
     <transition name="bounce">
-      <router-view class="router-view"></router-view>
+      <keep-alive>
+        <router-view class="router-view"></router-view>
+      </keep-alive>
     </transition>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
@@ -52,6 +54,7 @@ export default {
         // this.$router.push({
         //   path: '/login'
         // });
+        this.$store.commit('SetIsLogin', '0');
         this.openLogin();
       }
       return response;
@@ -64,7 +67,7 @@ export default {
   },
   mounted() {
     if (window.parent === window.self) {
-      if (this.OpenId == '') {
+      if (this.valueFromUrl('code')) {
         this.getOpenId();
       }
     }
@@ -90,10 +93,10 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetOpenId', res.data.Body.OpenId);
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          // this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        // this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
     openLogin() {

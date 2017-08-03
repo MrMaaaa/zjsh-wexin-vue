@@ -45,7 +45,14 @@ export default {
       isLoading: true,
     }
   },
-  mounted() {
+  activated() {
+    this.dateList = [];
+    this.timeList = [];
+    this.selDate = '';
+    this.selTime = '';
+    this.dateIndex = 0;
+    this.timeIndex = -1;
+    this.isLoading = true;
     this.getServiceTime();
   },
   methods: {
@@ -60,8 +67,24 @@ export default {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode == '0') {
           this.dateList = res.data.Body.AvailableDate;
-          this.timeList = this.dateList[0].TimeRange2;
-          this.selDate = this.dateList[0].Date.split(' ')[0];
+          if(this.OrderInfo.DateTime) {
+            // 如果已经选择时间，切换到该时间
+            this.dateList.map((value, index) => {
+              if(value.Date.indexOf(this.OrderInfo.DateTime.split(' ')[0]) > -1) {
+                this.dateIndex = index;
+                this.selDate = this.dateList[index].Date.split(' ')[0];
+                this.timeList = this.dateList[index].TimeRange2;
+                this.timeList.map((val, ind) => {
+                  if(val.Time === this.OrderInfo.DateTime.split(' ')[1]) {
+                    this.timeIndex = ind;
+                  }
+                });
+              }
+            })
+          } else {
+            this.timeList = this.dateList[0].TimeRange2;
+            this.selDate = this.dateList[0].Date.split(' ')[0];
+          }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -71,8 +94,8 @@ export default {
       });
     },
     dateSelect(event, item, index) {
+      this.timeIndex = -1;
       event.target.scrollIntoView(false);
-      console.log(item);
       this.dateIndex = Number(index);
       this.selDate = item.Date.split(' ')[0];
       this.timeList = this.dateList[index].TimeRange2;
@@ -108,6 +131,8 @@ export default {
 {
   .date-list
   {
+    -webkit-justify-content: flex-start;
+    justify-content: flex-start;
     overflow-x: scroll;
     overflow-y: hidden;
     padding-bottom: 0.226667rem;
@@ -115,7 +140,8 @@ export default {
     {
       position: relative;
       box-sizing: border-box;
-      padding: 0.266667rem 0.133333rem;
+      width: 2.133333rem;
+      padding: 0.266667rem 0;
       background-color: #eef2f5;
       color: #333639;
       text-align: center;

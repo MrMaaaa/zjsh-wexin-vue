@@ -138,9 +138,12 @@ export default {
       serviceList: [],
     }
   },
-  mounted() {
+  activated() {
     document.title = data[this.$route.params.id].title;
 
+    this.pageData = data[this.$route.params.id];
+
+    this.serviceList.splice(0);
     axios.post(API.QueryServicePrice, qs.stringify({
       ServiceId: this.$route.params.id
     }), {
@@ -151,6 +154,7 @@ export default {
       this.isLoading = false;
       this.txtLoading = '';
       this.bgLoading = '2';
+      this.serviceList.splice(0);
       if (res.data.Meta.ErrorCode === '0') {
         res.data.Body.Service.SubItems.map(value => {
           this.serviceList.push(value);

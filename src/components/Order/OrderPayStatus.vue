@@ -28,7 +28,8 @@ export default {
     getOrderDetail() {
       axios.post(API.GetOrderInfoEx, qs.stringify({
         Token: this.Token,
-        OrderId: this.$route.params.orderId,
+        // OrderId: this.$route.params.orderId,
+        OrderId: '85fc39db-2f78-e711-8f07-008cfae578e8',
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
