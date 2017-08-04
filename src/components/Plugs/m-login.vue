@@ -97,12 +97,12 @@ export default {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
+          this.$store.commit('SetIsLogin', '1');
           this.$emit('user-login');
           document.getElementById('module_login').classList.remove('active');
           setTimeout(() => {
             // 这里建议使用this.$router.go(0)来进行数据重绘，这样不会引起页面刷新
-            window.location.reload();
-            // this.$router.go(0);
+            // window.location.reload();
           }, 500);
         } else {
           this.alert(res.data.Meta.ErrorMsg);

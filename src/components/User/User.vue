@@ -185,6 +185,15 @@ export default {
   computed: {
     ...mapState(['ALERT_MSG', 'Token', 'ThreeServiceIdFilterList']),
   },
+  watch: {
+    Token(newValue, oldValue) {
+      if(newValue !== oldValue) {
+        this.getUserInfo();
+        this.getUserSettlement();
+        this.getCouponAmount();
+      }
+    }
+  }
 }
 </script>
 

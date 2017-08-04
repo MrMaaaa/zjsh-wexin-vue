@@ -8,10 +8,7 @@
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
 
-    <section id="module_login">
-      <a class="module-close"></a>
-      <m-login @user-login="reflashPage"></m-login>
-    </section>
+    <m-login id="module_login"></m-login>
   </div>
 </template>
 
@@ -122,16 +119,13 @@ export default {
         }
       });
     },
-    reflashPage() {
-      // this.$router.go(0);
-    }
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus'])
+    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus']),
   },
   components: {
     MLogin
-  }
+  },
 }
 </script>
 
