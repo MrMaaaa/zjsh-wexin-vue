@@ -425,6 +425,7 @@ export default {
       } else if (val > this.maxCount) {
         evt.target.value = this.maxCount;
       }
+      this.OrderInfo.Amount = Number(evt.target.value);
     },
     inputBlurCheck(evt) {
       if(evt.target.value < this.minCount || !evt.target.value) {
