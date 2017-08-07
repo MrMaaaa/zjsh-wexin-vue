@@ -166,10 +166,9 @@ export default {
       txtLoading: '正在获取服务信息…',
     }
   },
-  async mounted() {
+  mounted() {
     this.thisThreeServiceId = this.ThreeServiceId;
-    await this.getCouponList();
-    await this.getServiceDetail();
+    this.getCouponList();
     this.getUserAddress();
   },
   activated() {
@@ -726,6 +725,7 @@ export default {
       background-color: #fff;
       &.active
       {
+        border-color: #f56165;
         background-color: #f56165;
         .toggle
         {
