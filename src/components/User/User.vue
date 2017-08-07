@@ -123,7 +123,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        // this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
     getWxUserInfo() {
@@ -138,10 +138,10 @@ export default {
           this.userInfo.nickName = res.data.Body.NickName;
           this.userInfo.avatar = res.data.Body.HeadImgUrl;
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          // this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        // this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
     getUserSettlement() {
