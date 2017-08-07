@@ -34,6 +34,7 @@ export default {
     }
   },
   activated() {
+    this.couponListNoUsed.splice(0);
     this.getCouponList();
   },
   methods: {

@@ -210,13 +210,14 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.serviceList = res.data.Body.Service.SubItems;
 
-          // 默认显示第一个服务品类
+          // 如果之前已经选择过对应服务的四级服务，显示之，否则显示第一个服务品类
           if(this.OrderInfo.FourServiceId) {
+            this.typeIndex = -1;
             let isMatch = false;
             res.data.Body.Service.SubItems.map((value, index) => {
               if (value.ServiceId === this.OrderInfo.FourServiceId) {
-                this.selectType(this.serviceList[index], index);
                 isMatch = true;
+                this.selectType(this.serviceList[index], index);
               }
             });
             if(!isMatch) {
@@ -383,9 +384,6 @@ export default {
         // 获取id对应活动信息
         this.getServiceActivity();
 
-        // 保存订单信息
-        this.$store.commit('SetOrderInfo', this.OrderInfo);
-
         // 修改单价、数量步长、最大最小数量
         this.unitPrice = Number(item.Price);
         this.countStep = Number(item.CountStep);
@@ -415,6 +413,9 @@ export default {
           this.oneSafe.content = '';
           this.oneSafe.url = 'item.ClaimsNote.Url';
         }
+
+        // 保存订单信息
+        this.$store.commit('SetOrderInfo', this.OrderInfo);
       }
     },
     inputFilter(evt) {

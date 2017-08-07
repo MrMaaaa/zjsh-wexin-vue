@@ -98,7 +98,13 @@ export default {
     }
   },
   mounted() {
+    // 获取用户手机号
     this.getUserInfo();
+
+    // 获取用户微信头像与微信昵称
+    this.getWxUserInfo();
+
+    // 获取余额与红包
     this.getUserSettlement();
     this.getCouponAmount();
   },
@@ -112,10 +118,27 @@ export default {
         }
       }).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
-          this.userInfo.nickName = res.data.Body.Info.NickName;
           this.userInfo.phoneNumber = res.data.Body.Info.PhoneNumber;
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(error => {
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
+    getWxUserInfo() {
+      axios.post(API.GetWxUserInfo, qs.stringify({
+        OpenId: this.OpenId,
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          this.userInfo.nickName = res.data.Body.NickName;
+          this.userInfo.avatar = res.data.Body.HeadImgUrl;
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);
@@ -184,7 +207,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['ALERT_MSG', 'Token', 'ThreeServiceIdFilterList']),
+    ...mapState(['Token', 'OpenId', 'ThreeServiceIdFilterList', 'ALERT_MSG']),
   },
   watch: {
     Token(newValue, oldValue) {

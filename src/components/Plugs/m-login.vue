@@ -136,6 +136,7 @@ export default {
         this.isCountdown = false;
         this.isClickSendCaptcha = true;
         this.textCaptcha = '获取验证码';
+        this.captcha = '';
         this.isLoading = false;
       }
     }

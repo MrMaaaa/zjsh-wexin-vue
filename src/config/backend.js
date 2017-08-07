@@ -39,6 +39,9 @@ export default {
   // 微信获取open id
   "GetWxpayOpenId": wap + "api/v3/OrderInfo/GetWxpayOpenId",
 
+  // 微信获取用户信息
+  "GetWxUserInfo": wap + "api/v3/Wx/GetWxUserInfo",
+
   // 微信支付接口
   "GetWxpaySign": wap + "api/v3/OrderInfo/GetWxpaySign",
 
