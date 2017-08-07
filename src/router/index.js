@@ -130,8 +130,9 @@ var router = new Router({
 
 router.beforeEach((to, from, next) => {
   // 对不同的路由设置不同的title
-  if(document.getElementById('module_login') && document.getElementById('module_login').classList.contains('active')) {
-    document.getElementById('module_login') && document.getElementById('module_login').classList.remove('active');
+  var login = document.getElementById('module_login');
+  if(login && login.classList.contains('active')) {
+    login && login.classList.remove('active');
     document.title = ROUTER_TO_TITLE[from.path] || ROUTER_TO_TITLE['/menu/index'];
 
     // input失去焦点
@@ -140,6 +141,7 @@ router.beforeEach((to, from, next) => {
       inputs[i].blur();
     }
 
+    // 阻止路由跳转
     next(false);
   } else {
     if(to.path === '/menu/index/detail' && from.path === '/menu/index/detail') {

@@ -1,4 +1,26 @@
 <template>
+
+
+
+<!-- 被弃用 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div>
   <header class="header" :class="{ disable: phoneNumber !== '' }">欢迎体验助家生活的服务<br>请先验证手机号</header>
 

@@ -38,6 +38,7 @@ export default {
       phoneNumber: '',
       captcha: '',
       isCountdown: false,
+      sendCaptchaInterval: null,
       isClickSendCaptcha: true,
       textCaptcha: '获取验证码',
       isLoading: false,
@@ -65,11 +66,11 @@ export default {
           this.isClickSendCaptcha = false;
           let count = 60;
           that.isCountdown = true;
-          var sendCaptchaInterval = setInterval(function() {
+          this.sendCaptchaInterval = setInterval(function() {
             count--;
             that.textCaptcha = '重新发送(' + count + ')';
             if(count == 1) {
-              clearInterval(sendCaptchaInterval);
+              clearInterval(this.sendCaptchaInterval);
               that.isCountdown = false;
               that.textCaptcha = '重新发送';
               that.isClickSendCaptcha = true;
@@ -114,7 +115,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['ALERT_MSG']),
+    ...mapState(['IsOpenLogin', 'ALERT_MSG']),
     isPhone() {
       return /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phoneNumber);
     },
@@ -123,6 +124,19 @@ export default {
         return true;
       } else {
         return false;
+      }
+    }
+  },
+  watch: {
+    IsOpenLogin(newValue) {
+      if(newValue === '1') {
+        // 如果打开登录弹窗，取消获取验证码倒计时
+        this.$store.commit('SetIsOpenLogin', '0');
+        clearInterval(this.sendCaptchaInterval);
+        this.isCountdown = false;
+        this.isClickSendCaptcha = true;
+        this.textCaptcha = '获取验证码';
+        this.isLoading = false;
       }
     }
   }

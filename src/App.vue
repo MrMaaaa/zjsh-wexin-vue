@@ -98,6 +98,7 @@ export default {
     },
     openLogin() {
       document.getElementById('module_login').classList.add('active');
+      this.$store.commit('SetIsOpenLogin', '1');
       var WVJBIframe = document.createElement('iframe');
       document.title = '登录';
       WVJBIframe.style.display = 'none';
@@ -170,10 +171,10 @@ body,
 #module_login
 {
   position: fixed;
-  top: 100%;
+  top: 0;
   left: 0;
   z-index: 9999;
-  transform: translateZ(0);
+  transform: translateZ(0) translateY(100%);
   width: 100%;
   height: 100%;
   background-color: #fff;
@@ -181,7 +182,7 @@ body,
 }
 #module_login.active
 {
-  top: 0;
+  transform: translateY(0);
   transition: all .5s;
 }
 </style>

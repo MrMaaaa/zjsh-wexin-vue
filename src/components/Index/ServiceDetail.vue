@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <div v-if="pageData">
     <header class="header-img">
         <img :src="pageData.headImg">
     </header>
@@ -119,7 +119,7 @@
     <div class="btn-wrapper">
        <button type="button" class="order-button btn btn-warn" @click="subumitForWx">立即预约</button>
     </div>
-  </section>
+  </div v-if="pageData">
 </template>
 
 <script>
@@ -134,42 +134,48 @@ export default {
   data() {
     return {
       imgUrl: data.imgUrl,
-      pageData: data[this.$route.params.id],
+      pageData: null,
+      threeId: '',
       serviceList: [],
     }
   },
   activated() {
-    document.title = data[this.$route.params.id].title;
-
-    this.pageData = data[this.$route.params.id];
-
-    this.serviceList.splice(0);
-    axios.post(API.QueryServicePrice, qs.stringify({
-      ServiceId: this.$route.params.id
-    }), {
-      header: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).then(res => {
-      this.isLoading = false;
-      this.txtLoading = '';
-      this.bgLoading = '2';
+    let oldId = this.threeId;
+    this.threeId = this.$route.params.id;
+    document.title = data[this.threeId].title;
+    this.pageData = data[this.threeId];
+    if(oldId !== this.threeId) {
       this.serviceList.splice(0);
-      if (res.data.Meta.ErrorCode === '0') {
-        res.data.Body.Service.SubItems.map(value => {
-          this.serviceList.push(value);
-        })
-      } else {
-        this.alert(res.data.Meta.ErrorMsg);
-      }
-    }).catch(error => {
-      this.isLoading = false;
-      this.txtLoading = '';
-      this.bgLoading = '2';
-      this.alert(this.ALERT_MSG.NET_ERROR);
-    });
+      this.getServicePrice();
+    }
   },
   methods: {
+    getServicePrice() {
+      axios.post(API.QueryServicePrice, qs.stringify({
+        ServiceId: this.threeId
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        this.isLoading = false;
+        this.txtLoading = '';
+        this.bgLoading = '2';
+        this.serviceList.splice(0);
+        if (res.data.Meta.ErrorCode === '0') {
+          res.data.Body.Service.SubItems.map(value => {
+            this.serviceList.push(value);
+          })
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(error => {
+        this.isLoading = false;
+        this.txtLoading = '';
+        this.bgLoading = '2';
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
     subumitForWx() {
       // ios下会导致iframe中的fixed元素不相对于父页面来定位，因此在详情页下方放置一个按钮用来填补缺失
       // 使用此按钮就无需在iframe中添加调用父页面方法

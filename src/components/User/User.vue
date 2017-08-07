@@ -161,6 +161,7 @@ export default {
     },
     login() {
       document.getElementById('module_login').classList.add('active');
+      this.$store.commit('SetIsOpenLogin', '1');
       var WVJBIframe = document.createElement('iframe');
       document.title = '登录';
       WVJBIframe.style.display = 'none';

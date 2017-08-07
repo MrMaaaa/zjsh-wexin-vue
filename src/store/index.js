@@ -19,6 +19,9 @@ export default new Vuex.Store({
     // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0
     IsLogin: '0',
 
+    // 是否弹出登录窗口
+    IsOpenLogin: '0',
+
     // 详情页url，避免后退导致详情页无法加载
     DetailUrlForDetailPage: '',
 
@@ -108,6 +111,9 @@ export default new Vuex.Store({
     },
     SetIsLogin(state, data = '') {
       return state.IsLogin = data;
+    },
+    SetIsOpenLogin(state, data = '') {
+      return state.IsOpenLogin = data;
     },
     SetDetailUrlForDetailPage(state, data = '') {
       return state.DetailUrlForDetailPage = data;
