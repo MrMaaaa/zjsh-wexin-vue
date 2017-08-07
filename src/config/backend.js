@@ -42,11 +42,14 @@ export default {
   // 微信获取用户信息
   "GetWxUserInfo": wap + "api/v3/Wx/GetWxUserInfo",
 
+  // 微信授权
+  "GetAuthUrl": wap + "api/v3/wap/GetAuthUrl",
+
   // 微信支付接口
   "GetWxpaySign": wap + "api/v3/OrderInfo/GetWxpaySign",
 
-  // 微信授权
-  "GetAuthUrl": wap + "api/v3/wap/GetAuthUrl",
+  // 支付宝支付接口
+  "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
 
   // 取消订单
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",

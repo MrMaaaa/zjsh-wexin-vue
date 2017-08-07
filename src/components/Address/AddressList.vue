@@ -54,6 +54,9 @@ export default {
       this.getAddressList();
     }
   },
+  activated() {
+    this.getAddressList();
+  },
   methods: {
     getAddressList(addToken) {
       if(addToken) {

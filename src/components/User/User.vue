@@ -4,7 +4,7 @@
     <div class="user-section user-info flex-row" v-if="this.userInfo.phoneNumber">
       <img class="user-avatar" :src="userInfo.avatar">
 
-      <div class="section-info">
+      <div class="section-info user-info flex-row">
         <span class="user-name">{{ userInfo.nickName }}</span>
         <span class="user-phone">{{ userInfo.phoneNumber }}</span>
       </div>
@@ -79,6 +79,7 @@
 
 <script>
 import DefaultAvatar from '../../assets/images/user_default.png';
+import DefaultLoginAvatar from '../../assets/images/user_default_login.png';
 import { mapState } from 'vuex';
 import API from '../../config/backend';
 import axios from 'axios';
@@ -98,11 +99,13 @@ export default {
     }
   },
   mounted() {
-    // 获取用户手机号
+    // 获取
     this.getUserInfo();
 
     // 获取用户微信头像与微信昵称
-    this.getWxUserInfo();
+    if(this.OpenId) {
+      this.getWxUserInfo();
+    }
 
     // 获取余额与红包
     this.getUserSettlement();
@@ -118,7 +121,13 @@ export default {
         }
       }).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
+          this.userInfo.nickName = res.data.Body.Info.NickName;
           this.userInfo.phoneNumber = res.data.Body.Info.PhoneNumber;
+          if(res.data.Body.Info.HqPic) {
+            this.userInfo.avatar = res.data.Body.Info.HqPic;
+          } else {
+            this.userInfo.avatar = DefaultLoginAvatar;
+          }
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
@@ -198,9 +207,9 @@ export default {
       this.$store.commit('SetToken', '');
       this.$store.commit('SetIsLogin', '0');
       this.userInfo = {
-        nickName: '',
+        nickName: this.userInfo.nickName,
         phoneNumber: '',
-        avatar: DefaultAvatar,
+        avatar: this.userInfo.avatar,
         balance: '0',
         couponCount: 0,
       };
@@ -245,23 +254,28 @@ export default {
         {
           width: 1.6rem;
           height: 1.6rem;
+          border-radius: 50%;
         }
-        .section-info
+        .section-info.user-info
         {
-          height: 100%;
-          margin-top: 0.213333rem;
+          flex-direction: column;
+          -webkit-flex-direction: column;
+          justify-content: center;
+          -webkit-justify-content: center;
+          box-sizing: border-box;
+          align-items: flex-start;
+          -webkit-align-items: flex-start;
+          height: 1.6rem;
+          padding: 0.213333rem 0;
           margin-left: 0.32rem;
           .user-name
           {
             display: block;
-            line-height: 100%;
             color: #333639;
           }
           .user-phone
           {
             display: block;
-            line-height: 100%;
-            margin-top: 0.08rem;
             color: #333639;
             font-size: 14px;
           }
@@ -271,7 +285,7 @@ export default {
       {
         .section-info
         {
-          margin-top: 0;
+          margin-left: 0.32rem;
         }
       }
       .section-icon

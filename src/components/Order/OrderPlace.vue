@@ -87,8 +87,8 @@
       <span>红包</span>
 
       <div class="flex-row" @click="routeTo({ name: 'order_coupon_select' })">
-        <span class="txt-price" v-if="CouponSelected.NoUse === '0'">-￥{{ CouponSelected.CouponDetails[0].DiscountAmount | amountFormat }}</span>
-        <span class="txt-price" v-else-if="CouponSelected.NoUse === '1'">不使用红包</span>
+        <span class="txt-price" v-if="OrderInfo.CouponSelected.NoUse === '0'">-￥{{ OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount | amountFormat }}</span>
+        <span class="txt-price" v-else-if="OrderInfo.CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
         <span class="txt-price" v-else>暂无可用红包</span>
         <img class="icon-link" src="../../assets/images/link.png">
       </div>
@@ -96,7 +96,7 @@
 
     <div class="discount-split"></div>
 
-    <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ (discountAmount + Number(CouponSelected.CouponDetails[0].DiscountAmount)) | amountFormat }}</p>
+    <p class="discount-total" v-if="OrderInfo.CouponSelected.NoUse === '0'">已优惠￥{{ (discountAmount + Number(OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount)) | amountFormat }}</p>
     <p class="discount-total" v-else>已优惠￥{{ discountAmount | amountFormat }}</p>
   </section>
 
@@ -167,20 +167,21 @@ export default {
     }
   },
   mounted() {
-    this.thisThreeServiceId = this.ThreeServiceId;
-    this.getCouponList();
     this.getUserAddress();
   },
-  activated() {
+  async activated() {
     if(this.thisThreeServiceId !== this.ThreeServiceId) {
       this.thisThreeServiceId = this.ThreeServiceId;
+      this.OrderInfo.CouponSelected = {};
+      this.OrderInfo.CouponSelected.NoUse = '1';
       this.serviceList.splice(0);
-      this.getServiceDetail();
+      await this.getCouponList();
+      await this.getServiceDetail();
     }
 
     // 防止网络问题导致没有刷新
     if(this.serviceList.length == 0) {
-      this.getServiceDetail();
+      // this.getServiceDetail();
     }
   },
   methods: {
@@ -255,7 +256,7 @@ export default {
               let dis = 0, upp = 0;
               val.Rules.map(v => {
                 // 计算当前优惠规则的最大折扣
-                if(v.Upper >= upp && v.Upper <= this.payAmount) {
+                if(v.Upper >= upp && v.Upper <= Number(this.unitPrice) * Number(this.OrderInfo.Amount)) {
                   upp = Number(v.Upper);
                   dis = Number(v.Minus);
                 }
@@ -279,6 +280,7 @@ export default {
       });
     },
     getCouponList() {
+      this.couponList.splice(0);
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token
       }), {
@@ -291,7 +293,7 @@ export default {
           let date = new Date();
           res.data.Body.CouponList.forEach((value, index) => {
             // 未使用红包
-            if (date.getTime() < Number(value.EndTime + '000') && value.IsUsed === '0') {
+            if (date.getTime() < Number(value.EndTime + '000') && value.IsUsed === '0' && value.ServiceItem.ServiceId === this.ThreeServiceId) {
               this.couponList.push(value);
             }
           });
@@ -315,14 +317,13 @@ export default {
 
       // 遍历对象赋值
       if (maxDisCoupon) {
-        let keyArr = Object.keys(maxDisCoupon);
-        keyArr.map(value => {
-          this.CouponSelected[value] = maxDisCoupon[value];
-        });
-        this.CouponSelected.NoUse = '0';
+        this.OrderInfo.CouponSelected = maxDisCoupon;
+        this.OrderInfo.CouponSelected.NoUse = '0';
       } else {
-        this.CouponSelected.NoUse = '1';
+        this.OrderInfo.CouponSelected.NoUse = '1';
       }
+
+      this.$store.commit('SetOrderInfo', this.OrderInfo);
     },
     getUserAddress() {
       axios.post(API.GetAddress, qs.stringify({
@@ -488,7 +489,11 @@ export default {
             // 减去红包折扣
             p -= this.OrderInfo.CouponSelected.NoUse === '1' ? 0 : Number(this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount);
 
-            this.orderPay(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
+            if(this.OpenId) {
+              this.orderPayByWx(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
+            } else {
+              this.orderPayByAli(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
+            }
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
@@ -498,7 +503,7 @@ export default {
         });
       }
     },
-    orderPay(orderId, price, couponId) {
+    orderPayByWx(orderId, price, couponId) {
       this.isLoading = true;
       this.bgLoading = '2';
       this.txtLoading = '';
@@ -562,6 +567,33 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
+    orderPayByAli(orderId, price, couponId) {
+      this.isLoading = true;
+      this.bgLoading = '2';
+      this.txtLoading = '';
+      axios.post(API.GetAlipaySign, qs.stringify({
+        Token: this.Token,
+        OrderId: orderId,
+        CouponId: couponId,
+        Alipay: price,
+        BalancePay: '0'
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        this.isLoading = false;
+        const that = this;
+        if (res.data.Meta.ErrorCode === '0') {
+          // window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(error => {
+        this.isLoading = false;
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
     routeTo(option={name:''}, isReplace=false) {
       // 保存订单信息
       this.$store.commit('SetOrderInfo', this.OrderInfo);
@@ -575,15 +607,12 @@ export default {
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'ThreeServiceId', 'ThreeServiceName', 'OrderInfo', 'ALERT_MSG']),
-    CouponSelected() {
-      return this.OrderInfo.CouponSelected;
-    },
     payAmount() {
-        // 服务总价
+      // 服务总价
       let serviceTotalAmount = Number(this.unitPrice) * Number(this.OrderInfo.Amount);
 
       // 折扣
-      let discountTotal = Number(this.discountAmount) + Number(this.CouponSelected.NoUse === '0' ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0);
+      let discountTotal = Number(this.discountAmount) + Number(this.OrderInfo.CouponSelected.NoUse === '0' ? this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount : 0);
 
       // 是否使用一元赔付
       let oneSafeAmount = this.oneSafe.isUsed ? 1 : 0;

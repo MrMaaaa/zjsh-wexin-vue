@@ -299,12 +299,23 @@ export default {
         p -= couponMax.CouponDetails[0].DiscountAmount;
         couponId = couponMax.Id;
       }
+
+      if(this.OpenId) {
+        this.orderPayByWx(orderInfo.OrderId, p, couponId);
+      } else {
+        this.orderPayByAli(orderInfo.OrderId, p, couponId);
+      }
+    },
+    orderPayByWx(orderId, price, couponId) {
+      this.isLoading = true;
+      this.bgLoading = '2';
+      this.txtLoading = '';
       axios.post(API.GetWxpaySign, qs.stringify({
         Token: this.Token,
-        OrderId: orderInfo.OrderId,
-        PayFrom: '0', // 0: 微信公众号 1: app
+        OrderId: orderId,
+        PayFrom: '0', // 0:微信公众号 1:app
         OpenId: this.OpenId,
-        WxPay: p,
+        WxPay: price,
         BalancePay: '0',
         CouponId: couponId || '',
       }), {
@@ -358,10 +369,126 @@ export default {
         this.isLoading = false;
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
-      // this.$router.push({
-      //   name: 'order_pay'
-      // })
     },
+    orderPayByAli(orderId, price, couponId) {
+      this.isLoading = true;
+      this.bgLoading = '2';
+      this.txtLoading = '';
+      axios.post(API.GetAlipaySign, qs.stringify({
+        Token: this.Token,
+        OrderId: orderId,
+        CouponId: couponId,
+        Alipay: price,
+        BalancePay: '0'
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        this.isLoading = false;
+        const that = this;
+        if (res.data.Meta.ErrorCode === '0') {
+          var WVJBIframe = document.createElement('iframe');
+          document.title = '支付';
+          WVJBIframe.setAttribute('id', 'alipay');
+          WVJBIframe.setAttribute('frameborder', 'no');
+          WVJBIframe.setAttribute('border', '0');
+          WVJBIframe.setAttribute('width', '100%');
+          WVJBIframe.setAttribute('height', '100%');
+          WVJBIframe.id = 'alipay';
+          WVJBIframe.frameborder = 'no';
+          WVJBIframe.border = '0';
+          WVJBIframe.width = '100%';
+          WVJBIframe.height = '100%';
+          WVJBIframe.style.position = 'absolute';
+          WVJBIframe.style.top = '0';
+          WVJBIframe.style.left = '0';
+          WVJBIframe.style.backgroundColor = '#fff';
+          WVJBIframe.src = 'https://mapi.alipay.com/gateway.do?' + res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          document.documentElement.appendChild(WVJBIframe);
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(error => {
+        this.isLoading = false;
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
+    // orderPay(orderInfo) {
+    //   this.isLoading = true;
+    //   this.loadingBgStyle = '2';
+    //   this.txtLoading = '';
+    //   this.orderIdProcess = orderInfo.OrderId;
+    //   let couponId = '';
+    //   let couponMax = this.getCouponMaxAmount(orderInfo.Service.ServiceId);
+    //   let p = orderInfo.TotalPrice;
+    //   if(couponMax) {
+    //     p -= couponMax.CouponDetails[0].DiscountAmount;
+    //     couponId = couponMax.Id;
+    //   }
+    //   axios.post(API.GetWxpaySign, qs.stringify({
+    //     Token: this.Token,
+    //     OrderId: orderInfo.OrderId,
+    //     PayFrom: '0', // 0: 微信公众号 1: app
+    //     OpenId: this.OpenId,
+    //     WxPay: p,
+    //     BalancePay: '0',
+    //     CouponId: couponId || '',
+    //   }), {
+    //     header: {
+    //       'Content-Type': 'application/x-www-form-urlencoded'
+    //     }
+    //   }).then(res => {
+    //     this.isLoading = false;
+    //     const that = this;
+    //     if (res.data.Meta.ErrorCode === '0') {
+    //       function onBridgeReady() {
+    //         WeixinJSBridge.invoke(
+    //           'getBrandWCPayRequest', {
+    //             "appId": res.data.Body.WxpaySign.appid,
+    //             "timeStamp": res.data.Body.WxpaySign.timestamp,
+    //             "nonceStr": res.data.Body.WxpaySign.noncestr,
+    //             "package": res.data.Body.WxpaySign.package,
+    //             "signType": "MD5",
+    //             "paySign": res.data.Body.WxpaySign.sign
+    //           },
+    //           function(res) {
+    //             if (res.err_msg == "get_brand_wcpay_request:ok") {
+    //               that.$router.push({
+    //                 name: 'order_pay_status',
+    //                 params: {
+    //                   orderId: orderId
+    //                 }
+    //               });
+    //             } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
+    //               that.alert(that.ALERT_MSG.PAY_ERROR);
+    //             } else {
+    //               that.alert(res.err_msg);
+    //             }
+    //           }
+    //         );
+    //       }
+    //       if (typeof WeixinJSBridge == "undefined") {
+    //         if (document.addEventListener) {
+    //           document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+    //         } else if (document.attachEvent) {
+    //           document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+    //           document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+    //         }
+    //       } else {
+    //         onBridgeReady();
+    //       }
+    //     } else {
+    //       this.alert(res.data.Meta.ErrorMsg);
+    //     }
+    //   }).catch(error => {
+    //     this.isLoading = false;
+    //     this.alert(this.ALERT_MSG.NET_ERROR);
+    //   });
+    //   // this.$router.push({
+    //   //   name: 'order_pay'
+    //   // })
+    // },
     updateOrderFromList() {
       // 在点击取消、删除等按钮时更新订单信息
       axios.post(API.GetOrderInfoEx, qs.stringify({
