@@ -180,7 +180,7 @@ export default {
       }).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           res.data.Body.CouponList.map(value => {
-            if(this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
+            if(value.ServiceItem == null || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
               this.userInfo.couponCount++;
             }
           });
@@ -206,6 +206,10 @@ export default {
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
       this.$store.commit('SetIsLogin', '0');
+      this.$store.commit('SetOrderInfo', '');
+      this.$store.commit('SetThreeServiceId', '');
+      this.$store.commit('SetThreeServiceName', '');
+      this.$store.commit('SetUserId', '0');
       this.userInfo = {
         nickName: this.userInfo.nickName,
         phoneNumber: '',

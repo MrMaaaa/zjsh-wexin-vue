@@ -1,10 +1,10 @@
 <template>
   <div id="app">
-    <transition name="bounce">
+    <!-- <transition name="bounce"> -->
       <keep-alive>
         <router-view class="router-view"></router-view>
       </keep-alive>
-    </transition>
+    <!-- </transition> -->
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
 
@@ -27,6 +27,12 @@ export default {
     }
   },
   created() {
+    // 如果是微信浏览器下跳转到微信页面
+    if(!this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
+      window.location.replace('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=https%3A%2F%2Fwap.zhujiash.com%2Fpaylinks%2Findex.html&response_type=code&scope=snsapi_base#wechat_redirect');
+    }
+
+
     // 从缓存中获取Token, UserId, OrderIdForPay
     this.$store.commit('SetToken', Common.getCookie('ZJSH_WX_Token'));
     this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));

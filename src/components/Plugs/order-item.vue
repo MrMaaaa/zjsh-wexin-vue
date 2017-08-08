@@ -64,13 +64,14 @@ export default {
     }
   },
   props: ['orderItem'],
-  activated() {
+  mounted() {
     // 设置支付倒计时
-    if(this.orderItem.ResidualTime > 0 && !!this.orderItem.ResidualTime) {
-      this.orderItem.payCountdownInterval = setInterval(() => {
+    let interval = null;
+    if(this.orderItem.ResidualTime && this.orderItem.ResidualTime > 0) {
+      interval = setInterval(() => {
         this.orderItem.ResidualTime--;
         if(this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) {
-          clearInterval(this.orderItem.payCountdownInterval);
+          clearInterval(interval);
         }
       }, 1000);
     }

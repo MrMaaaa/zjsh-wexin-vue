@@ -86,7 +86,7 @@
     <div class="discount-coupon flex-row">
       <span>红包</span>
 
-      <div class="flex-row" @click="routeTo({ name: 'order_coupon_select' })">
+      <div class="flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: totalPrice } })">
         <span class="txt-price" v-if="OrderInfo.CouponSelected.NoUse === '0'">-￥{{ OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount | amountFormat }}</span>
         <span class="txt-price" v-else-if="OrderInfo.CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
         <span class="txt-price" v-else>暂无可用红包</span>
@@ -169,14 +169,19 @@ export default {
   mounted() {
     this.getUserAddress();
   },
-  async activated() {
+  activated() {
+    // 重置服务时间
+    if(this.$route.params.fromDetailPage === '1') {
+      this.OrderInfo.DateTime = '';
+    }
+
     if(this.thisThreeServiceId !== this.ThreeServiceId) {
       this.thisThreeServiceId = this.ThreeServiceId;
       this.OrderInfo.CouponSelected = {};
       this.OrderInfo.CouponSelected.NoUse = '1';
       this.serviceList.splice(0);
-      await this.getCouponList();
-      await this.getServiceDetail();
+      this.couponList.splice(0);
+      this.getServiceDetail();
     }
 
     // 防止网络问题导致没有刷新
@@ -256,7 +261,7 @@ export default {
               let dis = 0, upp = 0;
               val.Rules.map(v => {
                 // 计算当前优惠规则的最大折扣
-                if(v.Upper >= upp && v.Upper <= Number(this.unitPrice) * Number(this.OrderInfo.Amount)) {
+                if(v.Upper >= upp && v.Upper <= this.totalPrice) {
                   upp = Number(v.Upper);
                   dis = Number(v.Minus);
                 }
@@ -279,10 +284,10 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
-    getCouponList() {
-      this.couponList.splice(0);
+    getCouponList(id) {
       axios.post(API.GetCoupons, qs.stringify({
-        Token: this.Token
+        Token: this.Token,
+        ServiceId: id,
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -292,8 +297,8 @@ export default {
           // 红包分类
           let date = new Date();
           res.data.Body.CouponList.forEach((value, index) => {
-            // 未使用红包
-            if (date.getTime() < Number(value.EndTime + '000') && value.IsUsed === '0' && value.ServiceItem.ServiceId === this.ThreeServiceId) {
+            // 未使用红包且满足满减金额
+            if (value.CouponDetails[0].Amount <= this.totalPrice) {
               this.couponList.push(value);
             }
           });
@@ -309,7 +314,7 @@ export default {
       let maxDisCoupon = null;
       let maxDis = 0;
       this.couponList.map(value => {
-        if (this.ThreeServiceId === value.ServiceItem.ServiceId && maxDis <= value.CouponDetails[0].DiscountAmount) {
+        if (Number(maxDis) <= Number(value.CouponDetails[0].DiscountAmount)) {
           maxDisCoupon = value;
           maxDis = value.CouponDetails[0].DiscountAmount;
         }
@@ -377,6 +382,8 @@ export default {
         this.typeIndex = index;
         // 获取四级服务信息
         this.OrderInfo.FourServiceId = item.ServiceId;
+        // 获取四季服务对应红包信息
+        this.getCouponList(item.ServiceId);
         this.OrderInfo.SellType = item.SellType;
         this.OrderInfo.SpecialType = item.SpecialType;
         this.OrderInfo.Price = item.Price;
@@ -392,6 +399,8 @@ export default {
 
         // 初始化数量
         this.OrderInfo.Amount = this.minCount;
+
+        this.getCouponMaxAmount();
 
         // 判断是否可增减
         this.amountCheck();
@@ -607,9 +616,13 @@ export default {
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'ThreeServiceId', 'ThreeServiceName', 'OrderInfo', 'ALERT_MSG']),
+    //原价
+    totalPrice() {
+      return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
+    },
     payAmount() {
       // 服务总价
-      let serviceTotalAmount = Number(this.unitPrice) * Number(this.OrderInfo.Amount);
+      let serviceTotalAmount = this.totalPrice;
 
       // 折扣
       let discountTotal = Number(this.discountAmount) + Number(this.OrderInfo.CouponSelected.NoUse === '0' ? this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount : 0);

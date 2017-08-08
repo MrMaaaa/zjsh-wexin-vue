@@ -125,7 +125,7 @@ var router = new Router({
     path: '/menu/user/user_coupon',
     name: 'user_coupon',
     component: UserCoupon,
-  }]
+  }],
 });
 
 router.beforeEach((to, from, next) => {

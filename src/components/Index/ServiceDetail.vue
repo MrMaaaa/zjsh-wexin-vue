@@ -140,6 +140,7 @@ export default {
     }
   },
   activated() {
+    // 当服务id不同时刷新数据
     let oldId = this.threeId;
     this.threeId = this.$route.params.id;
     document.title = data[this.threeId].title;
@@ -182,7 +183,12 @@ export default {
 
       // 如果已经登录才进行跳转
       if(this.IsLogin === '1') {
-        this.routerTo({ name: 'order_place' }, false);
+        this.routerTo({
+          name: 'order_place',
+          params: {
+            fromDetailPage: '1'
+          }
+        }, false);
       } else {
         document.getElementById('module_login').classList.add('active');
         var WVJBIframe = document.createElement('iframe');

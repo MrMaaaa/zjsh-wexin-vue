@@ -8,6 +8,9 @@ export default new Vuex.Store({
   state: {
     zjsh_version: '3.5.0',
 
+    // 是否在微信浏览器环境下
+    IsWxBrowser: '0',
+
     // 这个字符串中的路由的name不会被拦截器拦截
     interceptorsExceptList: 'user index',
 
@@ -90,6 +93,9 @@ export default new Vuex.Store({
     AlertStatus: '0', // 弹框状态：0:隐藏，1:显示
   },
   mutations: {
+    SetIsWxBrowser(state, data) {
+      return state.IsWxBrowser = data;
+    },
     SetToken(state, data = '') {
       Common.setCookie('ZJSH_WX_Token', data, 30, '/');
       return state.Token = data;

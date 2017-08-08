@@ -31,11 +31,13 @@ export default {
     return {
       tabIndex: '0',
       couponListNoUsed: [],
+      totalPrice: 0,
     }
   },
   activated() {
     this.couponListNoUsed.splice(0);
     this.getCouponList();
+    this.totalPrice = this.$route.params.totalPrice;
   },
   methods: {
     alert(msg, timeout = 1000) {
@@ -48,7 +50,8 @@ export default {
     },
     getCouponList() {
       axios.post(API.GetCoupons, qs.stringify({
-        Token: this.Token
+        Token: this.Token,
+        ServiceId: this.OrderInfo.FourServiceId,
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -58,8 +61,7 @@ export default {
           let d = new Date().getTime();
           res.data.Body.CouponList.map(value => {
             // 红包分类
-            if (value.ServiceItem.ServiceId === this.ThreeServiceId && d < value.EndTime + '000' && value.IsUsed === '0') {
-              // 未使用红包
+            if (value.CouponDetails[0].Amount <= this.totalPrice) {
               this.couponListNoUsed.push(value);
             }
           });

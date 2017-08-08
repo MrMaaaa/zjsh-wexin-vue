@@ -14,7 +14,7 @@ couponTypeByVue: 0:未使用 1:已使用 2:已过期
   <div class="right">
     <header class="item-title txt-over-hide">{{ couponItem.Title }}</header>
 
-    <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes.length >  0">
+    <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes && couponItem.ServiceTypes.length >  0">
       <span class="service-type" v-for="(type, t_index) in couponItem.ServiceTypes"><span v-if="t_index > 0">、</span>{{ type.ServiceName }}</span>
     </p>
     <p class="item-limit-service" v-else>全品类可用</p>

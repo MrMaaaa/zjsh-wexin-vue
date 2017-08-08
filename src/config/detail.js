@@ -98,7 +98,7 @@ module.exports = {
 		introduce: '',
 		range: [],
 		price: '',
-		process: imgUrl + 'ktqx_1.png',
+		process: imgUrl + 'process-ktqx.png',
 
 		// 注意事项
 		warn: [],

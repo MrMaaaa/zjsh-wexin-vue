@@ -17,7 +17,7 @@
     </div>
   </section>
 
-  <a class="btn-login" :class="{ disable: !isSubmit }" @click="submit">下一步</a>
+  <a class="btn-login" :class="{ disable: !isSubmit }" @click="submit">登录</a>
 
     <p class="login-tip">点击登录，即表示您同意<a class="link" href="https://copen.zhujiash.com/htm/yhfwxy.html">《助家生活用户协议》</a></p>
 

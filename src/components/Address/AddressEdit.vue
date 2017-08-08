@@ -55,8 +55,8 @@
       <div class="info">
         <div class="address-selector">
           <div class="selector-item" @click="AddressAddedInfo.Tag=''">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag === ''" src="../../assets/images/address_select.png">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag !== ''" src="../../assets/images/address_unselected.png">
+            <img class="icon-selector" v-show="!AddressAddedInfo.Tag" src="../../assets/images/address_select.png">
+            <img class="icon-selector" v-show="AddressAddedInfo.Tag" src="../../assets/images/address_unselected.png">
             <span class="txt-selector">无</span>
           </div>
           <div class="selector-item" @click="AddressAddedInfo.Tag=item.Name" v-for="item in addressTagList">
@@ -122,6 +122,19 @@ export default {
       this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
     }
     this.getAddressTags();
+  },
+  activated() {
+    if (this.$route.params.addr_info) {
+      let editAddrData = this.$route.params.addr_info;
+
+      // 将AddressAddedInfo中存在的信息进行保存
+      for (let key in this.AddressAddedInfo) {
+        this.AddressAddedInfo[key] = editAddrData[key];
+      }
+      this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
+    }
+    this.isDeleteComfirm = false;
+    this.isLoading = false;
   },
   methods: {
     getAddressTags() {

@@ -39,7 +39,15 @@ export default {
     }
   },
   mounted() {
+  },
+  activated() {
+    this.isLoading = false;
+    this.couponListNoUsed = [];
+    this.couponListUsed = [];
+    this.couponListOverdued = [];
+    this.couponListActived = [];
     this.getCouponList();
+    this.toggleCouponList(0);
   },
   methods: {
     getCouponList() {
@@ -54,7 +62,7 @@ export default {
         if(res.data.Meta.ErrorCode === '0') {
           let couponList = [];
           res.data.Body.CouponList.map(value => {
-            if (this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
+            if (!value.ServiceItem || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
               couponList.push(value);
             }
           });
