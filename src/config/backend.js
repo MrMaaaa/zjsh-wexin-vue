@@ -21,6 +21,9 @@ export default {
   // 获取服务价格
   "QueryServicePrice": wap + "api/v3/Front/QueryServicePrice",
 
+  // 获取活动类服务价格
+  "QueryActivityCommonServicePrice": wap + "api/v3/Front/QueryActivityCommonServicePrice",
+
   // 获取服务时间
   "ServiceTimeStartAt": wap + "api/v3/Front/ServiceTimeStartAt",
 

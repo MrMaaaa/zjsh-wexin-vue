@@ -190,6 +190,7 @@ export default {
           }
         }, false);
       } else {
+        document.getElementById('module_login').setAttribute('title', document.title);
         document.getElementById('module_login').classList.add('active');
         var WVJBIframe = document.createElement('iframe');
         document.title = '登录';

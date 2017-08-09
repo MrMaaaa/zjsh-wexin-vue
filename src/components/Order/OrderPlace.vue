@@ -171,22 +171,29 @@ export default {
   },
   activated() {
     // 重置服务时间
-    if(this.$route.params.fromDetailPage === '1') {
+    if (this.$route.params.fromDetailPage === '1') {
       this.OrderInfo.DateTime = '';
     }
 
-    if(this.thisThreeServiceId !== this.ThreeServiceId) {
-      this.thisThreeServiceId = this.ThreeServiceId;
+    let threeIdFromUrl = this.valueFromUrl('ServiceId');
+    if (threeIdFromUrl) {
+      this.ThreeServiceId = threeIdFromUrl;
+      this.ThreeServiceName = this.valueFromUrl('ServiceName');
+
       this.OrderInfo.CouponSelected = {};
       this.OrderInfo.CouponSelected.NoUse = '1';
       this.serviceList.splice(0);
       this.couponList.splice(0);
-      this.getServiceDetail();
-    }
-
-    // 防止网络问题导致没有刷新
-    if(this.serviceList.length == 0) {
-      // this.getServiceDetail();
+      this.getActivityServiceDetail(threeIdFromUrl);
+    } else {
+      if (this.thisThreeServiceId !== this.ThreeServiceId) {
+        this.thisThreeServiceId = this.ThreeServiceId;
+        this.OrderInfo.CouponSelected = {};
+        this.OrderInfo.CouponSelected.NoUse = '1';
+        this.serviceList.splice(0);
+        this.couponList.splice(0);
+        this.getServiceDetail();
+      }
     }
   },
   methods: {
@@ -204,6 +211,49 @@ export default {
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.ThreeServiceId
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        this.isLoading = false;
+        this.txtLoading = '';
+        this.bgLoading = '2';
+        if (res.data.Meta.ErrorCode === '0') {
+          this.serviceList = res.data.Body.Service.SubItems;
+
+          // 如果之前已经选择过对应服务的四级服务，显示之，否则显示第一个服务品类
+          if(this.OrderInfo.FourServiceId) {
+            this.typeIndex = -1;
+            let isMatch = false;
+            res.data.Body.Service.SubItems.map((value, index) => {
+              if (value.ServiceId === this.OrderInfo.FourServiceId) {
+                isMatch = true;
+                this.selectType(this.serviceList[index], index);
+              }
+            });
+            if(!isMatch) {
+              this.selectType(this.serviceList[0], 0);
+            }
+          } else {
+            this.selectType(this.serviceList[0], 0);
+          }
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(error => {
+        this.isLoading = false;
+        this.txtLoading = '';
+        this.bgLoading = '2';
+        this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
+    getActivityServiceDetail(ServiceId) {
+      this.isLoading = true;
+      this.txtLoading = '正在获取服务信息……';
+      axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
+        Token: this.Token,
+        ActivityProductId: ServiceId
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -382,7 +432,7 @@ export default {
         this.typeIndex = index;
         // 获取四级服务信息
         this.OrderInfo.FourServiceId = item.ServiceId;
-        // 获取四季服务对应红包信息
+        // 获取四级服务对应红包信息
         this.getCouponList(item.ServiceId);
         this.OrderInfo.SellType = item.SellType;
         this.OrderInfo.SpecialType = item.SpecialType;
@@ -646,6 +696,21 @@ export default {
   components: {
     OrderServiceTime,
   },
+  watch: {
+    Token(newValue, oldValue) {
+      if(this.valueFromUrl('ServiceId') && newValue !== oldValue) {
+        this.ThreeServiceId = this.valueFromUrl('ServiceId');
+        this.ThreeServiceName = this.valueFromUrl('ServiceName');
+        this.getUserAddress();
+
+        this.OrderInfo.CouponSelected = {};
+        this.OrderInfo.CouponSelected.NoUse = '1';
+        this.serviceList.splice(0);
+        this.couponList.splice(0);
+        this.getActivityServiceDetail(this.valueFromUrl('ServiceId'));
+      }
+    }
+  }
 }
 </script>
 
