@@ -207,7 +207,6 @@ export default {
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
       this.$store.commit('SetIsLogin', '0');
-      this.$store.commit('SetOrderInfo', '');
       this.$store.commit('SetThreeServiceId', '');
       this.$store.commit('SetThreeServiceName', '');
       this.$store.commit('SetUserId', '0');
