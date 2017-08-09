@@ -5,7 +5,7 @@
   <section class="login">
     <div class="login-row flex-row">
       <img class="icon-header" src="../../assets/images/register_phone.png">
-      <input v-model="phoneNumber" type="tel" autofocus="autofocus" placeholder="请输入手机号" maxlength="11">
+      <input v-model="phoneNumber" ref="input_phone" type="tel" autofocus="autofocus" placeholder="请输入手机号" maxlength="11">
       <a class="btn-get-captcha"><img class="icon-delete" v-show="phoneNumber != ''" @click="clearPhone" src="../../assets/images/input_delete.png"><span :class="{ disable: !isClickSendCaptcha || !isPhone,'is-countdown': isCountdown }" @click="sendCaptcha">{{ textCaptcha }}</span></a>
     </div>
 
@@ -50,6 +50,7 @@ export default {
   methods: {
     clearPhone() {
       this.phoneNumber = '';
+      this.$refs.input_phone.focus();
     },
     sendCaptcha() {
       const that = this;

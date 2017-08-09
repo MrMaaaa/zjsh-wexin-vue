@@ -5,7 +5,7 @@
       <span class="title">联系人</span>
 
       <div class="info">
-        <input class="address-input" type="text" v-model="AddressAddedInfo.Contact" placeholder="您的姓名">
+        <input class="address-input" ref="input_contact" type="text" v-model="AddressAddedInfo.Contact" placeholder="您的姓名">
         <div class="split-line"></div>
         <div class="address-selector">
           <div class="selector-item" @click="AddressAddedInfo.Gender='0'">
@@ -20,7 +20,7 @@
           </div>
         </div>
 
-        <img class="input-clear" @click="AddressAddedInfo.Contact=''" src="../../assets/images/input_delete.png">
+        <img class="input-clear" @click="AddressAddedInfo.Contact='';$refs.input_contact.focus();" src="../../assets/images/input_delete.png">
       </div>
     </div>
 
@@ -28,9 +28,9 @@
       <span class="title">联系电话</span>
 
       <div class="info">
-        <input class="address-input" type="tel" v-model="AddressAddedInfo.PhoneNumber" maxlength="11" placeholder="您的联系电话">
+        <input class="address-input" ref="input_phone" type="tel" v-model="AddressAddedInfo.PhoneNumber" maxlength="11" placeholder="您的联系电话">
 
-        <img class="input-clear" @click="AddressAddedInfo.PhoneNumber=''" src="../../assets/images/input_delete.png">
+        <img class="input-clear" @click="AddressAddedInfo.PhoneNumber='';$refs.input_phone.focus();" src="../../assets/images/input_delete.png">
       </div>
     </div>
 
@@ -41,9 +41,9 @@
         <router-link :to="{ name: 'address_select' }" v-if="!AddressAddedInfo.Address1" class="address-input default">小区/写字楼/大厦/学校等</router-link>
         <router-link :to="{ name: 'address_select' }" v-else class="address-input txt-over-hide">{{ AddressAddedInfo.Address1 }}</router-link>
         <div class="split-line"></div>
-        <input class="address-input" type="text" v-model="AddressAddedInfo.Address2" placeholder="详细地址（如1单元203室…）">
+        <input class="address-input" ref="input_address2" type="text" v-model="AddressAddedInfo.Address2" placeholder="详细地址（如1单元203室…）">
 
-        <img class="input-clear bottom" @click="AddressAddedInfo.Address2=''" src="../../assets/images/input_delete.png">
+        <img class="input-clear bottom" @click="AddressAddedInfo.Address2='';$refs.input_address2.focus();" src="../../assets/images/input_delete.png">
       </div>
     </div>
   </section>
