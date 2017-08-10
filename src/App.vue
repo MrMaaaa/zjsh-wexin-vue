@@ -31,7 +31,7 @@ export default {
   data() {
     return {
       title: '',
-      isShowNewUserCoupon: '1',
+      isShowNewUserCoupon: '0',
     }
   },
   created() {
@@ -132,6 +132,8 @@ export default {
       }).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetIsLogin', '1');
+        } else {
+          this.isShowNewUserCoupon = '1';
         }
       });
     },
