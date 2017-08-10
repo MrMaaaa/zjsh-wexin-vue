@@ -12,7 +12,7 @@ export default new Vuex.Store({
     IsWxBrowser: '0',
 
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'user index',
+    interceptorsExceptList: 'user index new_user_coupon',
 
     Token: '',
     UserId: '',

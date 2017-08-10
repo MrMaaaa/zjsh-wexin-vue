@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     getRecommendList() {
-        axios.post(API.Recommend, qs.stringify({}), {
+      axios.post(API.Recommend, qs.stringify({}), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
@@ -44,7 +44,7 @@ export default {
         } else {
           // this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch((error)=> {
+      }).catch((error) => {
         // this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },

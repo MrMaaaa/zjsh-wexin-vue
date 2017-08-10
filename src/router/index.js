@@ -4,6 +4,8 @@ import Router from 'vue-router';
 import Menu from '@/components/Menu';
 import Index from '@/components/Index/Index';
 import ServiceDetail from '@/components/Index/ServiceDetail';
+import ServiceExpress from '@/components/Activity/SFExpress/ServiceExpress';
+import NewUserCoupon from '@/components/Activity/NewUserCoupon/NewUserCoupon';
 import AddressAdd from '@/components/Address/AddressAdd';
 import AddressList from '@/components/Address/AddressList';
 import AddressEdit from '@/components/Address/AddressEdit';
@@ -94,6 +96,14 @@ var router = new Router({
     path: '/login',
     name: 'login',
     component: Login
+  }, {
+    path: '/express',
+    name: 'express',
+    component: ServiceExpress
+  }, {
+    path: '/new_user_coupon',
+    name: 'new_user_coupon',
+    component: NewUserCoupon
   }, {
     path: '/menu/about',
     name: 'user_about',

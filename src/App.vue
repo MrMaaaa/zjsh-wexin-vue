@@ -1,10 +1,16 @@
 <template>
   <div id="app">
     <!-- <transition name="bounce"> -->
-      <keep-alive>
-        <router-view class="router-view"></router-view>
-      </keep-alive>
+    <keep-alive>
+      <router-view class="router-view"></router-view>
+    </keep-alive>
     <!-- </transition> -->
+
+    <div class="new-user-coupon" v-if="isShowNewUserCoupon === '1' && $route.name != 'new_user_coupon'">
+      <img class="coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
+
+      <img class="btn-close" @click="isShowNewUserCoupon = '0'" src="./assets/images/coupon_close.png">
+    </div>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
 
@@ -25,6 +31,7 @@ export default {
   data() {
     return {
       title: '',
+      isShowNewUserCoupon: '1',
     }
   },
   created() {
@@ -128,6 +135,12 @@ export default {
         }
       });
     },
+    routerToNewUser() {
+      this.isShowNewUserCoupon = '0';
+      this.$router.push({
+        name: 'new_user_coupon',
+      })
+    },
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus']),
@@ -175,6 +188,27 @@ body,
     -webkit-transform: translate3d(100%,0,0);
     transform: translate3d(-100%,0,0);
   }
+}
+.new-user-coupon
+{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+}
+.new-user-coupon .coupon
+{
+  width: 100%;
+  height: auto;
+}
+.new-user-coupon .btn-close
+{
+  position: absolute;
+  top: -0.333333rem;
+  right: -0.333333rem;
+  width: 0.666667rem;
+  height: auto;
 }
 #module_login
 {

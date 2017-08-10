@@ -34,7 +34,7 @@ export default {
   data() {
     return {
       orderList: [],
-      couponList: [],
+      couponMax: null,
       orderPageIndex: 1,
       DialogConfig: { //对话框配置信息
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
@@ -49,7 +49,6 @@ export default {
     }
   },
   activated() {
-    this.getCouponList();
     this.getOrderList();
     // if(this.orderList.length == 0) {
     //   // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
@@ -144,9 +143,10 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
-    getCouponList() {
+    getCouponMaxAmount(serviceId, originPrice, callback) {
       axios.post(API.GetCoupons, qs.stringify({
-        Token: this.Token
+        Token: this.Token,
+        ServiceId: serviceId,
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -154,38 +154,23 @@ export default {
       }).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 红包分类
-          let date = new Date();
+          let maxDisCoupon = null;
+          let maxDis = 0;
           res.data.Body.CouponList.forEach((value, index) => {
             // 未使用红包
-            if (date.getTime() < Number(value.EndTime + '000') && value.IsUsed === '0') {
-              this.couponList.push(value);
+            if (maxDis <= value.CouponDetails[0].DiscountAmount && originPrice >= value.CouponDetails[0].Amount) {
+              maxDisCoupon = value;
+              maxDis = value.CouponDetails[0].DiscountAmount;
             }
           });
+          this.couponMax = maxDisCoupon;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
+        callback && callback();
       }).catch(error => {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
-    },
-    getCouponMaxAmount(serviceId) {
-      let maxDisCoupon = null;
-      let maxDis = 0;
-      this.couponList.map(value => {
-        let isIdEqual = false;
-        for (let i = 0; i < value.ServiceTypes.length; i++) {
-          if (value.ServiceTypes[i].ServiceId === serviceId) {
-            isIdEqual = true;
-            break;
-          }
-        }
-        if(isIdEqual) {
-          maxDisCoupon = value;
-          maxDis = value.CouponDetails[0].DiscountAmount;
-        }
-      });
-
-      return maxDisCoupon;
     },
     orderCancelDialog(orderId) {
       this.orderIdProcess = orderId;
@@ -293,18 +278,19 @@ export default {
       this.txtLoading = '';
       this.orderIdProcess = orderInfo.OrderId;
       let couponId = '';
-      let couponMax = this.getCouponMaxAmount(orderInfo.Service.ServiceId);
-      let p = orderInfo.TotalPrice;
-      if(couponMax) {
-        p -= couponMax.CouponDetails[0].DiscountAmount;
-        couponId = couponMax.Id;
-      }
+      this.getCouponMaxAmount(orderInfo.Service.ServiceId, orderInfo.TotalPrice, () => {
+        let p = orderInfo.TotalPrice;
+        if (this.couponMax) {
+          p -= this.couponMax.CouponDetails[0].DiscountAmount;
+          couponId = this.couponMax.Id;
+        }
 
-      if(this.OpenId) {
-        this.orderPayByWx(orderInfo.OrderId, p, couponId);
-      } else {
-        this.orderPayByAli(orderInfo.OrderId, p, couponId);
-      }
+        if (this.OpenId) {
+          this.orderPayByWx(orderInfo.OrderId, p, couponId);
+        } else {
+          this.orderPayByAli(orderInfo.OrderId, p, couponId);
+        }
+      });
     },
     orderPayByWx(orderId, price, couponId) {
       this.isLoading = true;
@@ -379,7 +365,8 @@ export default {
         OrderId: orderId,
         CouponId: couponId,
         Alipay: price,
-        BalancePay: '0'
+        BalancePay: '0',
+        SignType: 'web'
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -388,24 +375,25 @@ export default {
         this.isLoading = false;
         const that = this;
         if (res.data.Meta.ErrorCode === '0') {
-          var WVJBIframe = document.createElement('iframe');
-          document.title = '支付';
-          WVJBIframe.setAttribute('id', 'alipay');
-          WVJBIframe.setAttribute('frameborder', 'no');
-          WVJBIframe.setAttribute('border', '0');
-          WVJBIframe.setAttribute('width', '100%');
-          WVJBIframe.setAttribute('height', '100%');
-          WVJBIframe.id = 'alipay';
-          WVJBIframe.frameborder = 'no';
-          WVJBIframe.border = '0';
-          WVJBIframe.width = '100%';
-          WVJBIframe.height = '100%';
-          WVJBIframe.style.position = 'absolute';
-          WVJBIframe.style.top = '0';
-          WVJBIframe.style.left = '0';
-          WVJBIframe.style.backgroundColor = '#fff';
-          WVJBIframe.src = 'https://mapi.alipay.com/gateway.do?' + res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          document.documentElement.appendChild(WVJBIframe);
+          // var WVJBIframe = document.createElement('iframe');
+          // document.title = '支付';
+          // WVJBIframe.setAttribute('id', 'alipay');
+          // WVJBIframe.setAttribute('frameborder', 'no');
+          // WVJBIframe.setAttribute('border', '0');
+          // WVJBIframe.setAttribute('width', '100%');
+          // WVJBIframe.setAttribute('height', '100%');
+          // WVJBIframe.id = 'alipay';
+          // WVJBIframe.frameborder = 'no';
+          // WVJBIframe.border = '0';
+          // WVJBIframe.width = '100%';
+          // WVJBIframe.height = '100%';
+          // WVJBIframe.style.position = 'absolute';
+          // WVJBIframe.style.top = '0';
+          // WVJBIframe.style.left = '0';
+          // WVJBIframe.style.backgroundColor = '#fff';
+          // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          // document.documentElement.appendChild(WVJBIframe);
+          window.location.href = 'https://mapi.alipay.com/gateway.do?' + res.data.Body.AlipaySign;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }

@@ -22,7 +22,7 @@ couponTypeByVue: 0:未使用 1:已使用 2:已过期
     <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
   </div>
 
-  <img v-if="couponItem.couponTypeByVue === '1'" class="item-status" src="../../assets/images/coupon_overdued.png">
+  <img v-if="couponItem.couponTypeByVue === '1'" class="item-status" src="../../assets/images/coupon_used.png">
   <img v-if="couponItem.couponTypeByVue === '2'" class="item-status" src="../../assets/images/coupon_overdued.png">
 </li>
 </template>

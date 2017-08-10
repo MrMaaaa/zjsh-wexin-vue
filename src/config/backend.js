@@ -6,6 +6,12 @@ export default {
   // 检查当前用户手机号
   "CheckClientUser": wap + "api/v3/ClientInfo/CheckClientUser",
 
+  // 新手红包页面获取老用户红包
+  "OldUserReceiveRedCoups" : wap + "api/v3/ClientInfo/OldUserReceiveRedCoups",
+
+  // 新手红包页面获取新用户红包
+  "NewUserReceiveRedCoups" : wap + "api/v3/ClientInfo/NewUserReceiveRedCoups",
+
   // 发送验证码
   "SendCaptcha": wap + "api/v3/Helper/SendCaptcha",
 
