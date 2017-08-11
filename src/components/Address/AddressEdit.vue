@@ -116,7 +116,7 @@ export default {
       let editAddrData = this.$route.params.addr_info;
 
       // 将AddressAddedInfo中存在的信息进行保存
-      for (let key in this.AddressAddedInfo) {
+      for (let key in editAddrData) {
         this.AddressAddedInfo[key] = editAddrData[key];
       }
       this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
@@ -128,7 +128,7 @@ export default {
       let editAddrData = this.$route.params.addr_info;
 
       // 将AddressAddedInfo中存在的信息进行保存
-      for (let key in this.AddressAddedInfo) {
+      for (let key in editAddrData) {
         this.AddressAddedInfo[key] = editAddrData[key];
       }
       this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';

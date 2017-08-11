@@ -86,8 +86,12 @@ export default {
         // 如果作为其他页面的内嵌页面，调用父页面方法传值
         window.parent.getDataFromIFrame(item);
       } else {
+        // 目前只在下单页用到地址，如果有其他地方也会用到，再另行处理
         this.OrderInfo.Address = item;
-        this.$router.go(-1);
+        this.$store.commit('SetOrderInfo', this.OrderInfo);
+        this.$router.push({
+          name: 'order_place'
+        });
       }
     }
   },

@@ -54,14 +54,14 @@
 
       <div class="info">
         <div class="address-selector">
-          <div class="selector-item" @click="AddressAddedInfo.Tag='0'">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag === '0'" src="../../assets/images/address_select.png">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag !== '0'" src="../../assets/images/address_unselected.png">
+          <div class="selector-item" @click="AddressAddedInfo.Tag=''">
+            <img class="icon-selector" v-show="AddressAddedInfo.Tag === ''" src="../../assets/images/address_select.png">
+            <img class="icon-selector" v-show="AddressAddedInfo.Tag !== ''" src="../../assets/images/address_unselected.png">
             <span class="txt-selector">无</span>
           </div>
-          <div class="selector-item" @click="AddressAddedInfo.Tag=item.Id" v-for="item in addressTagList">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag === item.Id" src="../../assets/images/address_select.png">
-            <img class="icon-selector" v-show="AddressAddedInfo.Tag !== item.Id" src="../../assets/images/address_unselected.png">
+          <div class="selector-item" @click="AddressAddedInfo.Tag=item.Name" v-for="item in addressTagList">
+            <img class="icon-selector" v-show="AddressAddedInfo.Tag === item.Name" src="../../assets/images/address_select.png">
+            <img class="icon-selector" v-show="AddressAddedInfo.Tag !== item.Name" src="../../assets/images/address_unselected.png">
             <span class="txt-selector">{{ item.Name }}</span>
           </div>
         </div>
@@ -92,8 +92,17 @@ export default {
     }
   },
   mounted() {
-    this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
-    this.AddressAddedInfo.Tag = parseInt(this.AddressAddedInfo.Gender) > 0 ? this.AddressAddedInfo.Gender : '0';
+    this.AddressAddedInfo.Id = '';
+    this.AddressAddedInfo.Contact = '';
+    this.AddressAddedInfo.Gender = '0';
+    this.AddressAddedInfo.PhoneNumber = '';
+    this.AddressAddedInfo.Address1 = '';
+    this.AddressAddedInfo.Address1Lng = '';
+    this.AddressAddedInfo.Address1Lat = '';
+    this.AddressAddedInfo.Address2 = '';
+    this.AddressAddedInfo.Tag = '';
+    // this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
+    // this.AddressAddedInfo.Tag = parseInt(this.AddressAddedInfo.Gender) > 0 ? this.AddressAddedInfo.Gender : '0';
     this.getAddressTags();
   },
   methods: {

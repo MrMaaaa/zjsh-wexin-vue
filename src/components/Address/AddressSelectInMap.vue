@@ -106,12 +106,30 @@ export default {
           that.result.splice(0);
           if(local.getStatus() == BMAP_STATUS_SUCCESS) {
             for(let i = 0; i < results.getCurrentNumPois(); i++) {
-              that.result.push(results.getPoi(i))
+              let addr = results.getPoi(i);
+              addr.address = that.fixAddress(addr.address, addr.city, addr.province);
+              that.result.push(addr);
             }
           }
         }
       });
       local.searchNearby('小区', point, 1000);
+    },
+    // 补全地址的省市信息
+    fixAddress(address, city, province) {
+      let isCity = false;
+      let isProvince = false;
+      if(address.indexOf(city) > -1) {
+        isCity = true;
+      }
+      if(address.indexOf(province) > -1) {
+        isProvince = true;
+      }
+      if(!isCity && !isProvince) {
+        return province + city + address;
+      } else {
+        return address;
+      }
     },
     // 根据point修改marker的位置
     refreshMarker(point, index, map) {
@@ -149,7 +167,9 @@ export default {
           that.inputResult.splice(0);
           if(local.getStatus() == BMAP_STATUS_SUCCESS) {
             for(let i = 0; i < results.getCurrentNumPois(); i++) {
-              that.inputResult.push(results.getPoi(i))
+              let addr = results.getPoi(i);
+              addr.address = that.fixAddress(addr.address, addr.city, addr.province);
+              that.inputResult.push(addr);
             }
           }
         }

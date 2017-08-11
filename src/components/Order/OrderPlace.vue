@@ -4,7 +4,7 @@
     <div class="left flex-row">
       <img class="icon-header" src="../../assets/images/nearby.png">
 
-      <p v-if="OrderInfo.Address.Contact === undefined" class="txt-light">请选择一个服务地址</p>
+      <p v-if="!OrderInfo.Address" class="txt-light">请选择一个服务地址</p>
 
       <p v-else class="address-info txt-normal">
         <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }}{{ OrderInfo.Address.Address2 }}</span>
@@ -177,7 +177,6 @@ export default {
         that.alert(that.ALERT_MSG.PAY_ERROR);
       }
     }
-    this.getUserAddress();
   },
   activated() {
     // 重置服务时间
@@ -185,6 +184,7 @@ export default {
       this.OrderInfo.DateTime = '';
     }
 
+    this.getUserAddress();
     let threeIdFromUrl = this.valueFromUrl('ServiceId');
     if (threeIdFromUrl) {
       this.ThreeServiceId = threeIdFromUrl;
@@ -403,7 +403,20 @@ export default {
           if(res.data.Body.length >= 1) {
             if(!this.OrderInfo.Address.Id) {
               this.OrderInfo.Address = res.data.Body[0];
+            } else {
+              // 判断地址是否存在
+              let avail = false;
+              res.data.Body.forEach(value => {
+                if(this.OrderInfo.Address.Id === value.Id) {
+                  avail = true;
+                }
+              });
+              if(!avail) {
+                this.OrderInfo.Address = res.data.Body[0];
+              }
             }
+          } else {
+            this.OrderInfo.Address = null;
           }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
