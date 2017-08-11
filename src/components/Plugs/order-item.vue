@@ -41,7 +41,7 @@
     <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime <= 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
 
     <div class="operation-btns flex-row">
-      <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="$emit('order-cancel-dialog', orderItem.OrderId)">取消订单</a>
+      <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="$emit('order-cancel-dialog', { orderId: orderItem.OrderId })">取消订单</a>
       <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
       <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
       <!-- <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a> -->
@@ -71,6 +71,10 @@ export default {
       interval = setInterval(() => {
         this.orderItem.ResidualTime--;
         if(this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) {
+          this.$emit('order-cancel-dialog', {
+            orderId: this.orderItem.OrderId,
+            autoCancel: '1'
+          });
           clearInterval(interval);
         }
       }, 1000);
@@ -200,7 +204,7 @@ $color_txt_warn: #f56165;
         // height: 0.8rem;
         height: 0.773333rem;
         // line-height: 0.8rem;
-        line-height: 0.773333rem;
+        line-height: 0.8rem;
         border: 1px solid $color_txt_warn;
         border-radius: 3px;
         color: $color_txt_warn;

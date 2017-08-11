@@ -179,8 +179,9 @@ export default {
         }
       }).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
+          let date = new Date();
           res.data.Body.CouponList.map(value => {
-            if(value.ServiceItem == null || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
+            if((value.ServiceItem == null || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
               this.userInfo.couponCount++;
             }
           });
@@ -224,7 +225,7 @@ export default {
   },
   watch: {
     Token(newValue, oldValue) {
-      if(newValue !== oldValue) {
+      if(newValue != '' && newValue !== oldValue) {
         this.getUserInfo();
         this.getUserSettlement();
         this.getCouponAmount();

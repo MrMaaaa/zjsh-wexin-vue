@@ -46,10 +46,31 @@ export default {
       orderIdProcess: '', // 要处理的订单id
       isLoading: true,
       loadingBgStyle: '1',
+      // 弹出支付页面时禁止滚动，待实现
+      noScroll: function(event) {
+        event.preventDefault();
+        return false;
+      }
+    }
+  },
+  mounted() {
+    let that = this;
+    // iframe页面调用函数
+    window.getPayStatusFromFrame = function(status) {
+      let payIFrame = document.getElementById('alipay');
+      document.documentElement.removeChild(payIFrame);
+      if(status == '1') {
+        that.orderPaySuccess();
+      } else {
+        that.alert(that.ALERT_MSG.PAY_ERROR);
+      }
     }
   },
   activated() {
     this.getOrderList();
+    if(this.Token == '') {
+      this.orderList.splice(0);
+    }
     // if(this.orderList.length == 0) {
     //   // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
     // }
@@ -172,15 +193,19 @@ export default {
         this.alert(this.ALERT_MSG.NET_ERROR);
       });
     },
-    orderCancelDialog(orderId) {
-      this.orderIdProcess = orderId;
-      this.dialogType = '0';
-      this.DialogConfig = {
-        IsDialog: '1',
-        DialogTitle: '取消订单',
-        DialogContent: '确定取消订单吗？',
-        DialogBtns: ['取消', '确定'],
-      };
+    orderCancelDialog(obj) {
+      this.orderIdProcess = obj.orderId;
+      if(obj.autoCancel === '1') {
+        this.orderCancel();
+      } else {
+        this.dialogType = '0';
+        this.DialogConfig = {
+          IsDialog: '1',
+          DialogTitle: '取消订单',
+          DialogContent: '确定取消订单吗？',
+          DialogBtns: ['取消', '确定'],
+        };
+      }
     },
     orderDeleteDialog(orderId) {
       this.orderIdProcess = orderId;
@@ -375,31 +400,40 @@ export default {
         this.isLoading = false;
         const that = this;
         if (res.data.Meta.ErrorCode === '0') {
-          // var WVJBIframe = document.createElement('iframe');
-          // document.title = '支付';
-          // WVJBIframe.setAttribute('id', 'alipay');
-          // WVJBIframe.setAttribute('frameborder', 'no');
-          // WVJBIframe.setAttribute('border', '0');
-          // WVJBIframe.setAttribute('width', '100%');
-          // WVJBIframe.setAttribute('height', '100%');
-          // WVJBIframe.id = 'alipay';
-          // WVJBIframe.frameborder = 'no';
-          // WVJBIframe.border = '0';
-          // WVJBIframe.width = '100%';
-          // WVJBIframe.height = '100%';
-          // WVJBIframe.style.position = 'absolute';
-          // WVJBIframe.style.top = '0';
-          // WVJBIframe.style.left = '0';
-          // WVJBIframe.style.backgroundColor = '#fff';
-          // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          // document.documentElement.appendChild(WVJBIframe);
-          window.location.href = 'https://mapi.alipay.com/gateway.do?' + res.data.Body.AlipaySign;
+          var WVJBIframe = document.createElement('iframe');
+          document.title = '支付';
+          WVJBIframe.setAttribute('id', 'alipay');
+          WVJBIframe.setAttribute('frameborder', 'no');
+          WVJBIframe.setAttribute('border', '0');
+          WVJBIframe.setAttribute('width', '100%');
+          WVJBIframe.setAttribute('height', '100%');
+          WVJBIframe.id = 'alipay';
+          WVJBIframe.frameborder = 'no';
+          WVJBIframe.border = '0';
+          WVJBIframe.width = '100%';
+          WVJBIframe.height = '100%';
+          WVJBIframe.style.position = 'fixed';
+          WVJBIframe.style.top = '0';
+          WVJBIframe.style.left = '0';
+          WVJBIframe.style.zIndex = '99999';
+          WVJBIframe.style.backgroundColor = '#fff';
+          WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          document.documentElement.appendChild(WVJBIframe);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.isLoading = false;
+        alert(error);
         this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
+    orderPaySuccess() {
+      this.$router.push({
+        name: 'order_pay_status',
+        params: {
+          orderId: this.orderIdProcess
+        }
       });
     },
     // orderPay(orderInfo) {
@@ -568,6 +602,13 @@ export default {
     clearStr(str) {
       return (str == null || str == undefined) ? '' : str;
     },
+  },
+  watch: {
+    Token(newValue, oldValue) {
+      if(newValue != '' && newValue !== oldValue) {
+        this.getOrderList();
+      }
+    }
   },
   components: {
     InfiniteLoading,

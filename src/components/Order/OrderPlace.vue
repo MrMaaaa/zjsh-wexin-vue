@@ -167,6 +167,16 @@ export default {
     }
   },
   mounted() {
+    let that = this;
+    window.getPayStatusFromFrame = function(status) {
+      let payIFrame = document.getElementById('alipay');
+      document.documentElement.removeChild(payIFrame);
+      if(status == '1') {
+        that.orderPaySuccess();
+      } else {
+        that.alert(that.ALERT_MSG.PAY_ERROR);
+      }
+    }
     this.getUserAddress();
   },
   activated() {
@@ -635,22 +645,47 @@ export default {
         OrderId: orderId,
         CouponId: couponId,
         Alipay: price,
-        BalancePay: '0'
+        BalancePay: '0',
+        SignType: 'web'
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).then(res => {
         this.isLoading = false;
-        const that = this;
         if (res.data.Meta.ErrorCode === '0') {
-          // window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          var WVJBIframe = document.createElement('iframe');
+          document.title = '支付';
+          WVJBIframe.setAttribute('id', 'alipay');
+          WVJBIframe.setAttribute('frameborder', 'no');
+          WVJBIframe.setAttribute('border', '0');
+          WVJBIframe.setAttribute('width', '100%');
+          WVJBIframe.setAttribute('height', '100%');
+          WVJBIframe.id = 'alipay';
+          WVJBIframe.frameborder = 'no';
+          WVJBIframe.border = '0';
+          WVJBIframe.width = '100%';
+          WVJBIframe.height = '100%';
+          WVJBIframe.style.position = 'fixed';
+          WVJBIframe.style.top = '0';
+          WVJBIframe.style.left = '0';
+          WVJBIframe.style.backgroundColor = '#fff';
+          WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          document.documentElement.appendChild(WVJBIframe);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(error => {
         this.isLoading = false;
         this.alert(this.ALERT_MSG.NET_ERROR);
+      });
+    },
+    orderPaySuccess() {
+      this.$router.push({
+        name: 'order_pay_status',
+        params: {
+          orderId: this.$store.state.OrderIdForPay
+        }
       });
     },
     routeTo(option={name:''}, isReplace=false) {

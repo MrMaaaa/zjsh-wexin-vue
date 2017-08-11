@@ -133,7 +133,7 @@ export default new Vuex.Store({
       return state.ThreeServiceName = data;
     },
     SetOrderIdForPay(state, data = '') {
-      Common.setCookie('ZJSH_WX_OrderIdForPay', data, 30, '/');
+      Common.setCookie('ZJSH_WX_OrderIdForPay', data, 1, '/');
       return state.OrderIdForPay = data;
     },
     SetOrderInfo(state, data) {

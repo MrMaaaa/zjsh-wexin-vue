@@ -6,10 +6,12 @@
     </keep-alive>
     <!-- </transition> -->
 
-    <div class="new-user-coupon" v-if="isShowNewUserCoupon === '1' && $route.name != 'new_user_coupon'">
-      <img class="coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
+    <div class="new-user-coupon" v-if="isShowUserCoupon === true">
+      <div class="coupon">
+        <img class="img-coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
 
-      <img class="btn-close" @click="isShowNewUserCoupon = '0'" src="./assets/images/coupon_close.png">
+        <img class="btn-close" @click="isShowNewUserCoupon = '0'" src="./assets/images/coupon_close.png">
+      </div>
     </div>
 
     <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
@@ -146,6 +148,13 @@ export default {
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus']),
+    isShowUserCoupon() {
+      if(this.isShowNewUserCoupon === '1' && this.$route.name != 'new_user_coupon' && this.$route.name != 'order_place' && !document.getElementById('module_login').classList.contains('active')) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   components: {
     MLogin
@@ -165,11 +174,11 @@ body,
 {
   background-color: #eef2f5;
 }
-.bounce-enter-active {
+/*.bounce-enter-active {
     animation: bounce-in .3s;
 }
 .bounce-leave-active {
-  /* animation: bounce-out 60ms; */
+  animation: bounce-out 60ms;
 }
 @keyframes bounce-in {
   0% {
@@ -190,19 +199,29 @@ body,
     -webkit-transform: translate3d(100%,0,0);
     transform: translate3d(-100%,0,0);
   }
-}
+}*/
 .new-user-coupon
 {
   position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateZ(0);
+  z-index: 99999;
+  width: 100%;
+  height: 100%;
+}
+.new-user-coupon .coupon
+{
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   width: 80%;
+  height: auto;
 }
-.new-user-coupon .coupon
+.new-user-coupon .coupon .img-coupon
 {
   width: 100%;
-  height: auto;
 }
 .new-user-coupon .btn-close
 {

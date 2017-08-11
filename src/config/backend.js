@@ -1,6 +1,6 @@
-// const wap = "http://192.168.1.191:3001/";
+const wap = "http://192.168.1.191:3001/";
 // const wap = "http://copen.homepaas.com/";
-const wap = "https://copen.zhujiash.com/";
+// const wap = "https://copen.zhujiash.com/";
 
 export default {
   // 检查当前用户手机号
@@ -58,7 +58,8 @@ export default {
   "GetWxpaySign": wap + "api/v3/OrderInfo/GetWxpaySign",
 
   // 支付宝支付接口
-  "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
+  // "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
+  "GetAlipaySign": "http://i8qbnf.natappfree.cc/api/v3/OrderInfo/GetAlipaySign",
 
   // 取消订单
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",
