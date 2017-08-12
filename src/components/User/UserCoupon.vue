@@ -1,9 +1,9 @@
 <template>
-<div class="wrapper">
+<div class="wrapper" id="user_coupon">
   <div class="header-tab flex-row">
-    <a class="tab-item" :class="{ active: tabIndex === '0' }" href="javascript: void(0)" @click="toggleCouponList(0)">未使用</a>
-    <a class="tab-item" :class="{ active: tabIndex === '1' }" href="javascript: void(0)" @click="toggleCouponList(1)">已使用</a>
-    <a class="tab-item" :class="{ active: tabIndex === '2' }" href="javascript: void(0)" @click="toggleCouponList(2)">已过期</a>
+    <a class="tab-item" :class="{ active: tabIndex === 0 }" href="javascript: void(0)" @click="toggleCouponList(0)">未使用</a>
+    <a class="tab-item" :class="{ active: tabIndex === 1 }" href="javascript: void(0)" @click="toggleCouponList(1)">已使用</a>
+    <a class="tab-item" :class="{ active: tabIndex === 2 }" href="javascript: void(0)" @click="toggleCouponList(2)">已过期</a>
   </div>
 
   <ul class="coupon-list" id="coupont_list" v-if="couponListActived.length > 0">
@@ -30,15 +30,30 @@ export default {
   name: 'user_coupon',
   data() {
     return {
-      tabIndex: '0',
+      tabIndex: 0,
       couponListNoUsed: [],
       couponListUsed: [],
       couponListOverdued: [],
       couponListActived: [],
       isLoading: true,
+      touchStart: 0,
+      touchEnd: 0,
     }
   },
   mounted() {
+    document.getElementById('user_coupon').addEventListener('touchstart', event => {
+      this.touchStart = event.changedTouches[0].clientX;
+    });
+    document.getElementById('user_coupon').addEventListener('touchend', event => {
+      this.touchEnd = event.changedTouches[0].clientX;
+      if(this.touchEnd - this.touchStart >= 100 && this.tabIndex > 0) {
+        this.tabIndex -= 1;
+        this.toggleCouponList(this.tabIndex);
+      } else if(this.touchStart - this.touchEnd >= 100 && this.tabIndex < 2) {
+        this.tabIndex += 1;
+        this.toggleCouponList(this.tabIndex);
+      }
+    });
   },
   activated() {
     this.isLoading = false;
@@ -98,12 +113,12 @@ export default {
       });
     },
     toggleCouponList(index) {
-      this.tabIndex = index.toString();
-      if(this.tabIndex === '0') {
+      this.tabIndex = Number(index);
+      if(this.tabIndex === 0) {
         this.couponListActived = this.couponListNoUsed;
-      } else if(this.tabIndex === '1') {
+      } else if(this.tabIndex === 1) {
         this.couponListActived = this.couponListUsed;
-      } else if(this.tabIndex === '2') {
+      } else if(this.tabIndex === 2) {
         this.couponListActived = this.couponListOverdued;
       }
     }
