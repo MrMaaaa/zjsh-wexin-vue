@@ -1,6 +1,6 @@
-// const wap = "http://192.168.1.191:3001/";
+const wap = "http://192.168.1.191:3001/";
 // const wap = "http://copen.homepaas.com/";
-const wap = "https://copen.zhujiash.com/";
+// const wap = "https://copen.zhujiash.com/";
 
 export default {
   // 检查当前用户手机号

@@ -36,20 +36,28 @@ export default {
       couponListOverdued: [],
       couponListActived: [],
       isLoading: true,
-      touchStart: 0,
-      touchEnd: 0,
+      touchStartX: 0,
+      touchStartY: 0,
+      touchEndX: 0,
+      touchEndY: 0,
     }
   },
   mounted() {
     document.getElementById('user_coupon').addEventListener('touchstart', event => {
-      this.touchStart = event.changedTouches[0].clientX;
+      this.touchStartX = event.changedTouches[0].clientX;
+      this.touchStartY = event.changedTouches[0].clientY;
+    });
+    document.getElementById('user_coupon').addEventListener('touchmove', event => {
+      if(Math.abs(event.changedTouches[0].clientY - this.touchStartY) <= 20) {
+        event.preventDefault();
+      }
     });
     document.getElementById('user_coupon').addEventListener('touchend', event => {
-      this.touchEnd = event.changedTouches[0].clientX;
-      if(this.touchEnd - this.touchStart >= 100 && this.tabIndex > 0) {
+      this.touchEndX = event.changedTouches[0].clientX;
+      if(this.touchEndX - this.touchStartX >= 100 && this.tabIndex > 0) {
         this.tabIndex -= 1;
         this.toggleCouponList(this.tabIndex);
-      } else if(this.touchStart - this.touchEnd >= 100 && this.tabIndex < 2) {
+      } else if(this.touchStartX - this.touchEndX >= 100 && this.tabIndex < 2) {
         this.tabIndex += 1;
         this.toggleCouponList(this.tabIndex);
       }
