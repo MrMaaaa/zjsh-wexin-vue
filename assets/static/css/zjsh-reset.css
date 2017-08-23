@@ -15,6 +15,12 @@ a, button
   text-decoration: none;
 }
 
+input
+{
+  border: none !important;
+  outline: none !important;
+}
+
 *[id*='ads']
 {
   width: 0 !important;

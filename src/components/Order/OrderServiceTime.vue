@@ -63,7 +63,7 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode == '0') {
           this.dateList = res.data.Body.AvailableDate;
@@ -88,9 +88,9 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     dateSelect(event, item, index) {

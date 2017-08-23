@@ -1,19 +1,24 @@
 <template>
 <div>
-  <header class="header" :class="{ disable: phoneNumber !== '' }">欢迎体验助家生活的服务<br>请先验证手机号</header>
+  <header class="header" :class="{ disable: phoneNumber !== '' }">欢迎体验{{ AppName }}的服务<br>请先验证手机号</header>
 
   <section class="login">
     <div class="login-row flex-row">
-      <img class="icon-header" src="../../assets/images/register_phone.png">
-      <input v-model="phoneNumber" ref="input_phone" type="tel" autofocus="autofocus" placeholder="请输入手机号" maxlength="11">
+      <div class="flex-row">
+        <img class="icon-header" src="../../assets/images/register_phone.png">
+        <input v-model="phoneNumber" ref="input_phone" type="tel" placeholder="请输入手机号" maxlength="11">
+      </div>
       <a class="btn-get-captcha"><img class="icon-delete" v-show="phoneNumber != ''" @click="clearPhone" src="../../assets/images/input_delete.png"><span :class="{ disable: !isClickSendCaptcha || !isPhone,'is-countdown': isCountdown }" @click="sendCaptcha">{{ textCaptcha }}</span></a>
     </div>
 
     <div class="split-line"></div>
 
     <div class="login-row flex-row">
-      <img class="icon-header" src="../../assets/images/register_captcha.png">
-      <input v-model="captcha" id="captcha" type="tel" placeholder="请输入验证码" maxlength="4">
+      <div class="flex-row">
+        <img class="icon-header" src="../../assets/images/register_captcha.png">
+        <input v-model="captcha" id="captcha" type="tel" placeholder="请输入验证码" maxlength="4">
+      </div>
+      <div></div>
     </div>
   </section>
 
@@ -71,7 +76,7 @@ export default {
           this.sendCaptchaInterval = setInterval(function() {
             count--;
             that.textCaptcha = '重新发送(' + count + ')';
-            if(count == 1) {
+            if(count <= 0) {
               clearInterval(this.sendCaptchaInterval);
               that.isCountdown = false;
               that.textCaptcha = '重新发送';
@@ -101,8 +106,9 @@ export default {
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
           this.$store.commit('SetIsLogin', '1');
-          document.title = document.getElementById('module_login').getAttribute('title');
-          document.getElementById('module_login').classList.remove('active');
+          var login = document.getElementById('module_login');
+          document.title = login.getAttribute('title');
+          login.classList.remove('active');
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -113,7 +119,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['IsOpenLogin', 'ALERT_MSG']),
+    ...mapState(['AppName', 'IsOpenLogin', 'ALERT_MSG']),
     isPhone() {
       return /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phoneNumber);
     },
@@ -136,6 +142,9 @@ export default {
         this.textCaptcha = '获取验证码';
         this.captcha = '';
         this.isLoading = false;
+        setTimeout(() => {
+          this.$refs.input_phone.focus();
+        }, 400);
       }
     },
   }

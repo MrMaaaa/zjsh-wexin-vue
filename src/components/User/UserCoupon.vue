@@ -52,12 +52,13 @@ export default {
         event.preventDefault();
       }
     });
+    const slideThreshold = 50;
     document.getElementById('user_coupon').addEventListener('touchend', event => {
       this.touchEndX = event.changedTouches[0].clientX;
-      if(this.touchEndX - this.touchStartX >= 100 && this.tabIndex > 0) {
+      if(this.touchEndX - this.touchStartX >= slideThreshold && this.tabIndex > 0) {
         this.tabIndex -= 1;
         this.toggleCouponList(this.tabIndex);
-      } else if(this.touchStartX - this.touchEndX >= 100 && this.tabIndex < 2) {
+      } else if(this.touchStartX - this.touchEndX >= slideThreshold && this.tabIndex < 2) {
         this.tabIndex += 1;
         this.toggleCouponList(this.tabIndex);
       }
@@ -85,7 +86,7 @@ export default {
         if(res.data.Meta.ErrorCode === '0') {
           let couponList = [];
           res.data.Body.CouponList.map(value => {
-            if (!value.ServiceItem || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) {
+            if (!value.ServiceItem || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) {
               couponList.push(value);
             }
           });
@@ -113,11 +114,15 @@ export default {
           // 默认显示未使用红包
           this.couponListActived = this.couponListNoUsed;
         } else {
-          this.alert(res.data.Meta.ErrorMsg);
+          if(res.data.Meta.ErrorCode === '2004') {
+            this.alert(this.ALERT_MSG.USER_COUPON_NO_LOGIN);
+          } else {
+            this.alert(res.data.Meta.ErrorMsg);
+          }
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     toggleCouponList(index) {

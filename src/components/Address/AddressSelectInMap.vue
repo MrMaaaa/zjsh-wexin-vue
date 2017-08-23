@@ -59,6 +59,10 @@ export default {
       that.getSurroundingLocation(that.point);
     });
   },
+  activated() {
+    this.inputFocus = false;
+    this.inputAddr = '';
+  },
   methods: {
     // 地图初始化
     init() {
@@ -245,9 +249,11 @@ a
 
 .input-wrapper
 {
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
   padding-top: 45px;
+  background-color: #fff;
 
   z-index: 99;
 }
@@ -272,6 +278,7 @@ a
   height: 66px;
   line-height: 33px;
   padding-left: 36px;
+  background-color: #fff;
 
   overflow: hidden;
   text-overflow: ellipsis;

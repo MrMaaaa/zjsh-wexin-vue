@@ -6,7 +6,7 @@
     </keep-alive>
     <!-- </transition> -->
 
-    <div class="new-user-coupon" v-if="isShowUserCoupon === true">
+    <div class="new-user-coupon" v-if="isShowNewUserCoupon === '1'">
       <div class="coupon">
         <img class="img-coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
 
@@ -42,7 +42,6 @@ export default {
       window.location.replace('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=code&scope=snsapi_base#wechat_redirect');
     }
 
-
     // 从缓存中获取数据
     this.$store.commit('SetToken', Common.getCookie('ZJSH_WX_Token'));
     this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));
@@ -59,14 +58,9 @@ export default {
     // 设置全局请求头
     axios.defaults.headers.common['zjsh_version'] = this.zjsh_version;
 
-    // 设置拦截器，当接口返回2004时跳转到登录页
-    // 拦截器例外：“我的”页面
+    // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
-      //if (!this.interceptorsExceptList.includes(this.$route.name) && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
-      if (!this.interceptorsExceptList.includes(this.$route.name) && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
-        // this.$router.push({
-        //   path: '/login'
-        // });
+      if (this.interceptorsExceptList.indexOf(this.$route.name) == -1 && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
         this.$store.commit('SetIsLogin', '0');
         this.openLogin();
       }
@@ -79,6 +73,7 @@ export default {
     }
   },
   mounted() {
+    this.getAppName();
     if (window.parent === window.self) {
       if (this.valueFromUrl('code')) {
         this.getOpenId();
@@ -106,23 +101,17 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetOpenId', res.data.Body.OpenId);
         } else {
-          // this.alert(res.data.Meta.ErrorMsg);
+          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        // this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
-    openLogin() {
-      document.getElementById('module_login').setAttribute('title', document.title);
-      document.getElementById('module_login').classList.add('active');
-      this.$store.commit('SetIsOpenLogin', '1');
-      var WVJBIframe = document.createElement('iframe');
-      document.title = '登录';
-      WVJBIframe.style.display = 'none';
-      document.documentElement.appendChild(WVJBIframe);
-      setTimeout(function() {
-        document.documentElement.removeChild(WVJBIframe)
-      }, 0);
+    getAppName() {
+      let name = this.valueFromUrl('utm_term');
+      if(name) {
+        this.$store.commit('SetAppName', decodeURIComponent(name));
+      }
     },
     vertifyToken() {
       axios.post(API.VerifyToken, qs.stringify({
@@ -135,7 +124,9 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetIsLogin', '1');
         } else {
-          this.isShowNewUserCoupon = '1';
+          if(this.$route.name == 'index' && !document.getElementById('module_login').classList.contains('active')) {
+            this.isShowNewUserCoupon = '1';
+          }
         }
       });
     },
@@ -143,18 +134,11 @@ export default {
       this.isShowNewUserCoupon = '0';
       this.$router.push({
         name: 'new_user_coupon',
-      })
+      });
     },
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus']),
-    isShowUserCoupon() {
-      if(this.isShowNewUserCoupon === '1' && this.$route.name != 'new_user_coupon' && this.$route.name != 'order_place' && !document.getElementById('module_login').classList.contains('active')) {
-        return true;
-      } else {
-        return false;
-      }
-    }
   },
   components: {
     MLogin
@@ -242,10 +226,12 @@ body,
   height: 100%;
   background-color: #fff;
   transition: all .5s;
+  opacity: 0;
 }
 #module_login.active
 {
   transform: translateY(0);
+  opacity: 1;
   transition: all .5s;
 }
 </style>

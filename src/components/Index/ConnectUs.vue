@@ -42,14 +42,6 @@
     <div class="row-split"></div>
 
     <div class="row flex-row">
-      <span class="left">微信号</span>
-
-      <span class="right">huahffhhv</span>
-    </div>
-
-    <div class="row-split"></div>
-
-    <div class="row flex-row">
       <span class="left">客服QQ</span>
 
       <span class="right">1372285990</span>

@@ -3,8 +3,11 @@ import Router from 'vue-router';
 
 import Menu from '@/components/Menu';
 import Index from '@/components/Index/Index';
-import ServiceDetail from '@/components/Index/ServiceDetail';
-import ServiceExpress from '@/components/Activity/SFExpress/ServiceExpress';
+import ServiceDetail from '@/components/Service/CommonServiceDetail';
+import ServiceExpress from '@/components/Service/ServiceExpress';
+import ServiceErrand from '@/components/Service/ServiceErrand';
+import ServiceExpressDetail from '@/components/Service/ServiceExpressDetail';
+import ServiceErrandDetail from '@/components/Service/ServiceErrandDetail';
 import NewUserCoupon from '@/components/Activity/NewUserCoupon/NewUserCoupon';
 import AddressAdd from '@/components/Address/AddressAdd';
 import AddressList from '@/components/Address/AddressList';
@@ -22,11 +25,17 @@ import OrderCouponSelect from '@/components/Order/OrderCouponSelect';
 import User from '@/components/User/User';
 import UserCoupon from '@/components/User/UserCoupon';
 
+import store from '../store/index';
+
 Vue.use(Router);
+
+console.log(store.state.AppName);
 
 // 路由-标题映射表
 const ROUTER_TO_TITLE = {
   '/menu/index': '搜上门服务，用助家生活',
+  '/errand': '同城跑腿',
+  '/express': '顺丰速运',
   '/menu/index/detail': '服务详情',
   '/menu/order': '订单列表',
   '/menu/order/order_place': '下单页',
@@ -44,7 +53,7 @@ const ROUTER_TO_TITLE = {
   '/address/address_select': '修改服务地址',
 }
 
-var router = new Router({
+let router = new Router({
   routes: [{
     path: '',
     redirect: '/menu/index'
@@ -101,6 +110,18 @@ var router = new Router({
     name: 'express',
     component: ServiceExpress
   }, {
+    path: '/express_order_detail',
+    name: 'express_order_detail',
+    component: ServiceExpressDetail
+  }, {
+    path: '/errand',
+    name: 'errand',
+    component: ServiceErrand
+  }, {
+    path: '/errand_order_detail',
+    name: 'errand_order_detail',
+    component: ServiceErrandDetail
+  }, {
     path: '/new_user_coupon',
     name: 'new_user_coupon',
     component: NewUserCoupon
@@ -136,12 +157,22 @@ var router = new Router({
     name: 'user_coupon',
     component: UserCoupon,
   }],
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return {
+        x: 0,
+        y: 0
+      }
+    }
+  }
 });
 
 router.beforeEach((to, from, next) => {
   // 对不同的路由设置不同的title
   var login = document.getElementById('module_login');
-  if(login && login.classList.contains('active')) {
+  if (login && login.classList.contains('active')) {
     login && login.classList.remove('active');
     document.title = ROUTER_TO_TITLE[from.path] || ROUTER_TO_TITLE['/menu/index'];
 
@@ -154,7 +185,7 @@ router.beforeEach((to, from, next) => {
     // 阻止路由跳转
     next(false);
   } else {
-    if(to.path === '/menu/index/detail' && from.path === '/menu/index/detail') {
+    if (to.path === '/menu/index/detail' && from.path === '/menu/index/detail') {
       next({
         name: '/menu/index'
       });
@@ -163,6 +194,6 @@ router.beforeEach((to, from, next) => {
       next();
     }
   }
-})
+});
 
 export default router;

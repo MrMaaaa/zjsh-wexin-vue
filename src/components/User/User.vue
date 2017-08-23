@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    <a @click="login" class="user-section user-info login flex-row" v-else>
+    <a @click="openLogin" class="user-section user-info login flex-row" v-else>
       <img class="user-avatar" src="../../assets/images/user_default.png">
 
       <div class="section-info">
@@ -52,7 +52,7 @@
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_inRegardTo.png">
 
-        <span class="section-name">关于助家生活</span>
+        <span class="section-name">关于{{ AppName }}</span>
       </div>
 
       <img class="section-icon-link" src="../../assets/images/link.png">
@@ -104,7 +104,7 @@ export default {
 
     // 获取用户微信头像与微信昵称
     if(this.OpenId) {
-      this.getWxUserInfo();
+      // this.getWxUserInfo();
     }
 
     // 获取余额与红包
@@ -131,8 +131,8 @@ export default {
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        // this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getWxUserInfo() {
@@ -147,10 +147,10 @@ export default {
           this.userInfo.nickName = res.data.Body.NickName;
           this.userInfo.avatar = res.data.Body.HeadImgUrl;
         } else {
-          // this.alert(res.data.Meta.ErrorMsg);
+          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        // this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getUserSettlement() {
@@ -166,8 +166,8 @@ export default {
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getCouponAmount() {
@@ -181,28 +181,16 @@ export default {
         if(res.data.Meta.ErrorCode === '0') {
           let date = new Date();
           res.data.Body.CouponList.map(value => {
-            if((value.ServiceItem == null || this.ThreeServiceIdFilterList.includes(' ' + value.ServiceItem.ServiceId + ' ')) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
+            if((value.ServiceItem == null || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
               this.userInfo.couponCount++;
             }
           });
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
-    },
-    login() {
-      document.getElementById('module_login').classList.add('active');
-      document.getElementById('module_login').setAttribute('title', document.title);
-      this.$store.commit('SetIsOpenLogin', '1');
-      var WVJBIframe = document.createElement('iframe');
-      document.title = '登录';
-      WVJBIframe.style.display = 'none';
-      document.documentElement.appendChild(WVJBIframe);
-      setTimeout(function() {
-        document.documentElement.removeChild(WVJBIframe)
-      }, 0);
     },
     logout() {
       window._vds.push(['setCS1', 'user_id', '']);
@@ -221,7 +209,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'ThreeServiceIdFilterList', 'ALERT_MSG']),
+    ...mapState(['Token', 'AppName', 'OpenId', 'ThreeServiceIdFilterList', 'ALERT_MSG']),
   },
   watch: {
     Token(newValue, oldValue) {
@@ -298,6 +286,7 @@ export default {
         display: block;
         width: 0.72rem;
         height: 0.72rem;
+        margin-right: 0.32rem;
       }
       .section-icon-link
       {
@@ -308,7 +297,6 @@ export default {
       .section-name
       {
         display: block;
-        margin-left: 0.32rem;
       }
       .user-balance
       {

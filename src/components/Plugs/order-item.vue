@@ -7,7 +7,7 @@
 
   <div class="item-split"></div>
 
-  <div class="item-info">
+  <div class="item-info" v-if="orderItem.IsKdEOrder === '0'">
     <div class="info-row flex-row">
       <div class="row-left">服务地址</div>
       <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
@@ -37,6 +37,50 @@
     </div>
   </div>
 
+  <div class="item-info" v-else-if="orderItem.KdEOrderInfo">
+    <div class="info-row flex-row">
+      <div class="row-left">快递单号</div>
+      <div class="row-right txt-over-hide">{{ orderItem.KdEOrderInfo.LogisticCode }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">发件地址</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">收件地址</div>
+      <div class="row-right txt-over-hide">{{ orderItem.KdEOrderInfo.TargetAddress.Address1 }}{{ orderItem.KdEOrderInfo.TargetAddress.Address2 | clearStr }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">寄件时间</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.ServiceStartTime | formatDate }}</div>
+    </div>
+  </div>
+
+  <div class="item-info" v-else-if="orderItem.ExpressOrderInfo">
+    <div class="info-row flex-row">
+      <div class="row-left">快递单号</div>
+      <div class="row-right txt-over-hide">{{ orderItem.ExpressOrderInfo.LogisticCode }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">发件地址</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">收件地址</div>
+      <div class="row-right txt-over-hide">{{ orderItem.ExpressOrderInfo.TargetAddress.Address1 }}{{ orderItem.ExpressOrderInfo.TargetAddress.Address2 | clearStr }}</div>
+    </div>
+
+    <div class="info-row flex-row">
+      <div class="row-left">寄件时间</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.ServiceStartTime | formatDate }}</div>
+    </div>
+  </div>
+
   <div class="item-operation flex-row" v-if="orderItem.OrderBtnInfo.IsShowBtnInfo">
     <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime <= 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
 
@@ -45,10 +89,10 @@
       <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
       <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
       <!-- <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a> -->
-      <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1' && orderItem.ResidualTime" @click="$emit('order-pay', orderItem)">立即支付</a>
+      <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1'" @click="$emit('order-pay', orderItem)">立即支付</a>
 
       <!-- 目前联系客服按钮只在“未支付”状态不显示 -->
-      <a class="btn oppo" v-if="orderItem.OrderStatus !== '1' || orderItem.IsPayOff !== '0'" href="tel:4008-262-056">联系客服</a>
+      <a class="btn oppo" v-if="(orderItem.OrderStatus !== '1' && orderItem.OrderStatus !== '10') || orderItem.IsPayOff !== '0'" href="tel:4008-262-056">联系客服</a>
     </div>
   </div>
 </li>
@@ -70,7 +114,7 @@ export default {
     if(this.orderItem.ResidualTime && this.orderItem.ResidualTime > 0) {
       interval = setInterval(() => {
         this.orderItem.ResidualTime--;
-        if(this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) {
+        if((this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) && this.orderItem.OrderStatus != '50') {
           this.$emit('order-cancel-dialog', {
             orderId: this.orderItem.OrderId,
             autoCancel: '1'

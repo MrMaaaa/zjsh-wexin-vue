@@ -25,7 +25,7 @@
   </div>
 
   <div class="address-add">
-    <router-link class="btn-add" :to="{ name: 'address_add' }"><img class="icon-add" src="../../assets/images/address_add.png">新增地址</router-link>
+    <router-link class="btn-add" :to="{ name: 'address_add', params: { isAddressAddedInfo: '1' } }"><img class="icon-add" src="../../assets/images/address_add.png">新增地址</router-link>
   </div>
 
   <m-loading bg-style="1" v-show="isLoading"></m-loading>
@@ -44,6 +44,7 @@ export default {
     return {
       addressList: [],
       isLoading: true,
+      originRoute: '',
     }
   },
   mounted() {
@@ -55,6 +56,9 @@ export default {
     }
   },
   activated() {
+    if(this.$route.params.originRoute) {
+      this.originRoute = this.$route.params.originRoute;
+    }
     this.getAddressList();
   },
   methods: {
@@ -69,16 +73,16 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           this.addressList = res.data.Body;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     routerTo(item) {
@@ -90,7 +94,10 @@ export default {
         this.OrderInfo.Address = item;
         this.$store.commit('SetOrderInfo', this.OrderInfo);
         this.$router.push({
-          name: 'order_place'
+          name: this.originRoute,
+          params: {
+            address: item
+          }
         });
       }
     }
@@ -104,6 +111,13 @@ export default {
         return '';
       } else {
         return val;
+      }
+    }
+  },
+  watch: {
+    Token(newValue, oldValue) {
+      if(newValue != '' && newValue !== oldValue) {
+        this.getAddressList();
       }
     }
   }

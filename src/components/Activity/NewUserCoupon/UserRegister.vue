@@ -61,7 +61,7 @@ export default {
       header: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }).then((res) => {
+    }).then(res => {
       if (res.data.Meta.ErrorCode == '0') {
         let that = this;
         res.data.Body.CouponList.map((val, index, arr) => {
@@ -96,6 +96,8 @@ export default {
         this.isWarn = true;
         this.warnMsg = res.data.Meta.ErrorMsg;
       }
+    }).catch(err => {
+      this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
     });
   },
   components: {

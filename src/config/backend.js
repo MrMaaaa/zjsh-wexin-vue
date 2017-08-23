@@ -2,6 +2,10 @@
 // const wap = "http://copen.homepaas.com/";
 const wap = "https://copen.zhujiash.com/";
 
+// import vuex from '../store/index';
+
+// const wap = vuex.state.API;
+
 export default {
   // 检查当前用户手机号
   "CheckClientUser": wap + "api/v3/ClientInfo/CheckClientUser",
@@ -23,6 +27,12 @@ export default {
 
   // 获取首页推荐品类
   "Recommend": wap + "api/v3/Front/Recommend",
+
+  // 获取超级优惠
+  "GetSuperDiscount": wap + "api/v3/Front/GetSuperDiscount",
+
+  // 获取全部分类
+  "AllService": wap + "api/v3/Front/AllService",
 
   // 获取服务价格
   "QueryServicePrice": wap + "api/v3/Front/QueryServicePrice",
@@ -58,8 +68,8 @@ export default {
   "GetWxpaySign": wap + "api/v3/OrderInfo/GetWxpaySign",
 
   // 支付宝支付接口
-  // "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
-  "GetAlipaySign": "http://i8qbnf.natappfree.cc/api/v3/OrderInfo/GetAlipaySign",
+  "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
+  // "GetAlipaySign": "http://i8qbnf.natappfree.cc/api/v3/OrderInfo/GetAlipaySign",
 
   // 取消订单
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",
@@ -93,4 +103,19 @@ export default {
 
   // 获取红包列表
   "GetCoupons": wap + "api/v3/User/GetCoupons",
-}
+
+  // 创建快递订单
+  "CreateKdEOrder": wap + "/api/v3/Front/CreateKdEOrder",
+
+  // 获取跑腿/快递订单详情
+  "GetExpressDetail": wap + "api/v3/Express/GetExpressDetail",
+
+  // 获取快递进度信息
+  "GetKdTrackInfo": wap + "/api/v3/Front/GetKdTrackInfo",
+
+  // 获取跑腿服务价格
+  "GetPaoTuiPrice": wap + "/api/v3/Express/GetPaoTuiPrice",
+
+  // 创建跑腿订单
+  "CreatePaoTuiOrder": wap + "/api/v3/Express/CreateOrder",
+};

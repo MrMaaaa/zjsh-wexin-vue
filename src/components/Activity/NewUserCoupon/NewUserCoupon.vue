@@ -41,7 +41,7 @@
 
           <div class="right flex-row">
             <div class="coupon-info">
-              <span class="coupon-range txt-hide">{{ item.Range }}</span><span class="coupon-vali-time txt-hide">有效期至{{ item.EndTime | formatDate }}</span>
+              <span class="coupon-range txt-over-hide">{{ item.Range }}</span><span class="coupon-vali-time txt-hide">有效期至{{ item.EndTime | formatDate }}</span>
             </div>
           </div>
         </li>
@@ -109,9 +109,9 @@ export default {
           }).then(res => {
             this.isLoading = false;
             if (res.data.Meta.ErrorCode == '0') {
-              this.isShowUserStatus = '1';
               if (res.data.Body.IsNewUser == '0') {
                 //老用户显示
+                this.isShowUserStatus = '1';
                 this.getOldUserCouponList();
               } else {
                 //新用户弹出注册页面
@@ -125,7 +125,7 @@ export default {
             }
           }).catch(err => {
             this.isLoading = false;
-            this.alert(this.WARN_INFO.NET_ERROR);
+            this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
           });
         }
       } else {
@@ -155,6 +155,7 @@ export default {
               //如果成功发送验证码
               if (res.data.Meta.ErrorCode == '0') {
                 // 登录
+                this.isShowUserStatus = '1';
                 window._vds.push(['setCS1', 'user_id', res.data.Body.CouponList[0].UserId]);
                 this.$store.commit('SetToken', res.data.Body.Token);
                 this.$store.commit('SetUserId', res.data.Body.CouponList[0].UserId);
@@ -193,7 +194,7 @@ export default {
             }).catch((err) => {
               this.isLoading = false;
               this.isDrawCoupon = true;
-              this.alert(this.WARN_INFO.NET_ERROR);
+              this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
             });
           }
         }
@@ -219,6 +220,7 @@ export default {
             if (res.data.Meta.ErrorCode == '0') {
               var that = this;
               this.isAllowedSendCaptcha = false;
+              this.alert(res.data.Meta.ErrorMsg);
               let count = 60;
               let timer = setInterval(function() {
                 that.captchaBtnText = count + 's';
@@ -234,7 +236,7 @@ export default {
             }
           }).catch((err) => {
             this.isLoading = false;
-            this.alert(this.WARN_INFO.NET_ERROR);
+            this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
           });
         }
       } else {
@@ -283,7 +285,7 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.WARN_INFO.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     checkPhoneNumber() {

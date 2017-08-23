@@ -38,7 +38,6 @@ module.exports = {
 			c: "服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！"
 		}]
 	},
-
 	'3': {
 		title: "新房开荒",
 		headImg: imgUrl + "header-xfkh.png",
@@ -111,6 +110,26 @@ module.exports = {
 			c: "服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！"
 		}]
 	},
+	'14': {
+		title: "冰箱清洗",
+		headImg: imgUrl + 'header-bx.png',
+		standard: ['1、冰箱无异味，内部无霜无冰', '2、零部件及冰箱内外洁净无菌'],
+		introduce: '',
+		range: [],
+		price: '',
+		process: imgUrl + 'bx_1.png',
+
+		// 注意事项
+		warn: [],
+
+		assurance: [{
+			t: "健康保障",
+			c: "服务人员均通过健康认证，每年进行2次健康检查，保障雇主家庭健康安全！"
+		}, {
+			t: "隐私保障",
+			c: "服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！"
+		}]
+	},
 	'15': {
 		title: "洗衣机清洗",
 		headImg: imgUrl + "header-xyj.png",
@@ -119,6 +138,46 @@ module.exports = {
 		range: [],
 		price: '',
 		process: imgUrl + 'xyj_1.png',
+
+		// 注意事项
+		warn: [],
+
+		assurance: [{
+			t: "健康保障",
+			c: "服务人员均通过健康认证，每年进行2次健康检查，保障雇主家庭健康安全！"
+		}, {
+			t: "隐私保障",
+			c: "服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！"
+		}]
+	},
+	'17': {
+		title: "饮水机清洗",
+		headImg: imgUrl + "header-ysj.png",
+		standard: ['1. 彻底冲洗：五放五排彻底冲洗管道中的污渍和异味。', '2.无缝洗尘: 全方位无死角的深度表面清洁，光亮如新'],
+		introduce: '',
+		range: [],
+		price: '',
+		process: imgUrl + 'ysj_1.png',
+
+		// 注意事项
+		warn: [],
+
+		assurance: [{
+			t: "健康保障",
+			c: "服务人员均通过健康认证，每年进行2次健康检查，保障雇主家庭健康安全！"
+		}, {
+			t: "隐私保障",
+			c: "服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！"
+		}]
+	},
+	'16': {
+		title: "微波炉清洗",
+		headImg: imgUrl + "header-wbl.png",
+		standard: ['1. 除垢除味：百洁布配合专业清洗剂，不放过任何死角。', '2.三洗: 分别对内部、外部、零件进行清洗、消毒。'],
+		introduce: '',
+		range: [],
+		price: '',
+		process: imgUrl + 'wbl_1.png',
 
 		// 注意事项
 		warn: [],

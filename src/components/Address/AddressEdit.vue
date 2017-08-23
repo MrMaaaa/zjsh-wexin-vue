@@ -142,18 +142,17 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.addressTagList = res.data.Body;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     saveAddress() {
-      console.log(this.AddressAddedInfo);
       if(this.AddressAddedInfo.Contact === '') {
         this.alert(this.ALERT_MSG.ADDRESS_ERROR.NAME_EMPTY);
       } else if (this.AddressAddedInfo.PhoneNumber === '') {
@@ -173,9 +172,20 @@ export default {
           header: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
-        }).then((res) => {
+        }).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode === '0') {
+            this.$store.commit('SetAddressAddedInfo', {
+              Id: '',
+              Contact: '',
+              Gender: '',
+              PhoneNumber: '',
+              Address1: '',
+              Address1Lng: '',
+              Address1Lat: '',
+              Address2: '',
+              Tag: ''
+            });
             this.$router.replace({
               name: 'address_list'
             });
@@ -183,9 +193,9 @@ export default {
             this.isLoading = false;
             this.alert(res.data.Meta.ErrorMsg);
           }
-        }).catch(function(error) {
+        }).catch(err => {
           this.isLoading = false;
-          this.alert(this.ALERT_MSG.NET_ERROR);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
         });
       }
     },
@@ -198,7 +208,7 @@ export default {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           this.$router.replace({
@@ -207,9 +217,9 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     }
   },
@@ -236,6 +246,7 @@ $splitLineColor: #e4eaee;
 .address-input
 {
   display: block;
+  width: 100%;
   height: 0.64rem;
   margin: 0;
   padding: 0.28rem 0;

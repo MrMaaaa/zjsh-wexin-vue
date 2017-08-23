@@ -41,11 +41,11 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     }
   },

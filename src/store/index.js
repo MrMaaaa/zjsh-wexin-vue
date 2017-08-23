@@ -8,11 +8,19 @@ export default new Vuex.Store({
   state: {
     zjsh_version: '3.5.0',
 
+    AppName: '助家生活', // 当前web app的名称
+
+    IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
+
     // 是否在微信浏览器环境下
     IsWxBrowser: '0',
 
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'user index new_user_coupon',
+    interceptorsExceptList: 'user index new_user_coupon express errand user_about user_connect_us',
+
+    // API: 'http://192.168.1.191:3001/',
+    // API: 'http://copen.homepaas.com/',
+    // API: 'https://copen.zhujiash.com/',
 
     Token: '',
     UserId: '',
@@ -79,13 +87,14 @@ export default new Vuex.Store({
         PHONE_EMPTY: '请填写你的手机号',
         PHONE_ERROR: '请填写正确的手机号',
         ADDRESS_EMPTY: '请填写您的详细地址',
-      }
+      },
+      USER_COUPON_NO_LOGIN: '登录后，才能看到红包情况',
     },
 
-    // 如何使用下面的两个过滤列表：ThreeServiceIdFilterList.includes(' ' + id + ' ')【或者判断indexOf是否大于-1】
+    // 如何使用下面的两个过滤列表：ThreeServiceIdFilterList.indexOf(' ' + id + ' ')
     // 注意：必须加上id前后的空格才能保证正确判断
     ThreeServiceIdFilterList: ' 2 3 4 12 13 15 ', // 首页对应的三级服务id
-    FourServiceIdFilterList: ' 5 733 734 735 316 317 297 298 299 300 301 302 307 308 815 814 ', // 首页对应的四级服务id
+    FourServiceIdFilterList: ' 5 733 734 735 316 317 297 298 299 300 301 302 307 308 815 814 642 643 644 162 26 137 156 ', // 首页对应的四级服务id
 
     // 全局弹框配置
     AlertMsg: '', // 弹出信息
@@ -96,6 +105,22 @@ export default new Vuex.Store({
     SetIsWxBrowser(state, data) {
       return state.IsWxBrowser = data;
     },
+    SetAppName(state, data) {
+      return state.AppName = data;
+    },
+    // SetAPI(state, data) {
+    //   let api = '';
+    //   if(data === '0') {
+    //     api = 'http://192.168.1.191:3001/';
+    //   } else if(data === '1') {
+    //     api = 'http://copen.homepaas.com/';
+    //   } else if(data === '2') {
+    //     api = 'https://copen.zhujiash.com/';
+    //   } else if(data === '3') {
+    //     api = 'http://copen.zhujiash.com/';
+    //   }
+    //   return state.API = api;
+    // },
     SetToken(state, data = '') {
       Common.setCookie('ZJSH_WX_Token', data, 30, '/');
       return state.Token = data;

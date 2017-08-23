@@ -1,4 +1,5 @@
 <template>
+<div>
   <div v-if="pageData">
     <header class="header-img">
         <img :src="pageData.headImg">
@@ -119,7 +120,8 @@
     <div class="btn-wrapper">
        <button type="button" class="order-button btn btn-warn" @click="subumitForWx">立即预约</button>
     </div>
-  </div v-if="pageData">
+  </div>
+</div>
 </template>
 
 <script>
@@ -140,6 +142,8 @@ export default {
     }
   },
   activated() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     // 当服务id不同时刷新数据
     let oldId = this.threeId;
     this.threeId = this.$route.params.id;
@@ -170,11 +174,11 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     subumitForWx() {
@@ -190,15 +194,7 @@ export default {
           }
         }, false);
       } else {
-        document.getElementById('module_login').setAttribute('title', document.title);
-        document.getElementById('module_login').classList.add('active');
-        var WVJBIframe = document.createElement('iframe');
-        document.title = '登录';
-        WVJBIframe.style.display = 'none';
-        document.documentElement.appendChild(WVJBIframe);
-        setTimeout(function() {
-          document.documentElement.removeChild(WVJBIframe)
-        }, 0);
+        this.openLogin();
       }
     },
     routerTo(option={'name':'order_place'}, isReplace=false) {
@@ -214,7 +210,7 @@ export default {
   },
   filters: {
     clearDeposit(str) {
-      return str ? str : '/';
+      return str ? str + '元' : '/';
     }
   }
 }

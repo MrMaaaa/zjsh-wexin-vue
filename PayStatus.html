@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta content="telephone=no,email=no" name="format-detection">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>订单详情</title>
+    <link rel="stylesheet" type="text/css" href="./assets/static/css/zjsh-reset.css">
+    <script src="./assets/static/js/browser.js"></script>
+    <script src="./assets/static/js/flexible.js"></script>
+    <style>
+      body{background-color: #eef2f5}.list-item{background-color:#fff;color:#888;font-size:14px}.list-item:not(:first-child){margin-top:0.266667rem}.list-item .item-header{line-height:100%;padding:0.533333rem 0.533333rem 0.48rem;font-size:15px}.list-item .item-split{height:1px;margin-left:0.533333rem;background-color:#e5e5e5}.list-item .item-info{padding:0.4rem 0.533333rem}.list-item .item-info .info-row:not(:first-child){margin-top:0.4rem}.list-item .item-info .info-row .row-left{flex-shrink:0;-webkit-flex-shrink:0}.list-item .item-info .info-row .row-right{flex-grow:1;-webkit-flex-grow:1;width:1px;margin-left:0.866667rem;text-align:right}.list-item .item-operation{overflow:hidden;height:1.333333rem;border-top:1px solid #e5e5e5;padding:0 0.533333rem}.list-item .item-operation .remain-pay-time{color:#333639;font-size:15px}.list-item .item-operation .remain-pay-time.hide{visibility:hidden}.list-item .item-operation .operation-btns{justify-content:flex-end;-webkit-justify-content:flex-end;text-align:right}.list-item .item-operation .operation-btns .btn{display:block;width:2.0rem;height:0.773333rem;line-height:0.8rem;border:1px solid #f56165;border-radius:3px;color:#f56165;font-size:13px;text-align:center}.list-item .item-operation .operation-btns .btn:not(:first-child){margin-left:0.266667rem}.list-item .item-operation .operation-btns .btn.oppo{background-color:#f56165;color:#fff}.warn-info-wrapper{position:fixed;top:0;left:0;transform:translateZ(0);z-index:999;width:100%;height:100%}.warn-info-wrapper .warn-info{width:100%;height:100%;transform:translateY(65%);text-align:center}.warn-info-wrapper .warn-info .txt{display:inline-block;max-width:85%;padding:0.2rem 0.4rem;border-radius:4px;background-color:#585858;color:#fff;font-size:16px}.loading{position:fixed;bottom:0;left:0;z-index:9999;transform:translateZ(0);width:100%;height:100%;background-color:#fff}.loading-content{position:absolute;top:50%;left:50%;padding:20px;border-radius:4px;background-color:rgba(0,0,0,0.6);text-align:center;transform:translate(-50%, -50%)}.loading-content .loading-txt{color:#fff;font-size:14px}.loading-content .loading-txt.txt-top{margin-bottom:0.266667rem}.loading-content .loading-txt.txt-bottom{margin-top:0.266667rem}.loading-content .loading-animate{width:1.5rem;margin:0 auto}.loading-animate .object{display:inline-block;width:0.3rem;height:0.3rem;padding:1px;border-radius:100%;background-color:#fff;-webkit-animation:bouncedelay 1.4s infinite ease-in-out;animation:bouncedelay 1.4s infinite ease-in-out;-webkit-animation-fill-mode:none;animation-fill-mode:none}@-webkit-keyframes bouncedelay{0%, 80%, 100%{-webkit-transform:scale(0)}40%{-webkit-transform:scale(1)}}@keyframes bouncedelay{0%, 80%, 100%{transform:scale(0);-webkit-transform:scale(0)}40%{transform:scale(1);-webkit-transform:scale(1)}}.loading-content .object1{-webkit-animation-delay:-0.32s;animation-delay:-0.32s}.loading-content .object2{-webkit-animation-delay:-0.16s;animation-delay:-0.16s}
+    </style>
+  </head>
+  <body>
+    <div class="loading" id="loading" v-show="isShowLoading">
+      <div class="loading-content">
+        <div class="loading-animate flex-row">
+          <div class="object object1"></div>
+          <div class="object object2"></div>
+          <div class="object object3"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="list-item" id="app">
+      <header class="item-header flex-row">
+        <span class="header-name">{{ orderItem.Service.ServiceName }}</span>
+        <span class="header-status">{{ orderItem.OrderBtnInfo.Title }}</span>
+      </header>
+
+      <div class="item-split"></div>
+
+      <div class="item-info">
+        <div class="info-row flex-row">
+          <div class="row-left">服务地址</div>
+          <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+        </div>
+
+        <div class="info-row flex-row">
+          <div class="row-left">服务时间</div>
+          <div class="row-right txt-over-hide">{{ orderItem.Service.ServiceStartTime | dateFormat }}</div>
+        </div>
+
+        <div class="info-row flex-row">
+          <div class="row-left">订单总价</div>
+          <div class="row-right txt-over-hide" v-if="orderItem.IsNegotiable === '1'">{{ orderItem.StartingPrice | moneyFormat }}元起</div>
+          <div class="row-right txt-over-hide" v-else>{{ orderItem.TotalPrice | moneyFormat }}元</div>
+        </div>
+
+        <div class="info-row flex-row">
+          <div class="row-left" v-if="orderItem.PayStatus === '0'">实付金额</div>
+          <div class="row-left" v-else>待付金额</div>
+          <div class="row-right txt-over-hide" v-if="orderItem.PayAmount == null">待付款</div>
+          <div class="row-right txt-over-hide" v-else>{{ orderItem.PayAmount | moneyFormat }}元</div>
+        </div>
+
+        <div class="info-row flex-row">
+          <div class="row-left">订单编号</div>
+          <div class="row-right txt-over-hide">{{ orderItem.OrderCode }}</div>
+        </div>
+      </div>
+
+      <div class="warn-info-wrapper" v-show="isShow" @touchend="isShow = false">
+        <div class="warn-info">
+          <span class="txt">{{ warnMsg }}</span>
+        </div>
+      </div>
+
+      <div class="loading" v-show="isShowLoading">
+        <div class="loading-content">
+          <div class="loading-animate flex-row">
+            <div class="object object1"></div>
+            <div class="object object2"></div>
+            <div class="object object3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="./assets/static/js/vue-2.3.0.min.js"></script>
+  <script src="./assets/static/js/axios.min.js"></script>
+  <script src="./assets/static/js/qs.min.js"></script>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        Token: '',
+        orderStatus: '支付成功',
+        orderItem: {
+          Service: {
+            AddressInfo: {},
+          },
+          OrderBtnInfo: {},
+        },
+        orderId: '',
+        isShow: false,
+        warnMsg: '',
+        isShowLoading: false,
+      },
+      mounted: function() {
+        document.getElementById('loading').style.display = 'none';
+        var status = this.valueFromUrl("status");
+        if (status != '1') {
+          this.orderStatus = '支付失败';
+        }
+        this.orderId = this.valueFromUrl("orderId");
+        this.Token = this.valueFromUrl("token");
+
+        // 安卓给父页面传值，ios显示订单详情
+        if (browser.versions.android) {
+          if (window.parent.getPayStatusFromFrame) {
+            window.parent.getPayStatusFromFrame(status);
+          } else if (window.opener.getPayStatusFromFrame) {
+            window.opener.getPayStatusFromFrame(status);
+          } else if (window.top.getPayStatusFromFrame) {
+            window.top.getPayStatusFromFrame(status);
+          }
+        } else if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+          this.getOrderDetail();
+        }
+      },
+      methods: {
+        alert(alertMsg, alertTimeout = 1000) {
+          this.warnMsg = alertMsg;
+          this.isShow = true;
+          setTimeout(() => {
+            this.isShow = false;
+          }, alertTimeout);
+        },
+        valueFromUrl: function(name) {
+          var reg = new RegExp("(^|\\?|&)" + name + "=([^&]*)(\\s|&|$)", "i");
+          if (reg.test(location.href)) return decodeURIComponent(RegExp.$2.replace(/\+/g, " "));
+          return "";
+        },
+        getOrderDetail: function() {
+          this.isShowLoading = true;
+          axios.post('https://copen.zhujiash.com/api/v3/OrderInfo/GetOrderInfoEx', Qs.stringify({
+            "Token": this.Token,
+            "OrderId": this.orderId,
+          }), {
+            header: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            }
+          }).then(res => {
+            this.isShowLoading = false;
+            if (res.data.Meta.ErrorCode === '0') {
+              this.orderItem = res.data.Body.Order;
+            } else {
+              this.alert(res.data.Meta.ErrorMsg);
+            }
+          }).catch(error => {
+            this.isShowLoading = false;
+            this.alert('网络连接失败，请检查您的网络');
+          });
+        },
+      },
+      filters: {
+        moneyFormat: function(value) {
+          if (!value) {
+            return '';
+          } else {
+            return Number(value);
+          }
+        },
+        dateFormat: function(value) {
+          if (!value) {
+            return '';
+          }
+          function addZero(value) {
+            return value < 10 ? '0' + value : value;
+          }
+          var date = new Date(Number(value + '000'));
+          var year = addZero(date.getFullYear()),
+            month = addZero(date.getMonth() + 1),
+            day = addZero(date.getDate()),
+            hour = addZero(date.getHours()),
+            minute = addZero(date.getMinutes()),
+            second = addZero(date.getSeconds());
+          return year + '-' + month + '-' + date.getDate() + ' ' + hour + ':' + minute + ':' + second;
+        }
+      }
+    });
+  </script>
+</html>

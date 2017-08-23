@@ -91,16 +91,18 @@ export default {
       isLoading: false,
     }
   },
-  mounted() {
-    this.AddressAddedInfo.Id = '';
-    this.AddressAddedInfo.Contact = '';
-    this.AddressAddedInfo.Gender = '0';
-    this.AddressAddedInfo.PhoneNumber = '';
-    this.AddressAddedInfo.Address1 = '';
-    this.AddressAddedInfo.Address1Lng = '';
-    this.AddressAddedInfo.Address1Lat = '';
-    this.AddressAddedInfo.Address2 = '';
-    this.AddressAddedInfo.Tag = '';
+  activated() {
+    if(this.$route.params.isAddressAddedInfo === '1') {
+      this.AddressAddedInfo.Id = '';
+      this.AddressAddedInfo.Contact = '';
+      this.AddressAddedInfo.Gender = '0';
+      this.AddressAddedInfo.PhoneNumber = '';
+      this.AddressAddedInfo.Address1 = '';
+      this.AddressAddedInfo.Address1Lng = '';
+      this.AddressAddedInfo.Address1Lat = '';
+      this.AddressAddedInfo.Address2 = '';
+      this.AddressAddedInfo.Tag = '';
+    }
     // this.AddressAddedInfo.Gender = this.AddressAddedInfo.Gender == '1' ? this.AddressAddedInfo.Gender : '0';
     // this.AddressAddedInfo.Tag = parseInt(this.AddressAddedInfo.Gender) > 0 ? this.AddressAddedInfo.Gender : '0';
     this.getAddressTags();
@@ -111,14 +113,14 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.addressTagList = res.data.Body;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     addAddress() {
@@ -126,6 +128,8 @@ export default {
         this.alert(this.ALERT_MSG.ADDRESS_ERROR.NAME_EMPTY);
       } else if (this.AddressAddedInfo.PhoneNumber === '') {
         this.alert(this.ALERT_MSG.ADDRESS_ERROR.PHONE_EMPTY);
+      } else if(!/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber)) {
+        this.alert(this.ALERT_MSG.ADDRESS_ERROR.PHONE_ERROR);
       } else if (this.AddressAddedInfo.Address1 === '') {
         this.alert(this.ALERT_MSG.ADDRESS_ERROR.ADDRESS_EMPTY);
       } else if (this.AddressAddedInfo.Address2 === '') {
@@ -140,18 +144,29 @@ export default {
           header: {
             'Content-Type': 'application/x-www-form-urlencoded'
           }
-        }).then((res) => {
+        }).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode === '0') {
+            this.$store.commit('SetAddressAddedInfo', {
+              Id: '',
+              Contact: '',
+              Gender: '',
+              PhoneNumber: '',
+              Address1: '',
+              Address1Lng: '',
+              Address1Lat: '',
+              Address2: '',
+              Tag: ''
+            });
             this.$router.replace({
               name: 'address_list'
             });
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
-        }).catch(function(error) {
+        }).catch(err => {
           this.isLoading = false;
-          this.alert(this.ALERT_MSG.NET_ERROR);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
         });
       }
     }
@@ -178,6 +193,7 @@ $row-height: 1.2rem;
 .address-input
 {
   display: block;
+  width: 100%;
   height: 0.64rem;
   margin: 0;
   padding: 0.28rem 0;

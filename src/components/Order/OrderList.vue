@@ -2,7 +2,7 @@
 <div class="wrapper">
   <div class="order-list-able" v-show="orderList.length > 0">
     <ul class="order-list">
-      <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" v-for="item in orderList"></order-item>
+      <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" @click.native="showOrderDetail(item)" v-for="item in orderList"></order-item>
     </ul>
 
     <!-- <infinite-loading :on-infinite="getOrderList"  ref="infiniteLoading">
@@ -44,7 +44,7 @@ export default {
       },
       dialogType: '0', // 对话框类型 0:取消订单 1:删除订单 2:确认订单
       orderIdProcess: '', // 要处理的订单id
-      isLoading: true,
+      isLoading: false,
       loadingBgStyle: '1',
       // 弹出支付页面时禁止滚动，待实现
       noScroll: function(event) {
@@ -67,9 +67,11 @@ export default {
     }
   },
   activated() {
-    this.getOrderList();
-    if(this.Token == '') {
+    if(this.Token == '' || this.IsLogin === '0') {
       this.orderList.splice(0);
+      this.openLogin();
+    } else {
+      this.getOrderList();
     }
     // if(this.orderList.length == 0) {
     //   // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
@@ -131,6 +133,7 @@ export default {
 
     // 目前只显示前10条订单数据
     getOrderList() {
+      this.isLoading = true;
       axios.post(API.GetOrderListEx, qs.stringify({
         Token: this.Token,
         PageIndex: '1',
@@ -140,7 +143,7 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           this.orderList.splice(0);
@@ -148,7 +151,8 @@ export default {
             // 只显示定价类订单
             res.data.Body.OrderList.map(value => {
               // 只显示首页服务中的订单
-              if(this.FourServiceIdFilterList.includes(' ' + value.Service.ServiceId + ' ')) {
+              // if(value.IsKdEOrder === '1' || this.FourServiceIdFilterList.indexOf(' ' + value.Service.ServiceId + ' ') > -1) {
+              if(this.FourServiceIdFilterList.indexOf(' ' + value.Service.ServiceId + ' ') > -1) {
                 // 判断是否显示底部按钮组
                 value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
                 this.orderList.push(value);
@@ -159,15 +163,16 @@ export default {
           this.isLoading = false;
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch((error) => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getCouponMaxAmount(serviceId, originPrice, callback) {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token,
         ServiceId: serviceId,
+        IsPay: '1',
       }), {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -178,10 +183,9 @@ export default {
           let maxDisCoupon = null;
           let maxDis = 0;
           res.data.Body.CouponList.forEach((value, index) => {
-            // 未使用红包
             if (maxDis <= value.CouponDetails[0].DiscountAmount && originPrice >= value.CouponDetails[0].Amount) {
               maxDisCoupon = value;
-              maxDis = value.CouponDetails[0].DiscountAmount;
+              maxDis = Number(value.CouponDetails[0].DiscountAmount);
             }
           });
           this.couponMax = maxDisCoupon;
@@ -189,8 +193,8 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
         callback && callback();
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderCancelDialog(obj) {
@@ -255,8 +259,8 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg, 2000);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderDelete() {
@@ -274,8 +278,8 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderConfirm() {
@@ -293,8 +297,8 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPay(orderInfo) {
@@ -319,7 +323,7 @@ export default {
     },
     orderPayByWx(orderId, price, couponId) {
       this.isLoading = true;
-      this.bgLoading = '2';
+      this.loadingBgStyle = '2';
       this.txtLoading = '';
       axios.post(API.GetWxpaySign, qs.stringify({
         Token: this.Token,
@@ -376,14 +380,14 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPayByAli(orderId, price, couponId) {
       this.isLoading = true;
-      this.bgLoading = '2';
+      this.loadingBgStyle = '2';
       this.txtLoading = '';
       axios.post(API.GetAlipaySign, qs.stringify({
         Token: this.Token,
@@ -400,32 +404,35 @@ export default {
         this.isLoading = false;
         const that = this;
         if (res.data.Meta.ErrorCode === '0') {
-          var WVJBIframe = document.createElement('iframe');
-          document.title = '支付';
-          WVJBIframe.setAttribute('id', 'alipay');
-          WVJBIframe.setAttribute('frameborder', 'no');
-          WVJBIframe.setAttribute('border', '0');
-          WVJBIframe.setAttribute('width', '100%');
-          WVJBIframe.setAttribute('height', '100%');
-          WVJBIframe.id = 'alipay';
-          WVJBIframe.frameborder = 'no';
-          WVJBIframe.border = '0';
-          WVJBIframe.width = '100%';
-          WVJBIframe.height = '100%';
-          WVJBIframe.style.position = 'fixed';
-          WVJBIframe.style.top = '0';
-          WVJBIframe.style.left = '0';
-          WVJBIframe.style.zIndex = '99999';
-          WVJBIframe.style.backgroundColor = '#fff';
-          WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          document.documentElement.appendChild(WVJBIframe);
+          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          } else if(browser.versions.android) {
+            var WVJBIframe = document.createElement('iframe');
+            document.title = '支付';
+            WVJBIframe.setAttribute('id', 'alipay');
+            WVJBIframe.setAttribute('frameborder', 'no');
+            WVJBIframe.setAttribute('border', '0');
+            WVJBIframe.setAttribute('width', '100%');
+            WVJBIframe.setAttribute('height', '100%');
+            WVJBIframe.id = 'alipay';
+            WVJBIframe.frameborder = 'no';
+            WVJBIframe.border = '0';
+            WVJBIframe.width = '100%';
+            WVJBIframe.height = '100%';
+            WVJBIframe.style.position = 'fixed';
+            WVJBIframe.style.top = '0';
+            WVJBIframe.style.left = '0';
+            WVJBIframe.style.backgroundColor = '#fff';
+            // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+            document.documentElement.appendChild(WVJBIframe);
+          }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        alert(error);
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPaySuccess() {
@@ -536,8 +543,8 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     deleteOrderFromList() {
@@ -549,6 +556,23 @@ export default {
       }
       if(this.orderList.length <= 1) {
         this.getOrderList();
+      }
+    },
+    showOrderDetail(item) {
+      if(item.IsKdEOrder === '1') {
+        this.$router.push({
+          name: 'express_order_detail',
+          params: {
+            orderId: item.OrderId
+          }
+        });
+      } else if(item.IsKdEOrder === '2') {
+        this.$router.push({
+          name: 'errand_order_detail',
+          params: {
+            orderId: item.OrderId
+          }
+        });
       }
     },
     isShowOperationBtns(OrderBtnInfo) {
@@ -575,7 +599,7 @@ export default {
     // }
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'ALERT_MSG', 'FourServiceIdFilterList'])
+    ...mapState(['Token', 'IsLogin', 'OpenId', 'ALERT_MSG', 'FourServiceIdFilterList'])
   },
   filters: {
     formatDate(val) {

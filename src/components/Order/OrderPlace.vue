@@ -1,10 +1,10 @@
 <template>
 <div>
-  <section class="section address flex-row" @click="routeTo({ name: 'address_list' })">
+  <section class="section address flex-row" @click="routeTo({ name: 'address_list', params: { originRoute: 'order_place' } })">
     <div class="left flex-row">
       <img class="icon-header" src="../../assets/images/nearby.png">
 
-      <p v-if="!OrderInfo.Address" class="txt-light">请选择一个服务地址</p>
+      <p v-if="!OrderInfo.Address.Id" class="txt-light">请选择一个服务地址</p>
 
       <p v-else class="address-info txt-normal">
         <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }}{{ OrderInfo.Address.Address2 }}</span>
@@ -251,11 +251,11 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getActivityServiceDetail(ServiceId) {
@@ -294,11 +294,11 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getServiceActivity() {
@@ -340,8 +340,8 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     getCouponList(id) {
@@ -356,27 +356,28 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           // 红包分类
           let date = new Date();
+          this.couponList.splice(0);
           res.data.Body.CouponList.forEach((value, index) => {
             // 未使用红包且满足满减金额
             if (value.CouponDetails[0].Amount <= this.totalPrice) {
               this.couponList.push(value);
             }
           });
-          this.getCouponMaxAmount();
+          this.getCouponMaxAmount(this.totalPrice);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
-    getCouponMaxAmount() {
+    getCouponMaxAmount(originPrice) {
       let maxDisCoupon = null;
       let maxDis = 0;
       this.couponList.map(value => {
-        if (Number(maxDis) <= Number(value.CouponDetails[0].DiscountAmount)) {
+        if (Number(maxDis) <= Number(value.CouponDetails[0].DiscountAmount) && originPrice >= Number(value.CouponDetails[0].Amount)) {
           maxDisCoupon = value;
-          maxDis = value.CouponDetails[0].DiscountAmount;
+          maxDis = Number(value.CouponDetails[0].DiscountAmount);
         }
       });
 
@@ -397,7 +398,7 @@ export default {
         header: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).then((res) => {
+      }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           if(res.data.Body.length >= 1) {
@@ -421,9 +422,9 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(function(error) {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     amountReduce() {
@@ -579,9 +580,9 @@ export default {
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
-        }).catch(error => {
+        }).catch(err => {
           this.isLoading = false;
-          this.alert(this.ALERT_MSG.NET_ERROR);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
         });
       }
     },
@@ -644,9 +645,9 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPayByAli(orderId, price, couponId) {
@@ -667,30 +668,35 @@ export default {
       }).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          var WVJBIframe = document.createElement('iframe');
-          document.title = '支付';
-          WVJBIframe.setAttribute('id', 'alipay');
-          WVJBIframe.setAttribute('frameborder', 'no');
-          WVJBIframe.setAttribute('border', '0');
-          WVJBIframe.setAttribute('width', '100%');
-          WVJBIframe.setAttribute('height', '100%');
-          WVJBIframe.id = 'alipay';
-          WVJBIframe.frameborder = 'no';
-          WVJBIframe.border = '0';
-          WVJBIframe.width = '100%';
-          WVJBIframe.height = '100%';
-          WVJBIframe.style.position = 'fixed';
-          WVJBIframe.style.top = '0';
-          WVJBIframe.style.left = '0';
-          WVJBIframe.style.backgroundColor = '#fff';
-          WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          document.documentElement.appendChild(WVJBIframe);
+          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          } else if(browser.versions.android) {
+            var WVJBIframe = document.createElement('iframe');
+            document.title = '支付';
+            WVJBIframe.setAttribute('id', 'alipay');
+            WVJBIframe.setAttribute('frameborder', 'no');
+            WVJBIframe.setAttribute('border', '0');
+            WVJBIframe.setAttribute('width', '100%');
+            WVJBIframe.setAttribute('height', '100%');
+            WVJBIframe.id = 'alipay';
+            WVJBIframe.frameborder = 'no';
+            WVJBIframe.border = '0';
+            WVJBIframe.width = '100%';
+            WVJBIframe.height = '100%';
+            WVJBIframe.style.position = 'fixed';
+            WVJBIframe.style.top = '0';
+            WVJBIframe.style.left = '0';
+            WVJBIframe.style.backgroundColor = '#fff';
+            // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+            document.documentElement.appendChild(WVJBIframe);
+          }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPaySuccess() {
