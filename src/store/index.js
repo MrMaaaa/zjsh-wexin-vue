@@ -16,11 +16,7 @@ export default new Vuex.Store({
     IsWxBrowser: '0',
 
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'user index new_user_coupon express errand user_about user_connect_us',
-
-    // API: 'http://192.168.1.191:3001/',
-    // API: 'http://copen.homepaas.com/',
-    // API: 'https://copen.zhujiash.com/',
+    interceptorsExceptList: 'user index service_detail new_user_coupon express errand user_about user_connect_us',
 
     Token: '',
     UserId: '',

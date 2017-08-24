@@ -2,7 +2,7 @@
 <li class="list-item">
   <header class="item-header flex-row">
     <span class="header-name">{{ orderItem.Service.ServiceName }}</span>
-    <span class="header-status">{{ orderItem.OrderBtnInfo.Title }}</span>
+    <span class="header-status" v-if="orderItem.IsKdEOrder !== '1'">{{ orderItem.OrderBtnInfo.Title }}</span>
   </header>
 
   <div class="item-split"></div>
@@ -37,7 +37,7 @@
     </div>
   </div>
 
-  <div class="item-info" v-else-if="orderItem.KdEOrderInfo">
+  <div class="item-info" v-else-if="orderItem.KdEOrderInfo" @click="showOrderDetail(orderItem)">
     <div class="info-row flex-row">
       <div class="row-left">快递单号</div>
       <div class="row-right txt-over-hide">{{ orderItem.KdEOrderInfo.LogisticCode }}</div>
@@ -59,7 +59,7 @@
     </div>
   </div>
 
-  <div class="item-info" v-else-if="orderItem.ExpressOrderInfo">
+  <div class="item-info" v-else-if="orderItem.ExpressOrderInfo" @click="showOrderDetail(orderItem)">
     <div class="info-row flex-row">
       <div class="row-left">快递单号</div>
       <div class="row-right txt-over-hide">{{ orderItem.ExpressOrderInfo.LogisticCode }}</div>
@@ -85,11 +85,11 @@
     <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime <= 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
 
     <div class="operation-btns flex-row">
-      <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="$emit('order-cancel-dialog', { orderId: orderItem.OrderId })">取消订单</a>
-      <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
-      <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
+      <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="$emit('order-cancel-dialog', { orderId: orderItem.OrderId })">取消订单</a>
+      <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
+      <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
       <!-- <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a> -->
-      <a class="btn oppo" v-if="orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1'" @click="$emit('order-pay', orderItem)">立即支付</a>
+      <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1'" @click="$emit('order-pay', orderItem)">立即支付</a>
 
       <!-- 目前联系客服按钮只在“未支付”状态不显示 -->
       <a class="btn oppo" v-if="(orderItem.OrderStatus !== '1' && orderItem.OrderStatus !== '10') || orderItem.IsPayOff !== '0'" href="tel:4008-262-056">联系客服</a>
@@ -123,6 +123,25 @@ export default {
         }
       }, 1000);
     }
+  },
+  methods: {
+    showOrderDetail(item) {
+      if(item.IsKdEOrder === '1') {
+        this.$router.push({
+          name: 'express_order_detail',
+          params: {
+            orderId: item.OrderId
+          }
+        });
+      } else if(item.IsKdEOrder === '2') {
+        this.$router.push({
+          name: 'errand_order_detail',
+          params: {
+            orderId: item.OrderId
+          }
+        });
+      }
+    },
   },
   filters: {
     formatDate(val) {

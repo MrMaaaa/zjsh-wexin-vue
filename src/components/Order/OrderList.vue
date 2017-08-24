@@ -2,7 +2,7 @@
 <div class="wrapper">
   <div class="order-list-able" v-show="orderList.length > 0">
     <ul class="order-list">
-      <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" @click.native="showOrderDetail(item)" v-for="item in orderList"></order-item>
+      <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" v-for="item in orderList"></order-item>
     </ul>
 
     <!-- <infinite-loading :on-infinite="getOrderList"  ref="infiniteLoading">
@@ -556,23 +556,6 @@ export default {
       }
       if(this.orderList.length <= 1) {
         this.getOrderList();
-      }
-    },
-    showOrderDetail(item) {
-      if(item.IsKdEOrder === '1') {
-        this.$router.push({
-          name: 'express_order_detail',
-          params: {
-            orderId: item.OrderId
-          }
-        });
-      } else if(item.IsKdEOrder === '2') {
-        this.$router.push({
-          name: 'errand_order_detail',
-          params: {
-            orderId: item.OrderId
-          }
-        });
       }
     },
     isShowOperationBtns(OrderBtnInfo) {

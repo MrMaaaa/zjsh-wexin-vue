@@ -409,7 +409,7 @@ body
 .price-table td
 {
   width: auto;
-  padding: 6px 0;
+  padding: 6px;
 
   color: #333639;
   text-align: center;

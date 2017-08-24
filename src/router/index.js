@@ -29,7 +29,7 @@ import store from '../store/index';
 
 Vue.use(Router);
 
-console.log(store.state.AppName);
+// console.log(store.state.AppName);
 
 // 路由-标题映射表
 const ROUTER_TO_TITLE = {

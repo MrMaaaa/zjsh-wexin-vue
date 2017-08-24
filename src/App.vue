@@ -37,6 +37,8 @@ export default {
     }
   },
   created() {
+    this.getAppName();
+
     // 如果是微信浏览器下跳转到微信页面
     if(!this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
       window.location.replace('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=code&scope=snsapi_base#wechat_redirect');
@@ -73,7 +75,6 @@ export default {
     }
   },
   mounted() {
-    this.getAppName();
     if (window.parent === window.self) {
       if (this.valueFromUrl('code')) {
         this.getOpenId();
@@ -124,7 +125,7 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetIsLogin', '1');
         } else {
-          if(this.$route.name == 'index' && !document.getElementById('module_login').classList.contains('active')) {
+          if((this.$route.name == 'index' || this.$route.name == 'service_detail' || this.$route.name == 'errand' || this.$route.name == 'express') && !document.getElementById('module_login').classList.contains('active')) {
             this.isShowNewUserCoupon = '1';
           }
         }
