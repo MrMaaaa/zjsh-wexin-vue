@@ -110,7 +110,7 @@ let router = new Router({
     name: 'express',
     component: ServiceExpress
   }, {
-    path: '/express_order_detail',
+    path: '/express_order_detail/:orderId',
     name: 'express_order_detail',
     component: ServiceExpressDetail
   }, {
@@ -118,7 +118,7 @@ let router = new Router({
     name: 'errand',
     component: ServiceErrand
   }, {
-    path: '/errand_order_detail',
+    path: '/errand_order_detail/:orderId',
     name: 'errand_order_detail',
     component: ServiceErrandDetail
   }, {

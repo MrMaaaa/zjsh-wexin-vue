@@ -220,14 +220,13 @@ export default {
       this.isLoading = true;
       this.loadingBgStyle = '2';
       this.txtLoading = '';
-      this.orderIdProcess = orderInfo.OrderId;
       let couponId = '';
-      this.getCouponMaxAmount(orderInfo.ServiceId, orderInfo.Price, () => {
-        let p = orderInfo.Price;
-        // if (this.couponMax) {
-        //   p -= this.couponMax.CouponDetails[0].DiscountAmount;
-        //   couponId = this.couponMax.Id;
-        // }
+      this.getCouponMaxAmount('137', orderInfo.Price, () => {
+        let p = Number(orderInfo.Price);
+        if (this.couponMax) {
+          p -= this.couponMax.CouponDetails[0].DiscountAmount;
+          couponId = this.couponMax.Id;
+        }
 
         if (this.OpenId) {
           this.orderPayByWx(orderInfo.OrderId, p, couponId);
@@ -373,7 +372,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'ALERT_MSG']),
   },
   filters: {
     formatDate(millisecond) {

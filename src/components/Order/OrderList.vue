@@ -56,6 +56,7 @@ export default {
   mounted() {
     let that = this;
     // iframe页面调用函数
+    this.isLoading = true;
     window.getPayStatusFromFrame = function(status) {
       let payIFrame = document.getElementById('alipay');
       document.documentElement.removeChild(payIFrame);
@@ -133,7 +134,6 @@ export default {
 
     // 目前只显示前10条订单数据
     getOrderList() {
-      this.isLoading = true;
       axios.post(API.GetOrderListEx, qs.stringify({
         Token: this.Token,
         PageIndex: '1',
