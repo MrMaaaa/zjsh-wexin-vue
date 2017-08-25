@@ -52,11 +52,16 @@ export default new Vuex.Store({
       Address: {
         Id: '', // 服务地址id
       },
+      IsActivity: '0', // 是否是活动id
       // 被选中的红包信息
       CouponSelected: {
         NoUse: '1',
       },
     },
+
+    SelectedAddress: {
+
+    }, // 下单页、顺丰、跑腿选中的地址
 
     // 地址增加&修改时的地址信息
     AddressAddedInfo: {
@@ -158,8 +163,11 @@ export default new Vuex.Store({
       return state.OrderIdForPay = data;
     },
     SetOrderInfo(state, data) {
-      Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');
+      // Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');
       return state.OrderInfo = data;
+    },
+    SetSelectedAddress(state, data) {
+      return state.SelectedAddress = data;
     },
     SetAddressAddedInfo(state, data) {
       return state.AddressAddedInfo = data;

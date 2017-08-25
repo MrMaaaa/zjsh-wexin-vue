@@ -56,9 +56,6 @@ export default {
     }
   },
   activated() {
-    if(this.$route.params.originRoute) {
-      this.originRoute = this.$route.params.originRoute;
-    }
     this.getAddressList();
   },
   methods: {
@@ -91,14 +88,8 @@ export default {
         window.parent.getDataFromIFrame(item);
       } else {
         // 目前只在下单页用到地址，如果有其他地方也会用到，再另行处理
-        this.OrderInfo.Address = item;
-        this.$store.commit('SetOrderInfo', this.OrderInfo);
-        this.$router.push({
-          name: this.originRoute,
-          params: {
-            address: item
-          }
-        });
+        this.$store.commit('SetSelectedAddress', item);
+        this.$router.go(-1);
       }
     }
   },

@@ -250,9 +250,7 @@ export default {
     this.selData.name = '其他';
   },
   activated() {
-    if(this.$route.params.address) {
-      this.updateAddress();
-    }
+    this.updateAddress();
   },
   methods: {
     onDateTimeChange(picker, values) {
@@ -428,31 +426,30 @@ export default {
         this.addrFlag = type;
         this.$router.push({
           name: 'address_list',
-          params: {
-            originRoute: 'errand'
-          }
         });
       } else {
         this.openLogin();
       }
     },
     updateAddress() {
-      if (this.addrFlag == '1' && this.$route.params.address) {
+      let addr = this.SelectedAddress;
+      this.$store.commit('SetSelectedAddress', {});
+      if (this.addrFlag == '1' && addr.Id) {
         this.addrData.sender.show = true;
-        this.addrData.sender.name = this.$route.params.address.Contact;
-        this.addrData.sender.phone = this.$route.params.address.PhoneNumber;
-        this.addrData.sender.addr = this.$route.params.address.Address1 + this.$route.params.address.Address2;
-        this.addrData.sender.lng = this.$route.params.address.Address1Lng;
-        this.addrData.sender.lat = this.$route.params.address.Address1Lat;
-        this.addrData.sender.id = this.$route.params.address.Id;
-      } else if (this.addrFlag == '2' && this.$route.params.address) {
+        this.addrData.sender.name = addr.Contact;
+        this.addrData.sender.phone = addr.PhoneNumber;
+        this.addrData.sender.addr = addr.Address1 + addr.Address2;
+        this.addrData.sender.lng = addr.Address1Lng;
+        this.addrData.sender.lat = addr.Address1Lat;
+        this.addrData.sender.id = addr.Id;
+      } else if (this.addrFlag == '2' && addr.Id) {
         this.addrData.receiver.show = true;
-        this.addrData.receiver.name = this.$route.params.address.Contact;
-        this.addrData.receiver.phone = this.$route.params.address.PhoneNumber;
-        this.addrData.receiver.addr = this.$route.params.address.Address1 + this.$route.params.address.Address2;
-        this.addrData.receiver.lng = this.$route.params.address.Address1Lng;
-        this.addrData.receiver.lat = this.$route.params.address.Address1Lat;
-        this.addrData.receiver.id = this.$route.params.address.Id;
+        this.addrData.receiver.name = addr.Contact;
+        this.addrData.receiver.phone = addr.PhoneNumber;
+        this.addrData.receiver.addr = addr.Address1 + addr.Address2;
+        this.addrData.receiver.lng = addr.Address1Lng;
+        this.addrData.receiver.lat = addr.Address1Lat;
+        this.addrData.receiver.id = addr.Id;
       }
       this.getErrandPrice();
     },
@@ -533,7 +530,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'IsLogin', 'ALERT_MSG']),
+    ...mapState(['Token', 'IsLogin', 'SelectedAddress', 'ALERT_MSG']),
   }
 }
 </script>

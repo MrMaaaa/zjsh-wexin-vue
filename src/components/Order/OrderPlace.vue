@@ -1,6 +1,6 @@
 <template>
 <div>
-  <section class="section address flex-row" @click="routeTo({ name: 'address_list', params: { originRoute: 'order_place' } })">
+  <section class="section address flex-row" @click="routeTo({ name: 'address_list' })">
     <div class="left flex-row">
       <img class="icon-header" src="../../assets/images/nearby.png">
 
@@ -184,6 +184,11 @@ export default {
       this.OrderInfo.DateTime = '';
     }
 
+    if(this.SelectedAddress.Id) {
+      this.OrderInfo.Address = this.SelectedAddress;
+      this.$store.commit('SetSelectedAddress', {});
+    }
+
     this.getUserAddress();
     let threeIdFromUrl = this.valueFromUrl('ServiceId');
     if (threeIdFromUrl) {
@@ -202,7 +207,20 @@ export default {
         this.OrderInfo.CouponSelected.NoUse = '1';
         this.serviceList.splice(0);
         this.couponList.splice(0);
-        this.getServiceDetail();
+
+        if(this.$route.params.isSuperDis) {
+          // 为了防止页面刷新导致服务品类变化，保存当前的活动类服务id
+          Common.setCookie('ZJSH_WX_ActivityServiceId', this.thisThreeServiceId, 1, '/');
+          this.getActivityServiceDetail(this.thisThreeServiceId);
+        } else {
+          // 如果在下单页刷新页面，params的参数丢失，此时判断保存的id与当前id是否一致，如果一致说明是活动类服务id
+          let activityId = Common.getCookie('ZJSH_WX_ActivityServiceId');
+          if(activityId == this.thisThreeServiceId) {
+            this.getActivityServiceDetail(this.thisThreeServiceId);
+          } else {
+            this.getServiceDetail();
+          }
+        }
       }
     }
   },
@@ -719,7 +737,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'ThreeServiceId', 'ThreeServiceName', 'OrderInfo', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'ThreeServiceId', 'ThreeServiceName', 'OrderInfo', 'SelectedAddress', 'ALERT_MSG']),
     //原价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);

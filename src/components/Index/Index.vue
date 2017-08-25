@@ -291,6 +291,9 @@ export default {
       this.$store.commit('SetThreeServiceName', item.ServiceName);
       this.$router.push({
         name: 'order_place',
+        params: {
+          isSuperDis: (item.OrderType === '1' ? true : false)
+        }
       });
     }
   },
@@ -511,7 +514,6 @@ export default {
         {
           display: inline-block;
           height: 0.44rem;
-          line-height: 0.44rem;
           padding: 0 0.15rem;
           border-top-left-radius: 0.22rem;
           border-top-right-radius: 0.22rem;
