@@ -725,7 +725,7 @@ export default {
 }
 .send-name-selector .list .list-item
 {
-  width: 2.8rem;
+  width: 2rem;
   height: 1.2rem;
   line-height: 1.2rem;
   border: 1px solid #eef2f5;

@@ -232,7 +232,7 @@ export default {
             value.IconUrl = require('../../assets/images/super_discount_' + index + '.png');
           });
           // this.superDiscountList.Title = list.Title;
-          this.superDiscountList.Title = '为你推荐';
+          this.superDiscountList.Title = '最优惠';
           list.Items.map((value, index) => {
             if(value.ServiceName == '小时工') {
               value.ServiceName += '3小时';

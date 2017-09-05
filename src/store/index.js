@@ -45,7 +45,7 @@ export default new Vuex.Store({
       Price: '', // 服务单价
       SellType: '', // 1:定价类型 2:面议类型
       SpecialType: '0',
-      OrderFrom: '210', // 订单来源 0:android 1:ios 210:微信
+      OrderFrom: '210', // 订单来源 0:android 1:ios 210:微信 215:同城家政分包
       ServiceContent: '', // 备注
       DateTime: '', // 订单预约时间
       IsClaims: '1', // 是否使用1元保险

@@ -79,7 +79,7 @@
 
   <section class="section discount">
     <ul class="discount-list" v-if="activityList.length > 0">
-      <li class="list-item-discount">-￥{{ discountAmount | amountFormat }}</li>
+      <li class="list-item-discount">-￥{{ discountAmount | formatAmount }}</li>
       <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
     </ul>
 
@@ -87,7 +87,7 @@
       <span>红包</span>
 
       <div class="flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: totalPrice } })">
-        <span class="txt-price" v-if="OrderInfo.CouponSelected.NoUse === '0'">-￥{{ OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount | amountFormat }}</span>
+        <span class="txt-price" v-if="OrderInfo.CouponSelected.NoUse === '0'">-￥{{ OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount | formatAmount }}</span>
         <span class="txt-price" v-else-if="OrderInfo.CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
         <span class="txt-price" v-else>暂无可用红包</span>
         <img class="icon-link" src="../../assets/images/link.png">
@@ -96,8 +96,8 @@
 
     <div class="discount-split"></div>
 
-    <p class="discount-total" v-if="OrderInfo.CouponSelected.NoUse === '0'">已优惠￥{{ (discountAmount + Number(OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount)) | amountFormat }}</p>
-    <p class="discount-total" v-else>已优惠￥{{ discountAmount | amountFormat }}</p>
+    <p class="discount-total" v-if="OrderInfo.CouponSelected.NoUse === '0'">已优惠￥{{ (discountAmount + Number(OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount)) | formatAmount }}</p>
+    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}</p>
   </section>
 
   <section class="section remark flex-row">
@@ -107,7 +107,7 @@
   </section>
 
   <section class="bottom-button">
-    <a class="btn-submit" @click="orderSubmit">立即支付 ￥{{ payAmount | amountFormat }}</a>
+    <a class="btn-submit" @click="orderSubmit">立即支付 ￥{{ payAmount | formatAmount }}</a>
   </section>
 
   <section class="one-safe-alert" v-show="oneSafe.isOpenAlert">
@@ -705,7 +705,6 @@ export default {
             WVJBIframe.style.top = '0';
             WVJBIframe.style.left = '0';
             WVJBIframe.style.backgroundColor = '#fff';
-            // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
             WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
             document.documentElement.appendChild(WVJBIframe);
           }
@@ -756,7 +755,7 @@ export default {
     },
   },
   filters: {
-    amountFormat(amount) {
+    formatAmount(amount) {
       let a = amount.toString();
       if(a.indexOf('.') === -1) {
         return amount + '.00';
@@ -860,6 +859,12 @@ export default {
   {
     -webkit-justify-content: flex-start;
     justify-content: flex-start;
+    span.txt-light
+    {
+      display: block;
+      width: 100%;
+      text-align: left;
+    }
   }
   &.amount
   {

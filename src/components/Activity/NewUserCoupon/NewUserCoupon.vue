@@ -11,9 +11,9 @@
       <input class="phone" v-model="phoneNumber" type="number" maxlength="11" placeholder="请输入手机号">
 
       <div class="user-captcha flex-row" v-show="isChecked">
-        <input class="captcha" v-model="captcha" type="number" maxlength="4" placeholder="请输入验证码">
+        <input class="captcha" v-model="captcha" type="number" ref="inputCaptcha" maxlength="4" placeholder="请输入验证码">
 
-        <button class="btn-captcha" type="button" @click="sendCaptcha">{{ captchaBtnText }}</button>
+        <button class="btn-captcha" type="button" ref="btnSendCaptcha" @click="sendCaptcha">{{ captchaBtnText }}</button>
       </div>
 
       <button class="btn-coupon" type="button" v-show="!isChecked" @click="checkUser">立即领取</button>
@@ -25,6 +25,8 @@
 
       <div class="info-content old" v-if="isNewUser === '0'">仅限新用户参与</div>
       <div class="info-content new" v-if="isNewUser === '1'">￥<span class="coupon-price">188</span></div>
+      <button class="btn-coupon" type="button" v-if="isNewUser === '0'" @click="$router.go(-1)">回到首页</button>
+      <button class="btn-coupon" type="button" v-if="isNewUser === '1'" @click="$router.go(-1)">立即使用</button>
     </div>
 
     <div class="coupons" v-if="couponList.length > 0">
@@ -79,7 +81,7 @@ export default {
       isNewUser: '0', // 是否是新用户
       isAllowedSendCaptcha: false,// 是否允许发送验证码，倒计时结束将变化
       captcha: '',// 用户输入的验证码
-      captchaBtnText: '60',
+      captchaBtnText: '',
       isChecked: false,// 是否已经检查过用户类型，true将显示验证码并切换按钮为领取红包
       isDrawCoupon: true,// 是否可以点击领取红包按钮，防止多次点击
       isWarn: false,
@@ -96,7 +98,7 @@ export default {
   },
   methods: {
     checkUser() {
-      //同时判断isWarn是为了防止多次点击
+      // 同时判断isWarn是为了防止多次点击
       if(this.checkPhoneNumber()) {
         if(!this.isWarn) {
           this.isLoading = true;
@@ -109,16 +111,19 @@ export default {
           }).then(res => {
             this.isLoading = false;
             if (res.data.Meta.ErrorCode == '0') {
+              // 无论新老用户均弹出验证码
               if (res.data.Body.IsNewUser == '0') {
                 //老用户显示
-                this.isShowUserStatus = '1';
-                this.getOldUserCouponList();
+                this.isNewUser = '0';
+                this.isChecked = true;
+                this.isAllowedSendCaptcha = true;
+                this.sendCaptcha('4');
               } else {
                 //新用户弹出注册页面
                 this.isNewUser = '1';
                 this.isChecked = true;
                 this.isAllowedSendCaptcha = true;
-                this.sendCaptcha();
+                this.sendCaptcha('1');
               }
             } else {
               this.alert(res.data.Meta.ErrorMsg);
@@ -137,7 +142,32 @@ export default {
         if (this.captcha == '') {
           this.alert(this.WARN_INFO.CAPTCHA_EMPTY);
         } else {
-          if (this.isDrawCoupon) {
+          if(this.isNewUser == '0') {
+            // 老用户直接登录
+            this.isLoading = true;
+            axios.post(API.QuickLogin, qs.stringify({
+              "LoginName": this.phoneNumber,
+              "Captcha": this.captcha,
+            }), {
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              }
+            }).then((res) => {
+              this.isLoading = false;
+              if (res.data.Meta.ErrorCode === '0') {
+                this.isShowUserStatus = '1';
+                window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
+                this.$store.commit('SetToken', res.data.Body.Token);
+                this.$store.commit('SetUserId', res.data.Body.UserId);
+                this.$store.commit('SetIsLogin', '1');
+              } else {
+                this.alert(res.data.Meta.ErrorMsg);
+              }
+            }).catch((error) => {
+              this.isLoading = false;
+              this.alert(this.ALERT_MSG.NET_ERROR);
+            });
+          } else if (this.isDrawCoupon) {
             this.isLoading = true;
             this.isDrawCoupon = false;
             axios.post(API.NewUserReceiveRedCoups, qs.stringify({
@@ -202,14 +232,14 @@ export default {
         this.alert(this.warnMsg);
       }
     },
-    sendCaptcha() {
+    sendCaptcha(type) {
       if(this.checkPhoneNumber()) {
         //发送验证码
         if(this.isAllowedSendCaptcha) {
           this.isLoading = true;
           axios.post(API.SendCaptcha, qs.stringify({
             "Phone": this.phoneNumber,
-            "Type": 1
+            "Type": type
           }), {
             header: {
               'Content-Type': 'application/x-www-form-urlencoded'
@@ -220,15 +250,19 @@ export default {
             if (res.data.Meta.ErrorCode == '0') {
               var that = this;
               this.isAllowedSendCaptcha = false;
+              this.$refs.btnSendCaptcha.classList.toggle('disable', true);
               this.alert(res.data.Meta.ErrorMsg);
+              this.$refs.inputCaptcha.focus();
               let count = 60;
+              that.captchaBtnText = count + 's';
               let timer = setInterval(function() {
-                that.captchaBtnText = count + 's';
                 count -= 1;
+                that.captchaBtnText = count + 's';
                 if (count == 0) {
                   clearInterval(timer);
                   that.captchaBtnText = '重新获取';
                   that.isAllowedSendCaptcha = true;
+                  that.$refs.btnSendCaptcha.classList.toggle('disable', false);
                 }
               }, 1000);
             } else {
@@ -441,7 +475,11 @@ export default {
   color: #fff;
   font-size: 14px;
 }
-#container .coupon .btn-coupon
+#container .user-captcha .btn-captcha.disable
+{
+  background-color: #bdbdbd;
+}
+#container .btn-coupon
 {
   display: block;
 

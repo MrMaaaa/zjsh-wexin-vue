@@ -1,6 +1,6 @@
-// const wap = "http://192.168.1.191:3001/";
+const wap = "http://192.168.1.191:3001/";
 // const wap = "http://copen.homepaas.com/";
-const wap = "https://copen.zhujiash.com/";
+// const wap = "https://copen.zhujiash.com/";
 
 // import vuex from '../store/index';
 
@@ -54,6 +54,9 @@ export default {
 
   // 获取订单详情
   "GetOrderInfoEx": wap + "api/v3/OrderInfo/GetOrderInfoEx",
+
+  // 跟踪订单状态
+  "TrackOrderStatus": wap + "api/v3/Order/TrackOrderStatus",
 
   // 微信获取open id
   "GetWxpayOpenId": wap + "api/v3/OrderInfo/GetWxpayOpenId",

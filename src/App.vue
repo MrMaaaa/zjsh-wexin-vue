@@ -72,6 +72,7 @@ export default {
     // 检测Token是否有效
     if (window.parent === window.self) {
       this.vertifyToken();
+      this.wxConfig();
     }
   },
   mounted() {
@@ -131,6 +132,9 @@ export default {
         }
       });
     },
+    wxConfig() {
+
+    },
     routerToNewUser() {
       this.isShowNewUserCoupon = '0';
       this.$router.push({
@@ -158,6 +162,7 @@ body,
 .router-view
 {
   background-color: #eef2f5;
+  overflow: auto;
 }
 /*.bounce-enter-active {
     animation: bounce-in .3s;

@@ -7,7 +7,7 @@
 
   <div class="item-split"></div>
 
-  <div class="item-info" v-if="orderItem.IsKdEOrder === '0'">
+  <div class="item-info" v-if="orderItem.IsKdEOrder === '0'" @click="showOrderDetail(orderItem)">
     <div class="info-row flex-row">
       <div class="row-left">服务地址</div>
       <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
@@ -126,7 +126,14 @@ export default {
   },
   methods: {
     showOrderDetail(item) {
-      if(item.IsKdEOrder === '1') {
+      if(item.IsKdEOrder === '0') {
+        this.$router.push({
+          name: 'order_detail',
+          params: {
+            orderId: item.OrderId
+          }
+        });
+      } else if(item.IsKdEOrder === '1') {
         this.$router.push({
           name: 'express_order_detail',
           params: {
@@ -261,13 +268,14 @@ $color_txt_warn: #f56165;
       text-align: right;
       .btn
       {
-        // box-sizing: border-box;
         display: block;
         width: 2.0rem;
         // height: 0.8rem;
-        height: 0.773333rem;
+        // height: 0.773333rem;
         // line-height: 0.8rem;
-        line-height: 0.8rem;
+        // line-height: 0.8rem;
+        line-height: 100%;
+        padding: 0.2rem 0;
         border: 1px solid $color_txt_warn;
         border-radius: 3px;
         color: $color_txt_warn;

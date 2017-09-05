@@ -18,6 +18,7 @@ import About from '@/components/Index/About';
 import ConnectUs from '@/components/Index/ConnectUs';
 import OrderList from '@/components/Order/OrderList';
 import OrderPlace from '@/components/Order/OrderPlace';
+import OrderDetail from '@/components/Order/OrderDetail';
 import OrderPayStatus from '@/components/Order/OrderPayStatus';
 import OrderPay from '@/components/Order/OrderPay';
 import OrderServiceTime from '@/components/Order/OrderServiceTime';
@@ -85,6 +86,10 @@ let router = new Router({
     path: '/menu/order/order_place',
     name: 'order_place',
     component: OrderPlace
+  }, {
+    path: '/menu/order/order_detail/:orderId',
+    name: 'order_detail',
+    component: OrderDetail
   }, {
     path: '/menu/order/order_pay_status',
     name: 'order_pay_status',

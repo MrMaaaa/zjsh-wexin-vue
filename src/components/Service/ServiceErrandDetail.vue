@@ -83,7 +83,7 @@
       </div>
       <div class="row price flex-row">
         <div class="left">费用</div>
-        <div class="right txt-over-hidden">{{ orderDetail.Price | amountFormat }}元</div>
+        <div class="right txt-over-hidden">{{ orderDetail.Price | formatAmount }}元</div>
       </div>
       <div class="info-split"></div>
       <div class="row flex-row">
@@ -96,12 +96,14 @@
       </div>
       <div class="info-split"></div>
       <div class="operation-btns flex-row">
-        <a class="btn" v-if="orderDetail.IsPayOff === '0' && orderDetail.State > 0" @click="orderCancel(orderDetail)">取消订单</a>
+        <a class="btn" v-if="orderDetail.IsPayOff === '0' && orderDetail.State > 0" @click="DialogConfig.IsDialog='1'">取消订单</a>
         <a class="btn oppo" v-if="orderDetail.IsPayOff === '0' && orderDetail.State > 0" @click="orderPay(orderDetail)">支付</a>
         <a class="btn oppo" v-if="orderDetail.State > 1" href="tel:4008-262-056">联系客服</a>
       </div>
     </div>
   </div>
+
+  <m-dialog :dialog-config="DialogConfig" @dialog-confirm="orderProcess" @dialog-cancel="dialogClose"></m-dialog>
 
   <m-loading :bg-style="loadingBgStyle" v-show="isLoading"></m-loading>
 </div>
@@ -122,6 +124,12 @@ export default {
       orderId: '',
       loadingBgStyle: '1',
       isLoading: true,
+      DialogConfig: {
+        IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
+        DialogTitle: '取消订单', // 对话框标题
+        DialogContent: '确定取消订单吗？', // 对话框内容
+        DialogBtns: ['取消', '确定'], // 对话框按钮文本
+      },
     }
   },
   activated() {
@@ -370,6 +378,13 @@ export default {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
+    orderProcess() {
+      this.DialogConfig.IsDialog = '0';
+      this.orderCancel();
+    },
+    dialogClose() {
+      this.DialogConfig.IsDialog = '0';
+    },
   },
   computed: {
     ...mapState(['Token', 'OpenId', 'ALERT_MSG']),
@@ -390,7 +405,7 @@ export default {
       second = second < 10 ? '0' + second : second;
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
     },
-    amountFormat(amount) {
+    formatAmount(amount) {
       let a = amount.toString();
       if(a.indexOf('.') === -1) {
         return amount + '.00';

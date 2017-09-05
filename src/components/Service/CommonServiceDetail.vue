@@ -168,6 +168,8 @@ export default {
         this.bgLoading = '2';
         this.serviceList.splice(0);
         if (res.data.Meta.ErrorCode === '0') {
+          this.$store.commit('SetThreeServiceId', res.data.Body.Service.ServiceId);
+          this.$store.commit('SetThreeServiceName', res.data.Body.Service.ServiceName);
           res.data.Body.Service.SubItems.map(value => {
             this.serviceList.push(value);
           })
