@@ -1,21 +1,52 @@
 <template>
 <div class="wrapper">
-  <div class="order-list-able" v-show="orderList.length > 0">
-    <ul class="order-list">
-      <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-pay="orderPay" v-for="item in orderList"></order-item>
-    </ul>
+  <header class="order-header flex-row">
+    <a class="header-title" :class="{ active: tabIndex == '0' }" @click="switchTab(0)">当前订单</a>
+    <a class="header-title" :class="{ active: tabIndex == '1' }" @click="switchTab(1)">历史订单</a>
+    <i class="header-index trans" :class="{ right: tabIndex == '1' }" ref="tabIndex"></i>
+  </header>
 
-    <!-- <infinite-loading :on-infinite="getOrderList"  ref="infiniteLoading">
-      <span class="no-result" slot="no-more">没有更多订单了</span>
-    </infinite-loading> -->
+  <div class="order-content" ref="sliderContainer">
+    <div class="now-list trans" ref="nowList" :class="{ right: tabIndex == 1 }">
+      <div class="list-placeholder"></div>
+
+      <div class="order-list-able" v-show="orderNowList.length > 0">
+        <ul class="order-list">
+          <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderNowList"></order-item>
+        </ul>
+        <infinite-loading :on-infinite="getNowOrderList"  ref="infiniteLoading1">
+          <span class="no-result" slot="no-more">没有更多订单了</span>
+        </infinite-loading>
+      </div>
+
+      <div class="order-list-empty" v-show="orderNowList.length === 0">
+        <img class="empty-icon" src="../../assets/images/order_empty.png">
+        <span class="empty-title">您还没有相关订单</span>
+      </div>
+    </div>
+
+    <div class="history-list trans" ref="historyList" :class="{ right: tabIndex == 1 }">
+      <div class="order-list-able" v-show="orderHistoryList.length > 0">
+        <ul class="order-list">
+          <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog"@order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderHistoryList"></order-item>
+        </ul>
+        <infinite-loading :on-infinite="getHistoryOrderList"  ref="infiniteLoading2">
+          <span class="no-result" slot="no-more">没有更多订单了</span>
+        </infinite-loading>
+      </div>
+
+      <div class="order-list-empty" v-show="orderHistoryList.length === 0">
+        <img class="empty-icon" src="../../assets/images/order_empty.png">
+        <span class="empty-title">您还没有相关订单</span>
+      </div>
+    </div>
   </div>
 
-  <div class="order-list-empty" v-show="orderList.length === 0">
-    <img class="empty-icon" src="../../assets/images/order_empty.png">
-    <span class="empty-title">您还没有相关订单</span>
-  </div>
+  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="dialogClose" @dialog-confirm="orderProcess"></m-dialog>
 
-  <m-dialog :dialog-config="DialogConfig" @dialog-confirm="orderProcess" @dialog-cancel="dialogClose"></m-dialog>
+  <order-evaluate :show-evaluate="isEvaluate" :order-code="orderCodeForEvaluate" :service-type-id="serviceTypeIdForEvaluate" @evaluate-finish="evaluateFinish"></order-evaluate>
+
+  <order-confirm :show-confirm="isConfirm" :order-id="orderIdProcess" :order-title="orderTitleForConfirm" @confirm-finish="confirmFinish"></order-confirm>
 
   <m-loading :bg-style="loadingBgStyle" v-show="isLoading"></m-loading>
 </div>
@@ -24,6 +55,8 @@
 <script>
 import InfiniteLoading from 'vue-infinite-loading';
 import OrderItem from '../Plugs/order-item';
+import OrderEvaluate from '../Plugs/m-dialog-evaluate';
+import OrderConfirm from '../Plugs/m-dialog-confirm';
 import { mapState } from 'vuex';
 import API from '../../config/backend';
 import axios from 'axios';
@@ -33,9 +66,12 @@ export default {
   name: 'order_list',
   data() {
     return {
-      orderList: [],
+      tabIndex: '0',
+      orderNowList: [],
+      orderHistoryList: [],
       couponMax: null,
-      orderPageIndex: 1,
+      orderNowPageIndex: 1,
+      orderHistoryPageIndex: 1,
       DialogConfig: { //对话框配置信息
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
         DialogTitle: '取消订单', // 对话框标题
@@ -44,6 +80,11 @@ export default {
       },
       dialogType: '0', // 对话框类型 0:取消订单 1:删除订单 2:确认订单
       orderIdProcess: '', // 要处理的订单id
+      orderCodeForEvaluate: '', // 要评价的订单code
+      serviceTypeIdForEvaluate: '', // 要评价的订单service id
+      orderTitleForConfirm: '', // 要评价的订单title
+      isEvaluate: '0',
+      isConfirm: '0',
       isLoading: false,
       loadingBgStyle: '1',
       // 弹出支付页面时禁止滚动，待实现
@@ -54,110 +95,107 @@ export default {
     }
   },
   mounted() {
-    let that = this;
-    // iframe页面调用函数
     this.isLoading = true;
-    window.getPayStatusFromFrame = function(status) {
-      let payIFrame = document.getElementById('alipay');
-      document.documentElement.removeChild(payIFrame);
-      if(status == '1') {
-        that.orderPaySuccess();
-      } else {
-        that.alert(that.ALERT_MSG.PAY_ERROR);
+    var responseTime = 15; // 修改translate距离的时间差
+    var lastTime = new Date().getTime(); // 上一次修改的毫秒数
+    this.$refs.sliderContainer.addEventListener('touchstart', event => {
+      this.touchStartX = event.targetTouches[0].pageX;
+      this.touchStartY = event.targetTouches[0].pageY;
+      this.$refs.tabIndex.classList.remove('trans');
+      this.$refs.nowList.classList.remove('trans');
+      this.$refs.historyList.classList.remove('trans');
+    });
+    this.$refs.sliderContainer.addEventListener('touchmove', event => {
+      var nowTime = new Date().getTime(); // 当前毫秒
+      if(nowTime - lastTime > responseTime) {
+        lastTime = nowTime;
+        if (Math.abs(event.targetTouches[0].pageY - this.touchStartY) <= 20) {
+          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+            // 向左滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+            this.$refs.nowList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+            this.$refs.historyList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+            // 向右滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+            this.$refs.nowList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+            this.$refs.historyList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+          }
+        }
+      }
+    });
+    this.$refs.sliderContainer.addEventListener('touchend', event => {
+      if (Math.abs(event.changedTouches[0].clientY - this.touchStartY) <= 20) {
+        this.$refs.tabIndex.removeAttribute('style');
+        this.$refs.nowList.removeAttribute('style');
+        this.$refs.historyList.removeAttribute('style');
+        this.$refs.tabIndex.classList.add('trans');
+        this.$refs.nowList.classList.add('trans');
+        this.$refs.historyList.classList.add('trans');
+        if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 3) {
+          this.tabIndex = this.tabIndex == '0' ? '1' : '0';
+        }
+      }
+    });
+  },
+  activated() {
+    if (this.Token === '') {
+      this.orderNowList.splice(0);
+      this.orderHistoryList.splice(0);
+      this.openLogin();
+    } else {
+      if (this.orderNowList.length > 0) {
+        this.orderNowPageIndex = 1;
+        this.getNowOrderList(); // 会自动获取订单列表，无需二次调用
+      }
+      if (this.orderHistoryList.length > 0) {
+        this.orderHistoryPageIndex = 1;
+        this.getHistoryOrderList(); // 会自动获取订单列表，无需二次调用
+      }
+      if (this.orderNowList.length == 0 && this.tabIndex == '0') {
+        this.$refs.infiniteLoading1.$emit('$InfiniteLoading:loaded');
+      }
+      if (this.orderHistoryList.length == 0 && this.tabIndex == '1') {
+        this.$refs.infiniteLoading2.$emit('$InfiniteLoading:loaded');
       }
     }
   },
-  activated() {
-    if(this.Token == '' || this.IsLogin === '0') {
-      this.orderList.splice(0);
-      this.openLogin();
-    } else {
-      this.getOrderList();
-    }
-    // if(this.orderList.length == 0) {
-    //   // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-    // }
-  },
   methods: {
-    // async getOrderList() {
-    //   await axios.post(API.GetOrderListEx, qs.stringify({
-    //     Token: this.Token,
-    //     PageIndex: this.orderPageIndex,
-    //     PageSize: '10',
-    //     Type: '0',
-    //   }), {
-    //     header: {
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    //   }).then((res) => {
-    //     if (res.data.Meta.ErrorCode === '0') {
-    //       this.orderPageIndex++;
-    //       if(res.data.Body.OrderList.length > 0) {
-    //         // 只显示定价类订单
-    //         res.data.Body.OrderList.map(value => {
-    //           // 只显示首页服务中的订单
-    //           if(this.FourServiceIdFilterList.includes(' ' + value.Service.ServiceId + ' ')) {
-    //             // 判断是否显示底部按钮组
-    //             value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
-
-    //             // 设置支付倒计时
-    //             // if(value.ResidualTime) {
-    //             //   value.payCountdownInterval = setInterval(() => {
-    //             //     value.ResidualTime--;
-    //             //     if(value.ResidualTime == 0) {
-    //             //       clearInterval(value.payCountdownInterval);
-    //             //     }
-    //             //   }, 1000);
-    //             // }
-    //             // 只有当存在符合条件的订单时关闭loading
-    //             this.orderList.push(value);
-    //             if (this.orderList.length > 1) {
-    //               this.isLoading = false;
-    //             }
-    //           }
-    //         });
-    //         // this.$refs.infiniteLoading.$emit('$InfiniteLoading:loaded');
-    //       } else {
-    //         this.isLoading = false;
-    //         // this.$refs.infiniteLoading.$emit('$InfiniteLoading:complete');
-    //       }
-    //     } else {
-    //       this.isLoading = false;
-    //       this.alert(res.data.Meta.ErrorMsg);
-    //     }
-    //   }).catch((error) => {
-    //     this.isLoading = false;
-    //     this.alert(this.ALERT_MSG.NET_ERROR);
-    //   });
-    // },
-
-
-    // 目前只显示前10条订单数据
-    getOrderList() {
-      axios.post(API.GetOrderListEx, qs.stringify({
+    switchTab(index) {
+      this.tabIndex = index + '';
+    },
+    async getNowOrderList() {
+      await axios.post(API.GetOrderListEx, qs.stringify({
         Token: this.Token,
-        PageIndex: '1',
+        PageIndex: this.orderNowPageIndex,
         PageSize: '10',
-        Type: '0',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        this.isLoading = false;
+        Type: '6', // 6 当前订单 7 历史订单
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
-          this.orderList.splice(0);
+          if(this.orderNowPageIndex == 1) {
+            this.getOrderListPop();
+            this.orderNowList.splice(0);
+          }
+          this.orderNowPageIndex += 1;
+          this.isLoading = false;
           if(res.data.Body.OrderList.length > 0) {
             // 只显示定价类订单
             res.data.Body.OrderList.map(value => {
-              // 只显示首页服务中的订单
-              // if(value.IsKdEOrder === '1' || this.FourServiceIdFilterList.indexOf(' ' + value.Service.ServiceId + ' ') > -1) {
-              if(this.FourServiceIdFilterList.indexOf(' ' + value.Service.ServiceId + ' ') > -1) {
-                // 判断是否显示底部按钮组
-                value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
-                this.orderList.push(value);
-              }
+              // 判断是否显示底部按钮组
+              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+              this.orderNowList.push(value);
             });
+            this.$refs.infiniteLoading1.$emit('$InfiniteLoading:loaded');
+          } else {
+            this.$refs.infiniteLoading1.$emit('$InfiniteLoading:complete');
           }
         } else {
           this.isLoading = false;
@@ -165,7 +203,64 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      });
+    },
+    async getHistoryOrderList() {
+      await axios.post(API.GetOrderListEx, qs.stringify({
+        Token: this.Token,
+        PageIndex: this.orderHistoryPageIndex,
+        PageSize: '10',
+        Type: '7', // 6 当前订单 7 历史订单
+      })).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          if(this.orderHistoryPageIndex == 1) {
+            this.orderHistoryList.splice(0);
+          }
+          this.orderHistoryPageIndex += 1;
+          this.isLoading = false;
+          if(res.data.Body.OrderList.length > 0) {
+            // 只显示定价类订单
+            res.data.Body.OrderList.map(value => {
+              // 判断是否显示底部按钮组
+              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+              this.orderHistoryList.push(value);
+            });
+            this.$refs.infiniteLoading2.$emit('$InfiniteLoading:loaded');
+          } else {
+            this.$refs.infiniteLoading2.$emit('$InfiniteLoading:complete');
+          }
+        } else {
+          this.isLoading = false;
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(err => {
+        this.isLoading = false;
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      });
+    },
+    getOrderListPop() {
+      axios.post(API.GetOrderListPop, qs.stringify({
+        Token: this.Token,
+      })).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          if(res.data.Body.PopType == '1') {
+            // 订单确认
+            this.orderConfirmDialog(res.data.Body.OrderId, res.data.Body.PopDescription);
+          } else {
+            // 订单评价
+            this.orderNowList.map(value => {
+              if(value.OrderId == res.data.Body.OrderId) {
+                this.orderIdProcess = res.data.Body.OrderId;
+                this.orderEvaluateDialog(value.OrderCode, value.Service.ServiceId);
+              }
+            });
+          }
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getCouponMaxAmount(serviceId, originPrice, callback) {
@@ -173,11 +268,7 @@ export default {
         Token: this.Token,
         ServiceId: serviceId,
         IsPay: '1',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 红包分类
           let maxDisCoupon = null;
@@ -194,22 +285,16 @@ export default {
         }
         callback && callback();
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
-    orderCancelDialog(obj) {
-      this.orderIdProcess = obj.orderId;
-      if(obj.autoCancel === '1') {
-        this.orderCancel();
-      } else {
-        this.dialogType = '0';
-        this.DialogConfig = {
-          IsDialog: '1',
-          DialogTitle: '取消订单',
-          DialogContent: '确定取消订单吗？',
-          DialogBtns: ['取消', '确定'],
-        };
-      }
+    orderCancelDialog(orderId) {
+      this.$router.push({
+        name: 'order_cancel_reason',
+        params: {
+          orderId: orderId
+        }
+      });
     },
     orderDeleteDialog(orderId) {
       this.orderIdProcess = orderId;
@@ -221,24 +306,46 @@ export default {
         DialogBtns: ['取消', '确定'],
       };
     },
-    orderConfirmDialog(orderId) {
+    orderEvaluateDialog(orderCode, serviceTypeId) {
+      this.orderCodeForEvaluate = orderCode;
+      this.serviceTypeIdForEvaluate = serviceTypeId;
+      this.isEvaluate = '1';
+    },
+    evaluateFinish(status) {
+      this.isEvaluate = '0';
+      if(status) {
+        if (status.ErrorCode == '0') {
+          this.alert('评价成功');
+          this.orderPageIndex = 1;
+          this.orderPageIndex = 1;
+          this.updateOrderFromList();
+        } else {
+          this.alert(status.ErrorMsg);
+        }
+      }
+    },
+    orderConfirmDialog(orderId, title) {
+      this.isConfirm = '1';
       this.orderIdProcess = orderId;
-      this.dialogType = '2';
-      this.DialogConfig = {
-        IsDialog: '1',
-        DialogTitle: '确认订单',
-        DialogContent: '确定确认订单吗？',
-        DialogBtns: ['取消', '确定'],
-      };
+      this.orderTitleForConfirm = title;
+    },
+    confirmFinish(status) {
+      this.isConfirm = '0';
+      if(status) {
+        if (status.ErrorCode == '0') {
+          this.alert('确认成功');
+          this.updateOrderFromList();
+        } else {
+          this.alert(status.ErrorMsg);
+        }
+      }
     },
     orderProcess() {
       this.DialogConfig.IsDialog = '0';
-      if(this.dialogType === '0') {
+      if(this.dialogType == '0') {
         this.orderCancel();
-      } else if(this.dialogType === '1') {
+      } else if(this.dialogType == '1') {
         this.orderDelete();
-      } else if(this.dialogType === '2') {
-        this.orderConfirm();
       }
     },
     dialogClose() {
@@ -248,30 +355,22 @@ export default {
       axios.post(API.CancelOrderEx, qs.stringify({
         Token: this.Token,
         OrderId: this.orderIdProcess,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
+      })).then(res => {
+        if(res.data.Meta.ErrorCode == '0') {
           this.alert('取消成功');
           this.updateOrderFromList();
         } else {
           this.alert(res.data.Meta.ErrorMsg, 2000);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     orderDelete() {
       axios.post(API.RemoveOrderEx, qs.stringify({
         Token: this.Token,
         OrderId: this.orderIdProcess,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           this.alert('删除成功');
           this.deleteOrderFromList();
@@ -279,282 +378,75 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
-    orderConfirm() {
-      axios.post(API.CompleteOrderEx, qs.stringify({
-        Token: this.Token,
-        OrderId: this.orderIdProcess,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+    orderAddPay(orderInfo) {
+      this.$router.push({
+        name: 'order_add_pay',
+        params: {
+          orderId: orderInfo.OrderId
         }
-      }).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
-          this.alert('确认成功');
-          this.deleteOrderFromList();
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderPay(orderInfo) {
-      this.isLoading = true;
-      this.loadingBgStyle = '2';
-      this.txtLoading = '';
-      this.orderIdProcess = orderInfo.OrderId;
-      let couponId = '';
-      this.getCouponMaxAmount(orderInfo.Service.ServiceId, orderInfo.TotalPrice, () => {
-        let p = orderInfo.TotalPrice;
-        if (this.couponMax) {
-          p -= this.couponMax.CouponDetails[0].DiscountAmount;
-          couponId = this.couponMax.Id;
-        }
-
-        if (this.OpenId) {
-          this.orderPayByWx(orderInfo.OrderId, p, couponId);
-        } else {
-          this.orderPayByAli(orderInfo.OrderId, p, couponId);
-        }
-      });
-    },
-    orderPayByWx(orderId, price, couponId) {
-      this.isLoading = true;
-      this.loadingBgStyle = '2';
-      this.txtLoading = '';
-      axios.post(API.GetWxpaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        PayFrom: '0', // 0:微信公众号 1:app
-        OpenId: this.OpenId,
-        WxPay: price,
-        BalancePay: '0',
-        CouponId: couponId || '',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        this.isLoading = false;
-        const that = this;
-        if (res.data.Meta.ErrorCode === '0') {
-          function onBridgeReady() {
-            WeixinJSBridge.invoke(
-              'getBrandWCPayRequest', {
-                "appId": res.data.Body.WxpaySign.appid,
-                "timeStamp": res.data.Body.WxpaySign.timestamp,
-                "nonceStr": res.data.Body.WxpaySign.noncestr,
-                "package": res.data.Body.WxpaySign.package,
-                "signType": "MD5",
-                "paySign": res.data.Body.WxpaySign.sign
-              },
-              function(res) {
-                if (res.err_msg == "get_brand_wcpay_request:ok") {
-                  that.$router.push({
-                    name: 'order_pay_status',
-                    params: {
-                      orderId: orderId
-                    }
-                  });
-                } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
-                  that.alert(that.ALERT_MSG.PAY_ERROR);
-                } else {
-                  that.alert(res.err_msg);
-                }
-              }
-            );
-          }
-          if (typeof WeixinJSBridge == "undefined") {
-            if (document.addEventListener) {
-              document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-            } else if (document.attachEvent) {
-              document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-              document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-            }
-          } else {
-            onBridgeReady();
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPayByAli(orderId, price, couponId) {
-      this.isLoading = true;
-      this.loadingBgStyle = '2';
-      this.txtLoading = '';
-      axios.post(API.GetAlipaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        CouponId: couponId,
-        Alipay: price,
-        BalancePay: '0',
-        SignType: 'web'
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        this.isLoading = false;
-        const that = this;
-        if (res.data.Meta.ErrorCode === '0') {
-          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
-            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          } else if(browser.versions.android) {
-            var WVJBIframe = document.createElement('iframe');
-            document.title = '支付';
-            WVJBIframe.setAttribute('id', 'alipay');
-            WVJBIframe.setAttribute('frameborder', 'no');
-            WVJBIframe.setAttribute('border', '0');
-            WVJBIframe.setAttribute('width', '100%');
-            WVJBIframe.setAttribute('height', '100%');
-            WVJBIframe.id = 'alipay';
-            WVJBIframe.frameborder = 'no';
-            WVJBIframe.border = '0';
-            WVJBIframe.width = '100%';
-            WVJBIframe.height = '100%';
-            WVJBIframe.style.position = 'fixed';
-            WVJBIframe.style.top = '0';
-            WVJBIframe.style.left = '0';
-            WVJBIframe.style.backgroundColor = '#fff';
-            // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            document.documentElement.appendChild(WVJBIframe);
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPaySuccess() {
       this.$router.push({
-        name: 'order_pay_status',
+        name: 'order_pay',
         params: {
-          orderId: this.orderIdProcess
+          orderId: orderInfo.OrderId
         }
       });
     },
-    // orderPay(orderInfo) {
-    //   this.isLoading = true;
-    //   this.loadingBgStyle = '2';
-    //   this.txtLoading = '';
-    //   this.orderIdProcess = orderInfo.OrderId;
-    //   let couponId = '';
-    //   let couponMax = this.getCouponMaxAmount(orderInfo.Service.ServiceId);
-    //   let p = orderInfo.TotalPrice;
-    //   if(couponMax) {
-    //     p -= couponMax.CouponDetails[0].DiscountAmount;
-    //     couponId = couponMax.Id;
-    //   }
-    //   axios.post(API.GetWxpaySign, qs.stringify({
-    //     Token: this.Token,
-    //     OrderId: orderInfo.OrderId,
-    //     PayFrom: '0', // 0: 微信公众号 1: app
-    //     OpenId: this.OpenId,
-    //     WxPay: p,
-    //     BalancePay: '0',
-    //     CouponId: couponId || '',
-    //   }), {
-    //     header: {
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    //   }).then(res => {
-    //     this.isLoading = false;
-    //     const that = this;
-    //     if (res.data.Meta.ErrorCode === '0') {
-    //       function onBridgeReady() {
-    //         WeixinJSBridge.invoke(
-    //           'getBrandWCPayRequest', {
-    //             "appId": res.data.Body.WxpaySign.appid,
-    //             "timeStamp": res.data.Body.WxpaySign.timestamp,
-    //             "nonceStr": res.data.Body.WxpaySign.noncestr,
-    //             "package": res.data.Body.WxpaySign.package,
-    //             "signType": "MD5",
-    //             "paySign": res.data.Body.WxpaySign.sign
-    //           },
-    //           function(res) {
-    //             if (res.err_msg == "get_brand_wcpay_request:ok") {
-    //               that.$router.push({
-    //                 name: 'order_pay_status',
-    //                 params: {
-    //                   orderId: orderId
-    //                 }
-    //               });
-    //             } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
-    //               that.alert(that.ALERT_MSG.PAY_ERROR);
-    //             } else {
-    //               that.alert(res.err_msg);
-    //             }
-    //           }
-    //         );
-    //       }
-    //       if (typeof WeixinJSBridge == "undefined") {
-    //         if (document.addEventListener) {
-    //           document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-    //         } else if (document.attachEvent) {
-    //           document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-    //           document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-    //         }
-    //       } else {
-    //         onBridgeReady();
-    //       }
-    //     } else {
-    //       this.alert(res.data.Meta.ErrorMsg);
-    //     }
-    //   }).catch(error => {
-    //     this.isLoading = false;
-    //     this.alert(this.ALERT_MSG.NET_ERROR);
-    //   });
-    //   // this.$router.push({
-    //   //   name: 'order_pay'
-    //   // })
-    // },
     updateOrderFromList() {
       // 在点击取消、删除等按钮时更新订单信息
-      axios.post(API.GetOrderInfoEx, qs.stringify({
-        Token: this.Token,
-        OrderId: this.orderIdProcess,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        if (res.data.Meta.ErrorCode === '0') {
-          // 定位到需要修改状态的订单
-          this.orderList.map(value => {
-            if(value.OrderId === res.data.Body.Order.OrderId) {
-              // 刷新订单信息
-              for (var i in value) {
-                value[i] = res.data.Body.Order[i];
-              }
-              // 刷新订单按钮
-              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
-            }
-          });
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
+      this.orderNowPageIndex = 1;
+      this.orderHistoryPageIndex = 1;
+      this.getNowOrderList();
+      this.getHistoryOrderList();
+      // axios.post(API.GetOrderInfoEx, qs.stringify({
+      //   Token: this.Token,
+      //   OrderId: this.orderIdProcess,
+      // })).then(res => {
+      //   if (res.data.Meta.ErrorCode === '0') {
+      //     // 定位到需要修改状态的订单
+      //     if(this.tabIndex == '0') {
+      //       this.orderNowList.map(value => {
+      //         if (value.OrderId === res.data.Body.Order.OrderId) {
+      //           // 刷新订单信息
+      //           for (var i in value) {
+      //             value[i] = res.data.Body.Order[i];
+      //           }
+      //           // 刷新订单按钮
+      //           value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+      //         }
+      //       });
+      //     } else if(this.tabIndex == '1') {
+      //       this.orderHistoryList.map(value => {
+      //         if (value.OrderId === res.data.Body.Order.OrderId) {
+      //           // 刷新订单信息
+      //           for (var i in value) {
+      //             value[i] = res.data.Body.Order[i];
+      //           }
+      //           // 刷新订单按钮
+      //           value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+      //         }
+      //       });
+      //     }
+      //   } else {
+      //     this.alert(res.data.Meta.ErrorMsg);
+      //   }
+      // }).catch(err => {
+      //   this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      // });
     },
     deleteOrderFromList() {
-      for(let i = 0; i < this.orderList.length; i++) {
-        if(this.orderList[i].OrderId === this.orderIdProcess) {
-          this.orderList.splice(i, 1);
+      for(let i = 0; i < this.orderHistoryList.length; i++) {
+        if(this.orderHistoryList[i].OrderId === this.orderIdProcess) {
+          this.orderHistoryList.splice(i, 1);
           break;
         }
       }
-      if(this.orderList.length <= 1) {
+      if(this.orderHistoryList.length <= 1) {
         this.getOrderList();
       }
     },
@@ -567,19 +459,8 @@ export default {
       }
     },
     addZero(str, digit = 2) {
-      // if(String.padStart) {
-      //   return str.toString().padStart(digit, '0');
-      // } else {
-      //   return Number(str) < 10 ? '0' + Number : str;
-      // }
       return Number(str) < 10 ? '0' + Number : str;
     },
-    // routerToPay(item) {
-    //   this.$store.commit('SetOrderIdForPay', item.OrderId);
-    //   this.$router.push({
-    //     name: 'order_pay',
-    //   });
-    // }
   },
   computed: {
     ...mapState(['Token', 'IsLogin', 'OpenId', 'ALERT_MSG', 'FourServiceIdFilterList'])
@@ -613,26 +494,112 @@ export default {
   watch: {
     Token(newValue, oldValue) {
       if(newValue != '' && newValue !== oldValue) {
-        this.getOrderList();
+        this.orderNowList.splice(0);
+        this.orderHistoryList.splice(0);
+        this.getNowOrderList();
+        this.getHistoryOrderList();
       }
-    }
+    },
   },
   components: {
     InfiniteLoading,
     OrderItem,
+    OrderEvaluate,
+    OrderConfirm,
   },
 }
 </script>
 
 <style scoped lang="scss">
+$text-warn: #f56165;
 .wrapper
 {
-  padding-top: 0.4rem;
+  height: 100%;
   background-color: #eef2f5;
+  .order-header
+  {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    transform: translateZ(0);
+    width: 100%;
+    height: 1.066667rem;
+    background-color: #fff;
+    box-shadow: 0 3px 3px #ddd;
+    overflow: hidden;
+    .header-title
+    {
+      display: block;
+      width: 50%;
+      height: 0.933333rem;
+      line-height: 0.933333rem;
+      font-size: 15px;
+      text-align: center;
+      &.active
+      {
+        color: $text-warn;
+      }
+    }
+    .header-index
+    {
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      width: 50%;
+      height: 4px;
+      background-color: $text-warn;
+      &.trans
+      {
+        transition: all .3s;
+      }
+      &.right
+      {
+        transform: translateX(100%);
+      }
+    }
+  }
+  .order-content
+  {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    // min-height: 100%;
+    // margin-top: 1.333333rem;
+    overflow: hidden;
+    .now-list,
+    .history-list
+    {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: scroll;
+      &.right
+      {
+        transform: translateX(-100%);
+      }
+      &.trans
+      {
+        transition: all .3s;
+      }
+      .order-list-able
+      {
+        box-sizing: border-box;
+        padding-bottom: 1.6rem;
+      }
+    }
+    .history-list
+    {
+      left: 100%;
+    }
+  }
   .order-list-able
   {
-    box-sizing: border-box;
-    padding-bottom: 1.333333rem;
+    padding-top: 1.333333rem;
     background-color: #eef2f5;
   }
   .order-list-empty

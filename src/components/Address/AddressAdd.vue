@@ -109,18 +109,14 @@ export default {
   },
   methods: {
     getAddressTags() {
-      axios.post(API.GetAddressTags, qs.stringify({}), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      axios.post(API.GetAddressTags, qs.stringify({})).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.addressTagList = res.data.Body;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     addAddress() {
@@ -140,11 +136,7 @@ export default {
         axios.post(API.AddAddress, qs.stringify({
           Token: this.Token,
           Address: this.AddressAddedInfo
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode === '0') {
             this.$store.commit('SetAddressAddedInfo', {
@@ -158,15 +150,16 @@ export default {
               Address2: '',
               Tag: ''
             });
-            this.$router.replace({
-              name: 'address_list'
-            });
+            // this.$router.replace({
+            //   name: 'address_list'
+            // });
+            this.$router.go(-1);
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
         }).catch(err => {
           this.isLoading = false;
-          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
       }
     }

@@ -24,7 +24,7 @@
           <div class="step">
             <img class="icon-receive" src="../../assets/images/icon_receive.png">
           </div>
-          <div class="info">【收件地址】{{ orderDetail.RevicerAddress.Address1 + orderDetail.RevicerAddress.Address2 }}</div>
+          <div class="info">【收件地址】{{ orderDetail.RevicerAddress.Address1 }} {{ orderDetail.RevicerAddress.Address2 }}</div>
         </li>
         <li class="status-item flex-row" v-for="(item,index) in orderStatusList">
           <div class="datetime">
@@ -42,11 +42,11 @@
     <div class="status-info">
       <div class="row flex-row">
         <div class="left">快递公司</div>
-        <div class="right txt-over-hidden">{{ orderDetail.ShipperName }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.ShipperName }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">快递单号</div>
-        <div class="right txt-over-hidden">{{ orderDetail.LogisticCode }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.LogisticCode }}</div>
       </div>
     </div>
 
@@ -65,42 +65,42 @@
       </div>
       <div class="row flex-row">
         <div class="left">发件地址</div>
-        <div class="right txt-over-hidden">{{ orderDetail.SenderAddress.Address1 + orderDetail.SenderAddress.Address2 }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.SenderAddress.Address1 }} {{ orderDetail.SenderAddress.Address2 }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">发件人</div>
-        <div class="right txt-over-hidden">{{ orderDetail.SenderAddress.Contact }}  {{orderDetail.SenderAddress.PhoneNumber }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.SenderAddress.Contact }}  {{orderDetail.SenderAddress.PhoneNumber }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">收件地址</div>
-        <div class="right txt-over-hidden">{{ orderDetail.RevicerAddress.Address1 + orderDetail.RevicerAddress.Address2 }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.RevicerAddress.Address1 }} {{ orderDetail.RevicerAddress.Address2 }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">收件人</div>
-        <div class="right txt-over-hidden">{{ orderDetail.RevicerAddress.Contact }}  {{orderDetail.RevicerAddress.PhoneNumber }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.RevicerAddress.Contact }}  {{orderDetail.RevicerAddress.PhoneNumber }}</div>
       </div>
       <div class="info-split"></div>
       <div class="row flex-row">
         <div class="left">物品名称</div>
-        <div class="right txt-over-hidden">{{ orderDetail.GoodsName }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.GoodsName }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">物品重量</div>
-        <div class="right txt-over-hidden">{{ orderDetail.GoodsWeight }}kg</div>
+        <div class="right txt-over-hide">{{ orderDetail.GoodsWeight }}kg</div>
       </div>
-      <div class="row flex-row">
+      <div class="row flex-row" v-if="orderDetail.PayType">
         <div class="left">付款方式</div>
-        <div class="right txt-over-hidden" v-if="orderDetail.PayType == '0'">寄件人付</div>
-        <div class="right txt-over-hidden" v-if="orderDetail.PayType == '1'">收件人付</div>
+        <div class="right txt-over-hide" v-if="orderDetail.PayType == '0'">寄件人付</div>
+        <div class="right txt-over-hide" v-else-if="orderDetail.PayType == '1'">收件人付</div>
       </div>
       <div class="info-split"></div>
       <div class="row flex-row">
         <div class="left">订单编号</div>
-        <div class="right txt-over-hidden">{{ orderDetail.OrderCode }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.OrderCode }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">下单时间</div>
-        <div class="right txt-over-hidden">{{ orderDetail.CreateTime | formatDate }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.CreateTime | formatDate }}</div>
       </div>
     </div>
   </div>
@@ -158,11 +158,7 @@ export default {
       axios.post(API.GetKdTrackInfo, qs.stringify({
         LogisticCode: LogisticCode,
         ShipperCode: ShipperCode
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.orderStatusList = res.data.Body.Traces;
           this.orderStatusList = this.orderStatusList.concat(this.orderDetail.Traces);

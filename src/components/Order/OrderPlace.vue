@@ -1,13 +1,13 @@
 <template>
 <div>
-  <section class="section address flex-row" @click="routeTo({ name: 'address_list' })">
+  <section class="section address flex-row" @click="routeTo({ name: 'address_list', params: { from: 'order_place' } })">
     <div class="left flex-row">
       <img class="icon-header" src="../../assets/images/nearby.png">
 
-      <p v-if="!OrderInfo.Address.Id" class="txt-light">请选择一个服务地址</p>
+      <p v-if="!OrderInfo.Address || !OrderInfo.Address.Id" class="txt-light">请选择一个服务地址</p>
 
       <p v-else class="address-info txt-normal">
-        <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }}{{ OrderInfo.Address.Address2 }}</span>
+        <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }} {{ OrderInfo.Address.Address2 }}</span>
         <span>{{ OrderInfo.Address.PhoneNumber }}</span>
       </p>
     </div>
@@ -18,7 +18,7 @@
   <section class="section type flex-row">
     <img class="icon-header" src="../../assets/images/orders_type.png">
 
-    <span class="txt-light">请选择{{ ThreeServiceName }}类型</span>
+    <span class="txt-light">请选择{{ serviceName }}类型</span>
   </section>
 
   <ul class="type-list">
@@ -28,7 +28,8 @@
       <div class="flex-row list-right">
         <div class="type-info">
           <p class="info-name">{{ item.ServiceName }}</p>
-          <p class="info-price">{{ item.Price }}元/{{ item.Unit }}</p>
+          <p class="info-price" v-if="!item.DepositAmount || item.DepositAmount == 0">{{ item.Price }}元/{{ item.Unit }}</p>
+          <p class="info-price" v-else>{{ item.DepositAmount }}元订金</p>
         </div>
 
         <img class="icon-selector" v-show="typeIndex != index" src="../../assets/images/orders_choose.png">
@@ -77,27 +78,68 @@
     </div>
   </section>
 
-  <section class="section discount">
+    <!-- 无订金 -->
+  <section class="section statistics" v-if="isShowDeposit == '0'">
+    <div class="statistics-row flex-row">
+      <span>订单总价</span>
+
+      <div class="flex-row">
+        <span class="txt-light">￥{{ totalPrice | formatAmount }}</span>
+      </div>
+    </div>
+
+    <div class="statistics-row flex-row" v-show="this.oneSafe.isUsed">
+      <span>一元保险</span>
+
+      <div class="flex-row">
+        <span class="txt-light">￥{{ '1' | formatAmount }}</span>
+      </div>
+    </div>
+
+    <div class="statistics-split2"></div>
+
     <ul class="discount-list" v-if="activityList.length > 0">
       <li class="list-item-discount">-￥{{ discountAmount | formatAmount }}</li>
       <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
     </ul>
 
-    <div class="discount-coupon flex-row">
+    <div class="statistics-row flex-row">
       <span>红包</span>
 
-      <div class="flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: totalPrice } })">
-        <span class="txt-price" v-if="OrderInfo.CouponSelected.NoUse === '0'">-￥{{ OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount | formatAmount }}</span>
-        <span class="txt-price" v-else-if="OrderInfo.CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
+      <div class="flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: totalPrice, serviceId: OrderInfo.FourServiceId } })">
+        <span class="txt-price" v-if="CouponSelected.NoUse === '0'">-￥{{ couponAmount | formatAmount }}</span>
+        <span class="txt-price" v-else-if="CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
         <span class="txt-price" v-else>暂无可用红包</span>
         <img class="icon-link" src="../../assets/images/link.png">
       </div>
     </div>
 
-    <div class="discount-split"></div>
+    <div class="statistics-split"></div>
 
-    <p class="discount-total" v-if="OrderInfo.CouponSelected.NoUse === '0'">已优惠￥{{ (discountAmount + Number(OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount)) | formatAmount }}</p>
-    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}</p>
+    <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+  </section>
+
+  <!-- 有订金 -->
+  <section class="section statistics" v-else>
+    <div class="statistics-row flex-row">
+      <span>订金</span>
+
+      <div class="flex-row">
+        <span class="txt-price">￥{{ payAmount | formatAmount }}</span>
+      </div>
+    </div>
+
+    <div class="statistics-split"></div>
+
+    <div class="statistics-row flex-row">
+      <span>红包</span>
+
+      <div class="flex-row">
+        <span class="txt-price">订金不可用红包</span>
+        <img class="icon-link" src="../../assets/images/link.png">
+      </div>
+    </div>
   </section>
 
   <section class="section remark flex-row">
@@ -106,8 +148,11 @@
     <input class="remark-input" type="text" v-model="OrderInfo.ServiceContent" placeholder="备注留言">
   </section>
 
-  <section class="bottom-button">
-    <a class="btn-submit" @click="orderSubmit">立即支付 ￥{{ payAmount | formatAmount }}</a>
+  <section class="bottom-button flex-row">
+    <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}<span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+
+    <a class="btn-submit" @click="orderSubmit">提交订单</a>
   </section>
 
   <section class="one-safe-alert" v-show="oneSafe.isOpenAlert">
@@ -140,10 +185,13 @@ export default {
   name: 'order_place',
   data() {
     return {
+      serviceId: '',
+      serviceName: '',
+      isActivity: '',
       serviceList: [],
-      activityList: [],
+      ServiceTypeRules: [], // 原始活动数据
+      activityList: [], // 清洗后的活动数据
       couponList: [],
-      discountAmount: 0,
       countStep: 0,
       maxCount: -1,
       minCount: -1,
@@ -152,6 +200,7 @@ export default {
       typeIndex: -1,
       unitPrice: 0,
       isMaunalInput: false, // 是否允许手动输入数量
+      isShowDeposit: '0', // 是否显示订金
       oneSafe: {
         title: '',
         content: '',
@@ -160,22 +209,9 @@ export default {
         isOpenAlert: false,
         isUsed: true
       },
-      thisThreeServiceId: '', // 用来和vuex中的id作比较
       isLoading: true,
       bgLoading: '1',
       txtLoading: '正在获取服务信息…',
-    }
-  },
-  mounted() {
-    let that = this;
-    window.getPayStatusFromFrame = function(status) {
-      let payIFrame = document.getElementById('alipay');
-      document.documentElement.removeChild(payIFrame);
-      if(status == '1') {
-        that.orderPaySuccess();
-      } else {
-        that.alert(that.ALERT_MSG.PAY_ERROR);
-      }
     }
   },
   activated() {
@@ -184,42 +220,28 @@ export default {
       this.OrderInfo.DateTime = '';
     }
 
-    if(this.SelectedAddress.Id) {
-      this.OrderInfo.Address = this.SelectedAddress;
-      this.$store.commit('SetSelectedAddress', {});
-    }
-
     this.getUserAddress();
+
+    // 从app活动页分享到微信等会带有ServiceId的参数
     let threeIdFromUrl = this.valueFromUrl('ServiceId');
     if (threeIdFromUrl) {
-      this.ThreeServiceId = threeIdFromUrl;
-      this.ThreeServiceName = this.valueFromUrl('ServiceName');
+      this.serviceId = threeIdFromUrl;
+      this.serviceName = this.valueFromUrl('ServiceName');
 
-      this.OrderInfo.CouponSelected = {};
-      this.OrderInfo.CouponSelected.NoUse = '1';
+      this.CouponSelected.NoUse = '1';
       this.serviceList.splice(0);
       this.couponList.splice(0);
-      this.getActivityServiceDetail(threeIdFromUrl);
+      this.getActivityServiceDetail();
     } else {
-      if (this.thisThreeServiceId !== this.ThreeServiceId) {
-        this.thisThreeServiceId = this.ThreeServiceId;
-        this.OrderInfo.CouponSelected = {};
-        this.OrderInfo.CouponSelected.NoUse = '1';
-        this.serviceList.splice(0);
-        this.couponList.splice(0);
-
-        if(this.$route.params.isSuperDis) {
-          // 为了防止页面刷新导致服务品类变化，保存当前的活动类服务id
-          Common.setCookie('ZJSH_WX_ActivityServiceId', this.thisThreeServiceId, 1, '/');
-          this.getActivityServiceDetail(this.thisThreeServiceId);
+      let oldId = this.serviceId;
+      let oldIsActivity = this.isActivity;
+      this.serviceId = this.$route.query.id;
+      this.isActivity = this.$route.query.isActivity || '0';
+      if(oldId !== this.serviceId || oldIsActivity !== this.isActivity) {
+        if(this.isActivity == '1') {
+          this.getActivityServiceDetail();
         } else {
-          // 如果在下单页刷新页面，params的参数丢失，此时判断保存的id与当前id是否一致，如果一致说明是活动类服务id
-          let activityId = Common.getCookie('ZJSH_WX_ActivityServiceId');
-          if(activityId == this.thisThreeServiceId) {
-            this.getActivityServiceDetail(this.thisThreeServiceId);
-          } else {
-            this.getServiceDetail();
-          }
+          this.getServiceDetail();
         }
       }
     }
@@ -238,17 +260,14 @@ export default {
       this.isLoading = true;
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
-        ServiceId: this.ThreeServiceId
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+        ServiceId: this.serviceId
+      })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
         if (res.data.Meta.ErrorCode === '0') {
           this.serviceList = res.data.Body.Service.SubItems;
+          this.serviceName = res.data.Body.Service.ServiceName;
 
           // 如果之前已经选择过对应服务的四级服务，显示之，否则显示第一个服务品类
           if(this.OrderInfo.FourServiceId) {
@@ -273,25 +292,22 @@ export default {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
-    getActivityServiceDetail(ServiceId) {
+    getActivityServiceDetail() {
       this.isLoading = true;
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
         Token: this.Token,
-        ActivityProductId: ServiceId
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+        ActivityProductId: this.serviceId
+      })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
         if (res.data.Meta.ErrorCode === '0') {
           this.serviceList = res.data.Body.Service.SubItems;
+          this.serviceName = res.data.Body.Service.ServiceName;
 
           // 如果之前已经选择过对应服务的四级服务，显示之，否则显示第一个服务品类
           if(this.OrderInfo.FourServiceId) {
@@ -316,34 +332,26 @@ export default {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
+    // 切换服务品类时重新获取活动
     getServiceActivity() {
       // 初始化折扣信息与折扣金额
       this.activityList.splice(0);
-      this.discountAmount = 0;
+      this.ServiceTypeRules.splice(0);
 
       axios.post(API.GetActivityEx, qs.stringify({
         Token: this.Token,
         ServiceId: this.OrderInfo.FourServiceId
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 活动信息清洗
+          this.ServiceTypeRules = res.data.Body.ServiceTypeRules;
           res.data.Body.ServiceTypeRules.map(value => {
             value.Details.map(val => {
               let dis = 0, upp = 0;
               val.Rules.map(v => {
-                // 计算当前优惠规则的最大折扣
-                if(v.Upper >= upp && v.Upper <= this.totalPrice) {
-                  upp = Number(v.Upper);
-                  dis = Number(v.Minus);
-                }
-
                 // 遍历每一条优惠信息（无论是否满足）
                 this.activityList.push({
                   Title: val.Title,
@@ -351,42 +359,33 @@ export default {
                   Minus: Number(v.Minus),
                 });
               });
-              // 累加满足的折扣金额
-              this.discountAmount += dis;
             });
           });
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getCouponList(id) {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token,
         ServiceId: id,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 红包分类
           let date = new Date();
           this.couponList.splice(0);
           res.data.Body.CouponList.forEach((value, index) => {
-            // 未使用红包且满足满减金额
-            if (value.CouponDetails[0].Amount <= this.totalPrice) {
-              this.couponList.push(value);
-            }
+            this.couponList.push(value);
           });
           this.getCouponMaxAmount(this.totalPrice);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getCouponMaxAmount(originPrice) {
@@ -399,40 +398,36 @@ export default {
         }
       });
 
-      // 遍历对象赋值
-      if (maxDisCoupon) {
-        this.OrderInfo.CouponSelected = maxDisCoupon;
-        this.OrderInfo.CouponSelected.NoUse = '0';
+      // 选择最大红包
+      if (maxDisCoupon && this.isShowDeposit == '0') {
+        maxDisCoupon.NoUse = '0';
+        this.$store.commit('SetCouponSelected', maxDisCoupon);
       } else {
-        this.OrderInfo.CouponSelected.NoUse = '1';
+        this.CouponSelected.NoUse = '1';
+        this.$store.commit('SetCouponSelected', this.CouponSelected);
       }
-
-      this.$store.commit('SetOrderInfo', this.OrderInfo);
     },
     getUserAddress() {
       axios.post(API.GetAddress, qs.stringify({
-        Token: this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+        Token: this.Token,
+      })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           if(res.data.Body.length >= 1) {
-            if(!this.OrderInfo.Address.Id) {
-              this.OrderInfo.Address = res.data.Body[0];
-            } else {
-              // 判断地址是否存在
-              let avail = false;
-              res.data.Body.forEach(value => {
-                if(this.OrderInfo.Address.Id === value.Id) {
-                  avail = true;
-                }
-              });
-              if(!avail) {
-                this.OrderInfo.Address = res.data.Body[0];
+            var avail = false;
+            var addr = null;
+            res.data.Body.forEach(value => {
+              // 两次判断，一次判断缓存保存的id，一次检索vuex中的id
+              if (this.DefaultAddressId == value.Id) {
+                avail = true;
+                addr = value;
               }
+            });
+            // 如果检索出对应id的地址，保存到订单信息中，否则默认取第一条
+            if (avail) {
+              this.OrderInfo.Address = addr;
+            } else {
+              this.OrderInfo.Address = res.data.Body[0];
             }
           } else {
             this.OrderInfo.Address = null;
@@ -442,7 +437,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     amountReduce() {
@@ -464,6 +459,8 @@ export default {
       } else {
         this.isAdd = true;
       }
+
+      this.getCouponMaxAmount(this.totalPrice);
     },
     selectType(item, index) {
       // 切换四级品类时
@@ -478,13 +475,16 @@ export default {
         this.getCouponList(item.ServiceId);
         this.OrderInfo.SellType = item.SellType;
         this.OrderInfo.SpecialType = item.SpecialType;
-        this.OrderInfo.Price = item.Price;
+        this.OrderInfo.Price = (item.DepositAmount && item.DepositAmount > 0) ? item.DepositAmount : item.Price;
+
+        // 是否显示订金
+        this.isShowDeposit = (item.DepositAmount && item.DepositAmount > 0) ? '1' : '0';
 
         // 获取id对应活动信息
         this.getServiceActivity();
 
         // 修改单价、数量步长、最大最小数量
-        this.unitPrice = Number(item.Price);
+        this.unitPrice = Number((item.DepositAmount && item.DepositAmount > 0) ? item.DepositAmount : item.Price);
         this.countStep = Number(item.CountStep);
         this.maxCount = Number(item.MaxCount);
         this.minCount = Number(item.MinCount);
@@ -492,7 +492,7 @@ export default {
         // 初始化数量
         this.OrderInfo.Amount = this.minCount;
 
-        this.getCouponMaxAmount();
+        this.getCouponMaxAmount(this.totalPrice);
 
         // 判断是否可增减
         this.amountCheck();
@@ -512,7 +512,7 @@ export default {
           this.oneSafe.isUsed = false;
           this.oneSafe.title = '';
           this.oneSafe.content = '';
-          this.oneSafe.url = 'item.ClaimsNote.Url';
+          this.oneSafe.url = '';
         }
 
         // 保存订单信息
@@ -568,161 +568,24 @@ export default {
           SellType: this.OrderInfo.SellType,
           ServiceContent: this.OrderInfo.ServiceContent,
           IsClaims: this.OrderInfo.IsClaims,
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode === '0') {
             // 订单支付页所用数据
-            this.$store.commit('SetOrderInfo', this.OrderInfo);
-            this.$store.commit('SetOrderIdForPay', res.data.Body.OrderId);
-
-            // 如果需要使用红包，需要在传入的总金额中减去红包的金额
-
-            // 原始总价
-            let p = Number(this.OrderInfo.Amount * this.OrderInfo.Price);
-
-            // 减去一元保险
-            p += this.OrderInfo.IsClaims == '1' ? 1 : 0;
-
-            // 减去红包折扣
-            p -= this.OrderInfo.CouponSelected.NoUse === '1' ? 0 : Number(this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount);
-
-            if(this.OpenId) {
-              this.orderPayByWx(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
-            } else {
-              this.orderPayByAli(res.data.Body.OrderId, p, this.OrderInfo.CouponSelected.NoUse === '1' ? '' : this.OrderInfo.CouponSelected.Id);
-            }
+            this.routeTo({
+              name: 'order_pay',
+              params: {
+                orderId: res.data.Body.OrderId
+              }
+            }, false);
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
         }).catch(err => {
           this.isLoading = false;
-          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
       }
-    },
-    orderPayByWx(orderId, price, couponId) {
-      this.isLoading = true;
-      this.bgLoading = '2';
-      this.txtLoading = '';
-      axios.post(API.GetWxpaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        PayFrom: '0', // 0:微信公众号 1:app
-        OpenId: this.OpenId,
-        WxPay: price,
-        BalancePay: '0',
-        CouponId: couponId || '',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        this.isLoading = false;
-        const that = this;
-        if (res.data.Meta.ErrorCode === '0') {
-          function onBridgeReady() {
-            WeixinJSBridge.invoke(
-              'getBrandWCPayRequest', {
-                "appId": res.data.Body.WxpaySign.appid,
-                "timeStamp": res.data.Body.WxpaySign.timestamp,
-                "nonceStr": res.data.Body.WxpaySign.noncestr,
-                "package": res.data.Body.WxpaySign.package,
-                "signType": "MD5",
-                "paySign": res.data.Body.WxpaySign.sign
-              },
-              function(res) {
-                if (res.err_msg == "get_brand_wcpay_request:ok") {
-                  that.$router.push({
-                    name: 'order_pay_status',
-                    params: {
-                      orderId: orderId
-                    }
-                  });
-                } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
-                  that.alert(that.ALERT_MSG.PAY_ERROR);
-                } else {
-                  that.alert(res.err_msg);
-                }
-              }
-            );
-          }
-          if (typeof WeixinJSBridge == "undefined") {
-            if (document.addEventListener) {
-              document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-            } else if (document.attachEvent) {
-              document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-              document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-            }
-          } else {
-            onBridgeReady();
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPayByAli(orderId, price, couponId) {
-      this.isLoading = true;
-      this.bgLoading = '2';
-      this.txtLoading = '';
-      axios.post(API.GetAlipaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        CouponId: couponId,
-        Alipay: price,
-        BalancePay: '0',
-        SignType: 'web'
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        this.isLoading = false;
-        if (res.data.Meta.ErrorCode === '0') {
-          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
-            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          } else if(browser.versions.android) {
-            var WVJBIframe = document.createElement('iframe');
-            document.title = '支付';
-            WVJBIframe.setAttribute('id', 'alipay');
-            WVJBIframe.setAttribute('frameborder', 'no');
-            WVJBIframe.setAttribute('border', '0');
-            WVJBIframe.setAttribute('width', '100%');
-            WVJBIframe.setAttribute('height', '100%');
-            WVJBIframe.id = 'alipay';
-            WVJBIframe.frameborder = 'no';
-            WVJBIframe.border = '0';
-            WVJBIframe.width = '100%';
-            WVJBIframe.height = '100%';
-            WVJBIframe.style.position = 'fixed';
-            WVJBIframe.style.top = '0';
-            WVJBIframe.style.left = '0';
-            WVJBIframe.style.backgroundColor = '#fff';
-            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            document.documentElement.appendChild(WVJBIframe);
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPaySuccess() {
-      this.$router.push({
-        name: 'order_pay_status',
-        params: {
-          orderId: this.$store.state.OrderIdForPay
-        }
-      });
     },
     routeTo(option={name:''}, isReplace=false) {
       // 保存订单信息
@@ -736,27 +599,58 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'ThreeServiceId', 'ThreeServiceName', 'OrderInfo', 'SelectedAddress', 'ALERT_MSG']),
-    //原价
+    ...mapState(['Token', 'OpenId', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
     },
+    // 活动减免金额
+    discountAmount: {
+      get() {
+        var discountAmount = 0;
+        this.ServiceTypeRules.map(value => {
+          value.Details.map(val => {
+            let dis = 0,
+              upp = 0;
+            val.Rules.map(v => {
+              // 计算当前优惠规则的最大折扣
+              if (Number(v.Upper) >= upp && Number(v.Upper) <= Number(this.totalPrice)) {
+                upp = Number(v.Upper);
+                dis = Number(v.Minus);
+              }
+            });
+            // 累加满足的折扣金额
+            discountAmount += dis;
+          });
+        });
+
+        return discountAmount;
+      },
+      set(val) {
+        if(!isNaN(val)) {
+          this.discountAmount = Number(val);
+        }
+      }
+    },
+    // 红包减免金额
+    couponAmount() {
+      if(this.CouponSelected.NoUse === '1') {
+        return 0;
+      } else {
+        return Number(this.CouponSelected.CouponDetails[0].DiscountAmount) || 0;
+      }
+    },
+    // 支付金额
     payAmount() {
-      // 服务总价
-      let serviceTotalAmount = this.totalPrice;
-
-      // 折扣
-      let discountTotal = Number(this.discountAmount) + Number(this.OrderInfo.CouponSelected.NoUse === '0' ? this.OrderInfo.CouponSelected.CouponDetails[0].DiscountAmount : 0);
-
       // 是否使用一元赔付
       let oneSafeAmount = this.oneSafe.isUsed ? 1 : 0;
 
-      return serviceTotalAmount + oneSafeAmount - discountTotal;
+      return this.totalPrice + oneSafeAmount - this.discountAmount - this.couponAmount;
     },
   },
   filters: {
     formatAmount(amount) {
-      let a = amount.toString();
+      let a = amount + '';
       if(a.indexOf('.') === -1) {
         return amount + '.00';
       } else {
@@ -770,12 +664,13 @@ export default {
   watch: {
     Token(newValue, oldValue) {
       if(this.valueFromUrl('ServiceId') && newValue !== oldValue) {
-        this.ThreeServiceId = this.valueFromUrl('ServiceId');
-        this.ThreeServiceName = this.valueFromUrl('ServiceName');
+        this.serviceId = this.valueFromUrl('ServiceId');
+        this.serviceName = this.valueFromUrl('ServiceName');
         this.getUserAddress();
 
-        this.OrderInfo.CouponSelected = {};
-        this.OrderInfo.CouponSelected.NoUse = '1';
+        this.CouponSelected = {
+          NoUse: '1'
+        };
         this.serviceList.splice(0);
         this.couponList.splice(0);
         this.getActivityServiceDetail(this.valueFromUrl('ServiceId'));
@@ -790,7 +685,7 @@ export default {
 {
   height: auto;
   padding-top: 0.32rem;
-  padding-bottom: 2.213333rem;
+  padding-bottom: 1.866667rem;
   background-color: #eef2f5;
 }
 .txt-light
@@ -821,8 +716,8 @@ export default {
   {
     .left
     {
-      justify-content: flex-start;
-      -webkit-justify-content: flex-start;
+      justify-content: initial;
+      -webkit-justify-content: initial;
       flex-grow: 1;
       -webkit-flex-grow: 1;
       margin-right: 0.266667rem;
@@ -929,7 +824,7 @@ export default {
       }
     }
   }
-  &.discount
+  &.statistics
   {
     height: auto;
     padding-top: 0.266667rem;
@@ -944,8 +839,8 @@ export default {
     {
       position: relative;
       // margin-top: 0.266667rem;
-      padding-top: 0.48rem;
-      padding-bottom: 0.48rem;
+      margin-top: 0.48rem;
+      margin-bottom: 0.48rem;
       padding-left: 0.413333rem;
       padding-right: 0.44rem;
       background-color: #fff;
@@ -966,28 +861,52 @@ export default {
         }
       }
     }
-    .discount-coupon
+    .statistics-row
     {
       padding-left: 0.413333rem;
       padding-right: 0.44rem;
+      margin-top: 0.266667rem;
+      margin-bottom: 0.266667rem;
+      &:first-child
+      {
+        margin-top: 0;
+      }
+      &:last-child
+      {
+        margin-bottom: 0;
+      }
     }
-    .discount-split
+    .statistics-split
     {
       height: 1px;
-      margin: 0.266667rem 0;
+      background-color: #eef2f5;
+    }
+    .statistics-split2
+    {
+      margin-left: 0.413333rem;
+      height: 1px;
       background-color: #eef2f5;
     }
     .discount-total
     {
+      margin-top: 0.266667rem;
       padding-left: 0.413333rem;
       padding-right: 0.44rem;
       text-align: right;
+      .total-pay
+      {
+        margin-left: 0.266667rem;
+        .price
+        {
+          font-size: 20px;
+        }
+      }
     }
   }
   &.remark
   {
-    justify-content: flex-start;
-    -webkit-justify-content: flex-start;
+    justify-content: initial;
+    -webkit-justify-content: initial;
     .remark-input
     {
       border: none;
@@ -1066,20 +985,36 @@ export default {
   left: 0;
   transform: translateZ(0);
   width: 100%;
-  height: 1.946667rem;
+  height: 1.6rem;
+  line-height: 1.6rem;
+  border-top: 1px solid #eef2f5;
   background-color: #fff;
+  .discount-total
+  {
+    flex-shrink: 0;
+    padding-left: 0.413333rem;
+    padding-right: 0.44rem;
+    text-align: right;
+    .total-pay
+    {
+      margin-left: 0.266667rem;
+      .price
+      {
+        color: #f66165;
+        font-size: 16px;
+      }
+    }
+  }
   .btn-submit
   {
     display: block;
-    width: 8.666667rem;
-    height: 1.146667rem;
-    line-height: 1.146667rem;
-    border-radius: 4px;
-    margin: 0.4rem auto;
+    width: 100%;
+    height: 100%;
+    line-height: 1.6rem;
     background-color: #f66165;
     color: #fff;
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
   }
 }
 .one-safe-alert

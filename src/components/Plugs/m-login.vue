@@ -59,50 +59,46 @@ export default {
     },
     sendCaptcha() {
       const that = this;
+      this.isClickSendCaptcha = false;
       axios.post(API.SendCaptcha, qs.stringify({
         Phone: this.phoneNumber,
         "Type": "4"
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then((res) => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           document.getElementById('captcha').focus();
           this.alert(this.ALERT_MSG.SEND_CAPTCHA);
-          this.isClickSendCaptcha = false;
           let count = 60;
           that.isCountdown = true;
           this.sendCaptchaInterval = setInterval(function() {
             count--;
             that.textCaptcha = '重新发送(' + count + ')';
             if(count <= 0) {
-              clearInterval(this.sendCaptchaInterval);
+              clearInterval(that.sendCaptchaInterval);
               that.isCountdown = false;
               that.textCaptcha = '重新发送';
               that.isClickSendCaptcha = true;
             }
           }, 1000);
         } else {
+          this.isClickSendCaptcha = true;
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch((error) => {
-        this.alert(this.ALERT_MSG.NET_ERROR);
+      }).catch(err => {
+        this.isClickSendCaptcha = true;
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     submit() {
       this.isLoading = true;
       axios.post(API.QuickLogin, qs.stringify({
-        "LoginName": this.phoneNumber,
-        "Captcha": this.captcha,
-      }), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then((res)=> {
+        LoginName: this.phoneNumber,
+        Captcha: this.captcha,
+        RegisterSource: '210',
+      })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
+          this.saveUserInfo(res.data.Body.Token);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
           this.$store.commit('SetIsLogin', '1');
@@ -112,11 +108,20 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch((error)=> {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
-    }
+    },
+    saveUserInfo(token) {
+      axios.post(API.GetUserInfo, qs.stringify({
+        Token: token
+      })).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          this.$store.commit('SetUserInfo', res.data.Body.Info);
+        }
+      });
+    },
   },
   computed: {
     ...mapState(['AppName', 'IsOpenLogin', 'ALERT_MSG']),

@@ -1,7 +1,7 @@
 <template>
 <div>
   <header id="header">
-    <img class="header-img" src="../../../assets/images/hbfx_bg2.jpg">
+    <img class="header-img" src="../../../../assets/static/images/hbfx_bg2.jpg">
   </header>
 
   <div id="container">
@@ -104,11 +104,7 @@ export default {
           this.isLoading = true;
           axios.post(API.CheckClientUser, qs.stringify({
             "PhoneNumber": this.phoneNumber
-          }), {
-            header: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }).then(res => {
+          })).then(res => {
             this.isLoading = false;
             if (res.data.Meta.ErrorCode == '0') {
               // 无论新老用户均弹出验证码
@@ -148,11 +144,7 @@ export default {
             axios.post(API.QuickLogin, qs.stringify({
               "LoginName": this.phoneNumber,
               "Captcha": this.captcha,
-            }), {
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }
-            }).then((res) => {
+            })).then((res) => {
               this.isLoading = false;
               if (res.data.Meta.ErrorCode === '0') {
                 this.isShowUserStatus = '1';
@@ -175,11 +167,7 @@ export default {
               "Password": '_fjw89odAAB_',
               "Captcha": this.captcha,
               "DeviceId": ""
-            }), {
-              header: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              }
-            }).then((res) => {
+            })).then((res) => {
               this.isLoading = false;
               this.isDrawCoupon = true;
               //如果成功发送验证码
@@ -240,11 +228,7 @@ export default {
           axios.post(API.SendCaptcha, qs.stringify({
             "Phone": this.phoneNumber,
             "Type": type
-          }), {
-            header: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            }
-          }).then(res => {
+          })).then(res => {
             this.isLoading = false;
             //如果成功发送验证码
             if (res.data.Meta.ErrorCode == '0') {
@@ -280,11 +264,7 @@ export default {
     getOldUserCouponList() {
       axios.post(API.OldUserReceiveRedCoups, qs.stringify({
         "PhoneNumber": this.phoneNumber
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           let that = this;
           res.data.Body.CouponList.map(val => {

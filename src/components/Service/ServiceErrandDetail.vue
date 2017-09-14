@@ -11,7 +11,7 @@
           <div class="step">
             <img class="icon-receive" src="../../assets/images/icon_receive.png">
           </div>
-          <div class="info">【收件地址】{{ orderDetail.RevicerAddress.Address1 + orderDetail.RevicerAddress.Address2 }}</div>
+          <div class="info">【收件地址】{{ orderDetail.RevicerAddress.Address1 }} {{ orderDetail.RevicerAddress.Address2 }}</div>
         </li>
         <li class="status-item flex-row" v-for="(item,index) in orderStatusList">
           <div class="datetime">
@@ -47,7 +47,7 @@
       <div class="info-split"></div>
       <div class="row flex-row">
         <div class="left">发件地址</div>
-        <div class="right txt-over-hidden">{{ orderDetail.SenderAddress.Address1 + orderDetail.SenderAddress.Address2 }}</div>
+        <div class="right txt-over-hidden">{{ orderDetail.SenderAddress.Address1 }} {{ orderDetail.SenderAddress.Address2 }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">发件人</div>
@@ -56,7 +56,7 @@
       <div class="info-split"></div>
       <div class="row flex-row">
         <div class="left">收件地址</div>
-        <div class="right txt-over-hidden">{{ orderDetail.RevicerAddress.Address1 + orderDetail.RevicerAddress.Address2 }}</div>
+        <div class="right txt-over-hidden">{{ orderDetail.RevicerAddress.Address1 }} {{ orderDetail.RevicerAddress.Address2 }}</div>
       </div>
       <div class="row flex-row">
         <div class="left">收件人</div>
@@ -174,11 +174,7 @@ export default {
       axios.post(API.GetKdTrackInfo, qs.stringify({
         LogisticCode: LogisticCode,
         ShipperCode: ShipperCode
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.orderStatusList = res.data.Body.Traces;
           this.orderStatusList = this.orderStatusList.concat(this.orderDetail.Traces);
@@ -199,11 +195,7 @@ export default {
         Token: this.Token,
         ServiceId: serviceId,
         IsPay: '1',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 红包分类
           let maxDisCoupon = null;
@@ -255,11 +247,7 @@ export default {
         WxPay: price,
         BalancePay: '0',
         CouponId: couponId || '',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         const that = this;
         if (res.data.Meta.ErrorCode === '0') {
@@ -318,11 +306,7 @@ export default {
         Alipay: price,
         BalancePay: '0',
         SignType: 'web'
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         const that = this;
         if (res.data.Meta.ErrorCode === '0') {
@@ -361,11 +345,7 @@ export default {
       axios.post(API.CancelOrderEx, qs.stringify({
         Token: this.Token,
         OrderId: this.orderId,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           this.alert('取消成功');
           this.orderStatusList.splice(0);

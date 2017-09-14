@@ -1,10 +1,6 @@
-const wap = "http://192.168.1.191:3001/";
+// const wap = "http://192.168.1.191:3001/";
 // const wap = "http://copen.homepaas.com/";
-// const wap = "https://copen.zhujiash.com/";
-
-// import vuex from '../store/index';
-
-// const wap = vuex.state.API;
+const wap = "https://copen.zhujiash.com/";
 
 export default {
   // 检查当前用户手机号
@@ -25,8 +21,14 @@ export default {
   // 快捷登录
   "QuickLogin": wap + "api/v3/Wap/QuickLogin",
 
+  // 获取活动列表
+  "GetAds": wap + "api/v3/Provider/GetAds",
+
   // 获取首页推荐品类
   "Recommend": wap + "api/v3/Front/Recommend",
+
+  // 获取首页推荐品类“更多”对应的服务
+  "QueryService": wap + "api/v3/Front/QueryService",
 
   // 获取超级优惠
   "GetSuperDiscount": wap + "api/v3/Front/GetSuperDiscount",
@@ -52,6 +54,9 @@ export default {
   // 获取订单列表
   "GetOrderListEx": wap + "api/v3/OrderInfo/GetOrderListEx",
 
+  // 获取订单列表页弹框
+  "GetOrderListPop": wap + "api/v3/Order/GetOrderListPop",
+
   // 获取订单详情
   "GetOrderInfoEx": wap + "api/v3/OrderInfo/GetOrderInfoEx",
 
@@ -67,21 +72,50 @@ export default {
   // 微信授权
   "GetAuthUrl": wap + "api/v3/wap/GetAuthUrl",
 
-  // 微信支付接口
+  // 余额支付
+  "BalancePay": wap + "api/v3/OrderInfo/BalancePay",
+
+  // 支付宝支付
+  "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
+
+  // 微信支付
   "GetWxpaySign": wap + "api/v3/OrderInfo/GetWxpaySign",
 
-  // 支付宝支付接口
-  "GetAlipaySign": wap + "api/v3/OrderInfo/GetAlipaySign",
-  // "GetAlipaySign": "http://i8qbnf.natappfree.cc/api/v3/OrderInfo/GetAlipaySign",
+  // 增项-余额支付
+  "IodOfBalancePay": wap + "api/v3/Order/IodOfBalancePay",
 
-  // 取消订单
+  // 增项-支付宝支付
+  "IodOfAlipay": wap + "api/v3/Order/IodOfAlipay",
+
+  // 增项-微信支付
+  "IodOfWxpay": wap + "api/v3/Order/IodOfWxpay",
+
+  // 取消订单（仅用于支付页倒计时结束后自动取消订单）
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",
+
+  // 取消订单（带取消理由）
+  "OrderCancel": wap + "api/v3/OrderInfo/OrderCancel",
+
+  // 获取订单取消原因
+  "GetOrderCancelReasonList": wap + "api/v3/Order/GetOrderCancelReasonList",
 
   // 删除订单
   "RemoveOrderEx": wap + "api/v3/OrderInfo/RemoveOrderEx",
 
   // 完成订单
   "CompleteOrderEx": wap + "api/v3/OrderInfo/CompleteOrderEx",
+
+  // 评价订单
+  "SubmitEvaluation": wap + "api/v3/Order/SubmitEvaluation",
+
+  // 获取投诉原因
+  "GetOrderComplaintsReasonList": wap + "api/v3/Order/GetOrderComplaintsReasonList",
+
+  // 提交投诉
+  "SubmitApplyComplaints": wap + "api/v3/Order/SubmitApplyComplaints",
+
+  // 获取评价标签
+  "GetStarLevel": wap + "api/v3/Order/GetStarLevel",
 
   // 获取地址
   "GetAddress": wap + "api/v3/ClientInfo/GetAddress",
@@ -108,17 +142,20 @@ export default {
   "GetCoupons": wap + "api/v3/User/GetCoupons",
 
   // 创建快递订单
-  "CreateKdEOrder": wap + "/api/v3/Front/CreateKdEOrder",
+  "CreateKdEOrder": wap + "api/v3/Front/CreateKdEOrder",
 
   // 获取跑腿/快递订单详情
   "GetExpressDetail": wap + "api/v3/Express/GetExpressDetail",
 
   // 获取快递进度信息
-  "GetKdTrackInfo": wap + "/api/v3/Front/GetKdTrackInfo",
+  "GetKdTrackInfo": wap + "api/v3/Front/GetKdTrackInfo",
 
   // 获取跑腿服务价格
-  "GetPaoTuiPrice": wap + "/api/v3/Express/GetPaoTuiPrice",
+  "GetPaoTuiPrice": wap + "api/v3/Express/GetPaoTuiPrice",
 
   // 创建跑腿订单
-  "CreatePaoTuiOrder": wap + "/api/v3/Express/CreateOrder",
+  "CreatePaoTuiOrder": wap + "api/v3/Express/CreateOrder",
+
+  // 超级星期五活动
+  "BlackFridayEx": wap + "api/v3/Activity/BlackFridayEx",
 };

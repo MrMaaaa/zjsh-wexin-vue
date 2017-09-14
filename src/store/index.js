@@ -16,29 +16,25 @@ export default new Vuex.Store({
     IsWxBrowser: '0',
 
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'user index service_detail new_user_coupon express errand user_about user_connect_us',
+    interceptorsExceptList: 'activity black_friday sf_activity user index service_detail new_user_coupon express errand user_about user_connect_us',
 
     Token: '',
     UserId: '',
     OpenId: '',// 微信用户标识
-    PhoneNumber: '',
 
-    // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0
+    // 环信客服发送客户数据
+    UserInfo: {
+    },
+
+    // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0，需要注意，由于该参数需要在verifyToken接口返回数据后才会修改，因此在某些页面中该参数将未必能及时修改状态，因此不要全部依赖该参数来进行登录状态的判断
     IsLogin: '0',
 
     // 是否弹出登录窗口
     IsOpenLogin: '0',
 
-    // 详情页url，避免后退导致详情页无法加载
-    DetailUrlForDetailPage: '',
-
-    // 获取默认地址，默认为上一次下单地址（未生效）
-    // 目前获取第一条地址即可，因此该参数暂时无效
+    // 下单页选择的地址
     DefaultAddressId: '',
 
-    ThreeServiceId: '', // 详情页跳转下单页对应服务三级id
-    ThreeServiceName: '', // 详情页跳转下单页对应服务三级name
-    OrderIdForPay: '', // 支付页面的订单id
     OrderInfo: { // 下单页提交订单信息
       FourServiceId: '', // 四级服务id
       Amount: '', // 服务数量
@@ -53,15 +49,17 @@ export default new Vuex.Store({
         Id: '', // 服务地址id
       },
       IsActivity: '0', // 是否是活动id
-      // 被选中的红包信息
-      CouponSelected: {
-        NoUse: '1',
-      },
     },
 
+    // 被选中红包信息
+    CouponSelected: {
+      NoUse: '1',
+    },
+
+    // 顺丰、跑腿选中的地址
     SelectedAddress: {
 
-    }, // 下单页、顺丰、跑腿选中的地址
+    },
 
     // 地址增加&修改时的地址信息
     AddressAddedInfo: {
@@ -82,6 +80,8 @@ export default new Vuex.Store({
       SEND_CAPTCHA: '验证码发送成功，请注意查收',
       PAY_SUCESS: '支付成功',
       PAY_ERROR: '支付失败',
+      AMOUNT_ERROR: '请输入正确的金额',
+      POSITION_ERROR: '定位失败，请开启定位或检查网络',
       ADDRESS_ERROR: {
         NAME_EMPTY: '请填写您的姓名',
         SEX_EMPTY: '请选择您的性别',
@@ -92,10 +92,39 @@ export default new Vuex.Store({
       USER_COUPON_NO_LOGIN: '登录后，才能看到红包情况',
     },
 
-    // 如何使用下面的两个过滤列表：ThreeServiceIdFilterList.indexOf(' ' + id + ' ')
-    // 注意：必须加上id前后的空格才能保证正确判断
-    ThreeServiceIdFilterList: ' 2 3 4 12 13 15 ', // 首页对应的三级服务id
-    FourServiceIdFilterList: ' 5 733 734 735 316 317 297 298 299 300 301 302 307 308 815 814 642 643 644 162 26 137 156 ', // 首页对应的四级服务id
+    // 路由-标题映射表
+    ROUTER_TO_TITLE: {
+      index: '搜上门服务，用',
+      activity: '活动列表',
+      order: '订单列表',
+      user: '我的信息',
+      black_friday: '‘折’就是爱',
+      sf_activity: '一字不写发快递',
+      service_detail: '服务详情',
+      recommend_more: '更多',
+      order_place: '我要下单',
+      order_detail: '订单详情',
+      order_complaint_reason: '投诉理由',
+      order_cancel_reason: '取消理由',
+      order_pay_status: '订单状态',
+      order_add_pay: '增加服务',
+      order_pay: '订单支付',
+      order_service_time: '选择服务时间',
+      order_coupon_select: '使用红包',
+      login: '登录',
+      express: '快递上门',
+      express_order_detail: '订单详情',
+      errand: '同城跑腿',
+      errand_order_detail: '订单详情',
+      new_user_coupon: '新手红包',
+      user_about: '关于我们',
+      user_connect_us: '联系我们',
+      user_coupon: '我的红包',
+      address_list: '服务地址',
+      address_add: '添加服务地址',
+      address_edit: '修改服务地址',
+      address_select: '选择你的位置',
+    },
 
     // 全局弹框配置
     AlertMsg: '', // 弹出信息
@@ -138,8 +167,8 @@ export default new Vuex.Store({
       Common.setCookie('ZJSH_WX_DefaultAddressId', data, 30, '/');
       return state.DefaultAddressId = data;
     },
-    SetPhoneNumber(state, data = '') {
-      return state.PhoneNumber = data;
+    SetUserInfo(state, data = '') {
+      return state.UserInfo = data;
     },
     SetIsLogin(state, data = '') {
       return state.IsLogin = data;
@@ -147,24 +176,12 @@ export default new Vuex.Store({
     SetIsOpenLogin(state, data = '') {
       return state.IsOpenLogin = data;
     },
-    SetDetailUrlForDetailPage(state, data = '') {
-      return state.DetailUrlForDetailPage = data;
-    },
-    SetThreeServiceId(state, data = '') {
-      Common.setCookie('ZJSH_WX_ThreeServiceId', data, 1, '/');
-      return state.ThreeServiceId = data;
-    },
-    SetThreeServiceName(state, data = '') {
-      Common.setCookie('ZJSH_WX_ThreeServiceName', encodeURIComponent(data), 1, '/');
-      return state.ThreeServiceName = data;
-    },
-    SetOrderIdForPay(state, data = '') {
-      Common.setCookie('ZJSH_WX_OrderIdForPay', data, 1, '/');
-      return state.OrderIdForPay = data;
-    },
     SetOrderInfo(state, data) {
       // Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');
       return state.OrderInfo = data;
+    },
+    SetCouponSelected(state, data) {
+      return state.CouponSelected = data;
     },
     SetSelectedAddress(state, data) {
       return state.SelectedAddress = data;
@@ -172,17 +189,22 @@ export default new Vuex.Store({
     SetAddressAddedInfo(state, data) {
       return state.AddressAddedInfo = data;
     },
-    SetCouponList(state, data) {
-      return state.CouponList = data;
+    SetROUTER_TO_TITLE(state, data) {
+      return state.ROUTER_TO_TITLE = data;
     },
   },
   actions: {
     SetAlert(context, data) {
       context.state.AlertMsg = data.alertMsg;
       context.state.AlertTimeout = Number(data.alertTimeout);
-      context.state.AlertStatus = '1';
+      context.state.AlertCallback = data.alertCallback;
+      if(context.state.AlertMsg != '') {
+        context.state.AlertStatus = '1';
+      }
       setTimeout(() => {
+        context.state.AlertMsg = '';
         context.state.AlertStatus = '0';
+        data.alertCallback && data.alertCallback();
       }, context.state.AlertTimeout);
     }
   }

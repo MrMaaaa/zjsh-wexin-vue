@@ -44,21 +44,23 @@ export default {
       window.location.replace('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=code&scope=snsapi_base#wechat_redirect');
     }
 
+    if(this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
+      this.wxConfig();
+      // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
+      if (this.OpenId == '') {
+        this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
+    }
+    }
+
     // 从缓存中获取数据
     this.$store.commit('SetToken', Common.getCookie('ZJSH_WX_Token'));
     this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));
-    // this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
-    this.$store.commit('SetOrderIdForPay', Common.getCookie('ZJSH_WX_OrderIdForPay'));
-    this.$store.commit('SetThreeServiceId', Common.getCookie('ZJSH_WX_ThreeServiceId'));
-    this.$store.commit('SetThreeServiceName', decodeURIComponent(Common.getCookie('ZJSH_WX_ThreeServiceName')));
-
-    // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
-    if(this.OpenId == '') {
-      this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
-    }
+    this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
 
     // 设置全局请求头
     axios.defaults.headers.common['zjsh_version'] = this.zjsh_version;
+    axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
+    axios.defaults.timeout = '30000'; // 设置15秒超时时间
 
     // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
@@ -71,8 +73,7 @@ export default {
 
     // 检测Token是否有效
     if (window.parent === window.self) {
-      this.vertifyToken();
-      this.wxConfig();
+      this.verifyToken();
     }
   },
   mounted() {
@@ -111,11 +112,19 @@ export default {
     },
     getAppName() {
       let name = this.valueFromUrl('utm_term');
+      var titles = this.$store.state.ROUTER_TO_TITLE;
       if(name) {
         this.$store.commit('SetAppName', decodeURIComponent(name));
+        titles['index'] += name;
+        document.title = titles['index'];
+        this.$store.commit('SetROUTER_TO_TITLE', titles);
+      } else {
+        titles['index'] += '助家生活';
+        document.title = titles['index'];
+        this.$store.commit('SetROUTER_TO_TITLE', titles);
       }
     },
-    vertifyToken() {
+    verifyToken() {
       axios.post(API.VerifyToken, qs.stringify({
         Token: this.Token,
       }), {
@@ -125,6 +134,7 @@ export default {
       }).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetIsLogin', '1');
+          this.saveUserInfo();
         } else {
           if((this.$route.name == 'index' || this.$route.name == 'service_detail' || this.$route.name == 'errand' || this.$route.name == 'express') && !document.getElementById('module_login').classList.contains('active')) {
             this.isShowNewUserCoupon = '1';
@@ -132,8 +142,39 @@ export default {
         }
       });
     },
+    saveUserInfo() {
+      axios.post(API.GetUserInfo, qs.stringify({
+        Token: this.Token
+      }), {
+        header: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          this.$store.commit('SetUserInfo', res.data.Body.Info);
+        }
+      });
+    },
     wxConfig() {
-
+      wx.config({
+        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+        appId: '', // 必填，公众号的唯一标识
+        timestamp: '', // 必填，生成签名的时间戳
+        nonceStr: '', // 必填，生成签名的随机串
+        signature: '', // 必填，签名，见附录1
+        jsApiList: [] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+      });
+      wx.onMenuShareTimeline({
+        title: '', // 分享标题
+        link: '', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+        imgUrl: '', // 分享图标
+        success: function() {
+          // 用户确认分享后执行的回调函数
+        },
+        cancel: function() {
+          // 用户取消分享后执行的回调函数
+        }
+      });
     },
     routerToNewUser() {
       this.isShowNewUserCoupon = '0';

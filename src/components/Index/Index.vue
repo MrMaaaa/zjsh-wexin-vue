@@ -29,11 +29,13 @@
     </div>
   </section>
 
-  <section class="category clearning" v-if="recommendList[0]">
-    <header class="category-title">{{ recommendList[0].Title }}</header>
+  <section class="category clearning" v-for="recommend in recommendList">
+    <header class="category-title">{{ recommend.Title }}</header>
+
+    <router-link class="category-more" :to="{ name: 'recommend_more', query: { id:recommend.ServiceId } }">更多</router-link>
 
     <ul class="category-list flex-row">
-      <li class="category-item" v-for="item in recommendList[0].Items" @click="routerTo(item)">
+      <li class="category-item" v-for="item in recommend.Items" @click="routerTo(item)">
         <img class="item-img" :src="item.LogoUrl[0]">
 
         <p class="item-name">{{ item.ServiceName }}</p>
@@ -43,36 +45,12 @@
     </ul>
   </section>
 
-  <section class="category appliance" v-if="recommendList[1]">
-    <header class="category-title">{{ recommendList[1].Title }}</header>
+  <section class="category convenience">
+    <header class="category-title">便民服务</header>
 
     <ul class="category-list flex-row">
-      <li class="category-item" v-for="item in recommendList[1].Items.slice(0,3)" @click="routerTo(item)">
-        <img class="item-img" :src="item.LogoUrl[0]">
-
-        <p class="item-name">{{ item.ServiceName }}</p>
-
-        <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
-      </li>
-    </ul>
-
-    <ul class="category-list flex-row">
-      <li class="category-item" v-for="item in recommendList[1].Items.slice(3,6)" @click="routerTo(item)">
-        <img class="item-img" :src="item.LogoUrl[0]">
-
-        <p class="item-name">{{ item.ServiceName }}</p>
-
-        <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
-      </li>
-    </ul>
-  </section>
-
-  <section class="category convenience" v-if="ConvenienceServiceList">
-    <header class="category-title">{{ ConvenienceServiceList.Title }}</header>
-
-    <ul class="category-list flex-row">
-      <li class="category-item" v-for="(item, index) in ConvenienceServiceList.Items" @click="routerToConvenience(index)">
-        <img class="item-img" :src="item.LogoUrl[0]">
+      <li class="category-item" v-for="item in convenienceList" @click="routerTo(item)">
+        <img class="item-img" :src="item.icon">
 
         <p class="item-name">{{ item.ServiceName }}</p>
 
@@ -96,69 +74,29 @@ export default {
   data() {
     return {
       recommendList: [], // 首页推荐服务
-      shortcuts: [{
-        ServiceName: '小时工',
-        ServiceId: '2',
-        icon: require('../../assets/images/shortcut_xiaoshigong.png'),
-      }, {
-        ServiceName: '新房开荒',
-        ServiceId: '3',
-        icon: require('../../assets/images/shortcut_xinfangkaihuang.png'),
-      }, {
-        ServiceName: '油烟机清洗',
-        ServiceId: '12',
-        icon: require('../../assets/images/shortcut_youyanjiqingxi.png'),
-      }, {
-        ServiceName: '空调清洗',
-        ServiceId: '13',
-        icon: require('../../assets/images/shortcut_kongtiaoqingxi.png'),
-      }, {
-        ServiceName: '沙发清洗',
-        ServiceId: '4',
-        icon: require('../../assets/images/shortcut_shafaqingxi.png'),
-      }, {
-        ServiceName: '洗衣机清洗',
-        ServiceId: '15',
-        icon: require('../../assets/images/shortcut_xiyijiqingxi.png'),
-      }, {
-        ServiceName: '微波炉清洗',
-        ServiceId: '16',
-        icon: require('../../assets/images/shortcut_chongfuliang.png'),
-      }, {
-        ServiceName: '冰箱清洗',
-        ServiceId: '14',
-        icon: require('../../assets/images/shortcut_bingxiangqingxi.png'),
-      }, {
-        ServiceName: '快递上门',
-        ServiceId: '21',
-        icon: require('../../assets/images/shortcut_kuaidi.png'),
-      }, {
-        ServiceName: '同城跑腿',
-        ServiceId: '59',
-        icon: require('../../assets/images/shortcut_paotui.png'),
-      }],
-      ConvenienceServiceList: {
-        Title: '便民服务',
-        Items: [{
-          ServiceName: '快递上门',
-          Price: '12',
-          Unit: '次起',
-          LogoUrl: [require('../../assets/images/convenience_service_express.png')]
-        }, {
-          ServiceName: '同城跑腿',
-          Price: '10',
-          Unit: '次起',
-          LogoUrl: [require('../../assets/images/convenience_service_errand.png')]
-        }]
-      },
+      shortcuts: [],
       superDiscountList: {
         Title: '',
         Items: [],
       },
+      convenienceList: [{
+        ServiceName: '快递上门',
+        ServiceId: '21',
+        icon: require('../../../assets/static/images/convenience_service_express.png'),
+        Price: '12',
+        Unit: '次',
+      }, {
+        ServiceName: '同城跑腿',
+        ServiceId: '21',
+        icon: require('../../../assets/static/images/convenience_service_errand.png'),
+        Price: '10',
+        Unit: '次',
+      }],
       swiperOption: {
         notNextTick: true,
         slidesPerView: 'auto',
         centeredSlides: true,
+        loop: true,
         autoplay: 3000,
         autoplayDisableOnInteraction: false,
         pagination: '.swiper-pagination',
@@ -169,11 +107,55 @@ export default {
     }
   },
   created() {
+    var type = '';
     if(this.AppName === '助家生活' || this.AppName === '同城家政') {
       this.appName = 'name-zjsh';
-    } else {
-      this.appName = 'name-kdsm';
+    } else if(this.AppName === '同城到家') {
+      this.appName = 'name-tcdj';
+      type = '2';
     }
+
+    this.shortcuts = [{
+        ServiceName: '小时工',
+        ServiceId: '2',
+        icon: require('../../assets/images/shortcut' + type + '_xiaoshigong.png'),
+      }, {
+        ServiceName: '新房开荒',
+        ServiceId: '3',
+        icon: require('../../assets/images/shortcut' + type + '_xinfangkaihuang.png'),
+      }, {
+        ServiceName: '油烟机清洗',
+        ServiceId: '12',
+        icon: require('../../assets/images/shortcut' + type + '_youyanjiqingxi.png'),
+      }, {
+        ServiceName: '空调清洗',
+        ServiceId: '13',
+        icon: require('../../assets/images/shortcut' + type + '_kongtiaoqingxi.png'),
+      }, {
+        ServiceName: '沙发清洗',
+        ServiceId: '4',
+        icon: require('../../assets/images/shortcut' + type + '_shafaqingxi.png'),
+      }, {
+        ServiceName: '洗衣机清洗',
+        ServiceId: '15',
+        icon: require('../../assets/images/shortcut' + type + '_xiyijiqingxi.png'),
+      }, {
+        ServiceName: '微波炉清洗',
+        ServiceId: '16',
+        icon: require('../../assets/images/shortcut' + type + '_chongfuliang.png'),
+      }, {
+        ServiceName: '冰箱清洗',
+        ServiceId: '14',
+        icon: require('../../assets/images/shortcut' + type + '_bingxiangqingxi.png'),
+      }, {
+        ServiceName: '快递上门',
+        ServiceId: '21',
+        icon: require('../../assets/images/shortcut' + type + '_kuaidi.png'),
+      }, {
+        ServiceName: '同城跑腿',
+        ServiceId: '59',
+        icon: require('../../assets/images/shortcut' + type + '_paotui.png'),
+      }]
   },
   mounted() {
     this.getRecommendList();
@@ -183,56 +165,38 @@ export default {
   },
   methods: {
     getRecommendList() {
-      axios.post(API.Recommend, qs.stringify({}), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      axios.post(API.Recommend, qs.stringify({})).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
-          this.recommendList = res.data.Body.RecommendBlock.slice(0, 2);
-          this.recommendList[1].Items.push({
-            ServiceId: '14',
-            ServiceName: '冰箱清洗',
-            Price: '130',
-            Unit: '台',
-            LogoUrl: [require('../../assets/images/index_bingxiangqingxi.jpg')]
-          });
-          this.recommendList[1].Items.push({
-            ServiceId: '17',
-            ServiceName: '饮水机清洗',
-            Price: '90',
-            Unit: '台',
-            LogoUrl: [require('../../assets/images/index_yinshuijiqingxi.jpg')]
-          });
-          this.recommendList[1].Items.push({
-            ServiceId: '16',
-            ServiceName: '微波炉清洗',
-            Price: '70',
-            Unit: '台',
-            LogoUrl: [require('../../assets/images/index_weiboluqingxi.jpg')]
-          });
+          this.recommendList = res.data.Body.RecommendBlock;
+          // this.recommendList.forEach(value => {
+          //   value.Items.forEach(val => {
+          //     var url = val.LogoUrl[0];
+          //     val.LogoUrl[0] = require('../../assets/images/order_pay_icon.png');
+          //     var img = new Image();
+          //     img.src = url;
+          //     img.onload = () => {
+          //       val.LogoUrl[0] = url;
+          //     }
+          //   });
+          // });
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getSuperDiscountList() {
       axios.post(API.GetSuperDiscount, qs.stringify({
         Token: this.Token,
         IsNewVersion: '1',
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.superDiscountList.Items.splice(0);
           let list = res.data.Body;
           list.Items.forEach((value, index) => {
-            value.IconUrl = require('../../assets/images/super_discount_' + index + '.png');
+            value.IconUrl = require('../../../assets/static/images/super_discount_' + index + '.png');
           });
           // this.superDiscountList.Title = list.Title;
-          this.superDiscountList.Title = '最优惠';
+          this.superDiscountList.Title = this.appName == 'name-zjsh' ? '最优惠' : '为你推荐';
           list.Items.map((value, index) => {
             if(value.ServiceName == '小时工') {
               value.ServiceName += '3小时';
@@ -243,58 +207,51 @@ export default {
           });
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     routerTo(item) {
       if(item.ServiceId == '21') {
-        this.routerToConvenience(0);
+        this.$router.push({
+          name: 'express'
+        });
       } else if(item.ServiceId == '59') {
-        this.routerToConvenience(1);
+        this.$router.push({
+          name: 'errand'
+        });
       } else {
-        this.$store.commit('SetThreeServiceId', item.ServiceId);
-        this.$store.commit('SetThreeServiceName', item.ServiceName);
-
-        // iframe
-        // this.$router.push({
-        //   name: 'service_detail',
-        //   query: {
-        //     service_id: item.ServiceId
-        //   },
-        //   params: {
-        //     detail_url: item.DetailUrl
-        //   }
-        // })
-
         // 自定义模块
         this.$router.push({
           name: 'service_detail',
-          params: {
+          query: {
             id: item.ServiceId
+          },
+          params: {
+            url: item.DetailUrl,
+            img: item.LogoUrl ? item.LogoUrl[0] : '',
           }
         });
       }
     },
-    routerToConvenience(index) {
-      if(index == '0') {
+    gotoOrderPlace(item) {
+      // 目前只有小时工（还有从活动页中跳转到下单的服务）isActivity才是1，其他服务isActivity均为0
+      if (item.ServiceId == '1') {
         this.$router.push({
-          name: 'express'
+          name: 'order_place',
+          query: {
+            id: item.ServiceId,
+            isActivity: '1'
+          }
         });
-      } else if(index == '1') {
+      } else {
         this.$router.push({
-          name: 'errand'
+          name: 'order_place',
+          query: {
+            id: item.ServiceId,
+            isActivity: '0'
+          }
         });
       }
-    },
-    gotoOrderPlace(item) {
-      this.$store.commit('SetThreeServiceId', item.ServiceId);
-      this.$store.commit('SetThreeServiceName', item.ServiceName);
-      this.$router.push({
-        name: 'order_place',
-        params: {
-          isSuperDis: (item.OrderType === '1' ? true : false)
-        }
-      });
     }
   },
   computed: {
@@ -328,6 +285,7 @@ export default {
 {
   padding-bottom: 1.6rem;
 }
+// 助家生活 同城家政样式
 .menu-router-view.index-wrapper.name-zjsh
 {
   @for $item from 0 to 10 {
@@ -339,15 +297,11 @@ export default {
   }
   .category
   {
+    width: 100%;
     &.clearning
     {
       -webkit-order: 2;
       order: 2;
-    }
-    &.appliance
-    {
-      -webkit-order: 3;
-      order: 3;
     }
     &.convenience
     {
@@ -356,6 +310,101 @@ export default {
     }
   }
 }
+
+// 同城到家样式
+.menu-router-view.index-wrapper.name-tcdj
+{
+  .swiper-pagination
+  {
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    border-radius: 7px;
+    background-color: rgba(0,0,0,.2);
+  }
+  // @for $item from 0 to 10 {
+  //   .list-item#{$item}
+  //   {
+  //     -webkit-order: $item;
+  //     order: $item;
+  //   }
+  // }
+  .shortcut
+  {
+    -webkit-order: 1;
+    order: 1;
+    margin-top: 0.266667rem;
+    .shortcut-list
+    {
+      .list-item
+      {
+        -webkit-order: 2;
+        order: 2;
+        &.list-item8
+        {
+          order: 0;
+        }
+        &.list-item9
+        {
+          order: 1;
+        }
+        .item-img
+        {
+          background: transparent;
+        }
+      }
+    }
+  }
+  .super-discount
+  {
+    -webkit-order: 0;
+    order: 0;
+    margin-top: 0;
+  }
+  .category
+  {
+    width: 100%;
+    &.clearning
+    {
+      -webkit-order: 4;
+      order: 4;
+      padding-bottom: 1.173333rem;
+      .category-list
+      {
+        .category-item
+        {
+          .item-unit-price
+          {
+            color: #f56165;
+            font-size: 15px;
+          }
+        }
+      }
+      .category-more
+      {
+        right: 0;
+        top: 100%;
+        width: 100%;
+        transform: translateY(-1.173333rem);
+        height: 1.173333rem;
+        line-height: 1.173333rem;
+        color: #999;
+        &::before
+        {
+          content: '查看'
+        }
+      }
+    }
+    &.convenience
+    {
+      -webkit-order: 2;
+      order: 2;
+    }
+  }
+}
+
+// 快递上门样式
 .menu-router-view.index-wrapper.name-kdsm
 {
   @for $item from 0 to 10 {
@@ -388,6 +437,7 @@ export default {
 {
   -webkit-order: 0;
   order: 0;
+  width: 100%;
   background-color: #fff;
   .shortcut-list
   {
@@ -579,6 +629,7 @@ export default {
 }
 .category
 {
+  position: relative;
   margin-top: 0.266667rem;
   background-color: #fff;
   text-align: center;
@@ -613,6 +664,14 @@ export default {
       height: 1px;
       background-color: #eef2f5;
     }
+  }
+  .category-more
+  {
+    position: absolute;
+    top: 0.266667rem;
+    right: 0.266667rem;
+    color: #000;
+    font-size: 14px;
   }
   .category-list
   {

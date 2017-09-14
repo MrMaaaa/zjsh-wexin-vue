@@ -1,5 +1,5 @@
 <template>
-  <div class="warn-info-wrapper" v-show="isShow" @click="isShow = false">
+  <div class="warn-info-wrapper" v-show="isShow && warnMsg != ''" @click="isShow = false">
     <div class="warn-info">
       <span class="txt">{{ warnMsg }}</span>
     </div>

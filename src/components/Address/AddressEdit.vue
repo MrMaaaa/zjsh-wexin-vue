@@ -138,18 +138,14 @@ export default {
   },
   methods: {
     getAddressTags() {
-      axios.post(API.GetAddressTags, qs.stringify({}), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      axios.post(API.GetAddressTags, qs.stringify({})).then(res => {
         if (res.data.Meta.ErrorCode == '0') {
           this.addressTagList = res.data.Body;
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     saveAddress() {
@@ -168,11 +164,7 @@ export default {
         axios.post(API.EditAddress, qs.stringify({
           Token: this.Token,
           Address: this.AddressAddedInfo
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode === '0') {
             this.$store.commit('SetAddressAddedInfo', {
@@ -186,16 +178,17 @@ export default {
               Address2: '',
               Tag: ''
             });
-            this.$router.replace({
-              name: 'address_list'
-            });
+            // this.$router.replace({
+            //   name: 'address_list'
+            // });
+            this.$router.go(-1);
           } else {
             this.isLoading = false;
             this.alert(res.data.Meta.ErrorMsg);
           }
         }).catch(err => {
           this.isLoading = false;
-          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
       }
     },
@@ -204,22 +197,16 @@ export default {
       axios.post(API.DeleteAddress, qs.stringify({
         Token: this.Token,
         AddressId: this.AddressAddedInfo.Id
-      }), {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          this.$router.replace({
-            name: 'address_list'
-          });
+          this.$router.go(-1);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     }
   },
@@ -368,7 +355,7 @@ $splitLineColor: #e4eaee;
   width: 100%;
   height: 100%;
   transform: translateZ(0);
-  z-index: 1000;
+  z-index: 30;
   .wrapper
   {
     width: 100%;

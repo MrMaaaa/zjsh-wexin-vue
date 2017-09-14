@@ -1,5 +1,5 @@
 <template>
-  <div class="dialog-wrapper" v-show="DialogConfig.IsDialog === '1'">
+  <div class="dialog-wrapper" v-show="DialogConfig.IsDialog == '1'">
     <div class="dialog">
       <div class="title">{{ DialogConfig.DialogTitle }}</div>
 
@@ -29,6 +29,7 @@ export default {
     DialogTitle: 'string', // 对话框标题
     DialogContent: 'string', // 对话框内容
     DialogBtns: ['string'], // 对话框按钮文本
+    DialogBtnsHref: ['string'], // 按钮的href属性
   }
   */
   props: ['DialogConfig'],
@@ -55,6 +56,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 100;
 
   width: 100%;
   height: 100%;

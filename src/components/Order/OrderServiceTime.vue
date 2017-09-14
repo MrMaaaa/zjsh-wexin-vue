@@ -59,11 +59,7 @@ export default {
     getServiceTime() {
       axios.post(API.ServiceTimeStartAt, qs.stringify({
         ServiceId: this.OrderInfo.FourServiceId
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode == '0') {
           this.dateList = res.data.Body.AvailableDate;
@@ -77,6 +73,7 @@ export default {
                 this.timeList.map((val, ind) => {
                   if(val.Time === this.OrderInfo.DateTime.split(' ')[1]) {
                     this.timeIndex = ind;
+                    this.selTime = val.Time;
                   }
                 });
               }
@@ -90,7 +87,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     dateSelect(event, item, index) {
@@ -125,14 +122,21 @@ export default {
 <style scoped lang="scss">
 .router-view
 {
+  position: relative;
+  padding-top: 1.6rem;
+  padding-bottom: 2rem;
   background-color: #fff;
 }
 .date
 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   .date-list
   {
-    -webkit-justify-content: flex-start;
-    justify-content: flex-start;
+    -webkit-justify-content: initial;
+    justify-content: initial;
     overflow-x: scroll;
     overflow-y: hidden;
     padding-bottom: 0.226667rem;
@@ -181,8 +185,8 @@ export default {
   {
     flex-wrap: wrap;
     -webkit-flex-wrap: wrap;
-    justify-content: flex-start;
-    -webkit-justify-content: flex-start;
+    justify-content: initial;
+    -webkit-justify-content: initial;
     padding: 0 0.266667rem;
     .list-item
     {
@@ -224,6 +228,7 @@ export default {
   width: 100%;
   height: 1.933333rem;
   border-top: 1px solid #eef2f5;
+  background-color: #fff;
   .btn-submit
   {
     display: block;

@@ -3,7 +3,7 @@
   <div class="coupon-no-use flex-row" @click="couponNoUse">
     <span>不使用红包</span>
 
-    <img v-if="OrderInfo.CouponSelected.NoUse === '1'" src="../../assets/images/pay_complete.png">
+    <img v-if="CouponSelected.NoUse === '1'" src="../../assets/images/pay_complete.png">
     <img v-else src="../../assets/images/orders_choose.png">
   </div>
 
@@ -32,63 +32,51 @@ export default {
       tabIndex: '0',
       couponListNoUsed: [],
       totalPrice: 0,
+      serviceId: '',
     }
   },
   activated() {
     this.couponListNoUsed.splice(0);
-    this.getCouponList();
     this.totalPrice = this.$route.params.totalPrice;
+    this.serviceId = this.$route.params.serviceId;
+    this.getCouponList();
   },
   methods: {
-    alert(msg, timeout = 1000) {
-      this.isWarn = true;
-      this.warnMsg = msg;
-      this.timeout = timeout;
-      setTimeout(() => {
-        this.isWarn = false;
-      }, timeout);
-    },
     getCouponList() {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token,
-        ServiceId: this.OrderInfo.FourServiceId,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+        ServiceId: this.serviceId,
+        IsPay: '1',
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           let d = new Date().getTime();
           res.data.Body.CouponList.map(value => {
             // 红包分类
-            if (value.CouponDetails[0].Amount <= this.totalPrice) {
+            if (Number(value.CouponDetails[0].Amount) <= Number(this.totalPrice)) {
               this.couponListNoUsed.push(value);
             }
           });
-          this.$store.commit('SetCouponList', this.CouponList);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     couponNoUse() {
-      this.OrderInfo.CouponSelected = {
+      this.$store.commit('SetCouponSelected', {
         NoUse: '1',
-      };
-      this.$store.commit('SetOrderInfo', this.OrderInfo);
+      });
       this.$router.go(-1);
     },
     couponSelect(item) {
       item.NoUse = '0';
-      this.OrderInfo.CouponSelected = item;
-      this.$store.commit('SetOrderInfo', this.OrderInfo);
+      this.$store.commit('SetCouponSelected', item);
       this.$router.go(-1);
     },
   },
   computed: {
-    ...mapState(['Token', 'ALERT_MSG', 'OrderInfo', 'ThreeServiceId']),
+    ...mapState(['Token', 'CouponSelected', 'ALERT_MSG']),
   },
   components: {
     CouponItem,

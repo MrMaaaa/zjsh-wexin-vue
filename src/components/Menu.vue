@@ -1,23 +1,27 @@
 <template>
-  <div>
-    <keep-alive>
-      <router-view class="menu-router-view"></router-view>
-    </keep-alive>
-    <footer class="menu flex-row">
-      <router-link :to="{ name: 'index' }" class="menu-item menu-item1" active-class="active">
-        <i class="menu-icon"></i>
-        <span class="menu-name">首页</span>
-      </router-link>
-      <router-link :to="{ name: 'order' }" class="menu-item menu-item2" active-class="active">
-        <i class="menu-icon"></i>
-        <span class="menu-name">订单</span>
-      </router-link>
-      <router-link :to="{ name: 'user' }" class="menu-item menu-item3" active-class="active">
-        <i class="menu-icon"></i>
-        <span class="menu-name">我的</span>
-      </router-link>
-    </footer>
-  </div>
+<div>
+  <keep-alive>
+    <router-view class="menu-router-view"></router-view>
+  </keep-alive>
+  <footer class="menu flex-row">
+    <router-link :to="{ name: 'index' }" class="menu-item menu-item1" active-class="active">
+      <i class="menu-icon"></i>
+      <span class="menu-name">首页</span>
+    </router-link>
+    <router-link :to="{ name: 'activity' }" class="menu-item menu-item2" active-class="active">
+      <i class="menu-icon"></i>
+      <span class="menu-name">活动</span>
+    </router-link>
+    <router-link :to="{ name: 'order' }" class="menu-item menu-item3" active-class="active">
+      <i class="menu-icon"></i>
+      <span class="menu-name">订单</span>
+    </router-link>
+    <router-link :to="{ name: 'user' }" class="menu-item menu-item4" active-class="active">
+      <i class="menu-icon"></i>
+      <span class="menu-name">我的</span>
+    </router-link>
+  </footer>
+</div>
 </template>
 
 <script>
@@ -26,7 +30,7 @@ export default {
   data() {
     return {
     }
-  }
+  },
 }
 </script>
 
@@ -36,23 +40,6 @@ export default {
   box-sizing: border-box;
   position: relative;
   padding-bottom: 1.333333rem;
-}
-.flex-row
-{
-  display: box;              /* OLD - Android 4.4- */
-  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
-  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
-  display: -ms-flexbox;      /* TWEENER - IE 10 */
-  display: -webkit-flex;     /* NEW - Chrome */
-  display: flex;             /* NEW, Spec - Opera 12.1, Firefox 20+ */
-  -webkit-flex-wrap: nowrap;
-  flex-wrap: nowrap;
-  -webkit-flex-direction: row;
-  flex-direction: row;
-  -webkit-justify-content: space-between;
-  justify-content: space-between;
-  -webkit-align-items: center;
-  align-items: center;
 }
 .menu
 {
@@ -111,17 +98,25 @@ export default {
     }
     &.menu-item2 .menu-icon
     {
-      background-image: url(../assets/images/order.png);
+      background-image: url(../assets/images/activity.png);
     }
     &.menu-item2.active .menu-icon
     {
-      background-image: url(../assets/images/order-active.png);
+      background-image: url(../assets/images/activity-active.png);
     }
     &.menu-item3 .menu-icon
     {
-      background-image: url(../assets/images/user.png);
+      background-image: url(../assets/images/order.png);
     }
     &.menu-item3.active .menu-icon
+    {
+      background-image: url(../assets/images/order-active.png);
+    }
+    &.menu-item4 .menu-icon
+    {
+      background-image: url(../assets/images/user.png);
+    }
+    &.menu-item4.active .menu-icon
     {
       background-image: url(../assets/images/user-active.png);
     }

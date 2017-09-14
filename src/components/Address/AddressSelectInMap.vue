@@ -96,10 +96,12 @@ export default {
           if(callback) {
             callback();
           }
+        } else {
+          that.alert(that.ALERT_MSG.POSITION_ERROR);
         }
       }, {
         enableHighAccuracy: true
-      })
+      });
     },
     // 获取当前坐标附近位置信息
     getSurroundingLocation(point) {

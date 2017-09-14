@@ -244,7 +244,7 @@ export default {
       },
       nameFlag: '-1', //选中的物品名称的index（非自定义）
       customName: '', //自定义物品名称
-      addrFlag: '1', //地址类型： 0 无；1 寄件地址；2 收件地址
+      addrFlag: '0', //地址类型： 0 无；1 寄件地址；2 收件地址
       estimatedPrice: '0',
       isLoading: false,
     }
@@ -263,7 +263,9 @@ export default {
     }
   },
   activated() {
-    this.updateAddress();
+    if(this.addrFlag != '0') {
+      this.updateAddress();
+    }
   },
   methods: {
     onDateTimeChange(picker, values) {
@@ -309,7 +311,7 @@ export default {
     },
     selectPayWay() {
       this.showData.way = this.payWayPicker_now;
-      this.selData.way = this.payWayPicker_now == '寄件人付' ? '0' : '1';
+      this.selData.way = this.payWayPicker_now == '寄件人付' ? '1' : '2';
       this.isPayWayPicker = false;
     },
     openPicker(type) {
@@ -481,11 +483,7 @@ export default {
           OrderFrom: '210',
           ServiceTime: this.selData.date,
           GoodsWeight: this.selData.weight
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
             this.alert('订单已提交，快递员将在2小时内上门取件', 1000);

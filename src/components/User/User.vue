@@ -1,10 +1,10 @@
 <template>
 <div class="wrapper">
-  <div class="user-group">
+  <section class="user-group">
     <div class="user-section user-info flex-row" v-if="this.userInfo.phoneNumber">
       <img class="user-avatar" :src="userInfo.avatar">
 
-      <div class="section-info user-info flex-row">
+      <div class="section-info user-info">
         <span class="user-name">{{ userInfo.nickName }}</span>
         <span class="user-phone">{{ userInfo.phoneNumber }}</span>
       </div>
@@ -17,9 +17,9 @@
         <span class="user-name">快速登录</span>
       </div>
     </a>
-  </div>
+  </section>
 
-  <div class="user-group">
+  <section class="user-group">
     <div class="user-section flex-row">
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_balance.png">
@@ -45,35 +45,46 @@
         <img class="section-icon-link" src="../../assets/images/link.png">
       </div>
     </router-link>
-  </div>
+  </section>
 
-  <div class="user-group">
+  <section class="user-group">
     <router-link class="user-section flex-row" :to="{ name: 'user_about' }">
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_inRegardTo.png">
 
-        <span class="section-name">关于{{ AppName }}</span>
+        <span class="section-name">一分钟了解{{ AppName }}</span>
       </div>
 
       <img class="section-icon-link" src="../../assets/images/link.png">
     </router-link>
+  </section>
 
-    <div class="section-split"></div>
-
-    <router-link class="user-section flex-row" :to="{ name: 'user_connect_us' }">
+  <section class="user-group">
+    <a class="user-section flex-row" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'>
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_relation.png">
 
-        <span class="section-name">联系我们</span>
+        <span class="section-name">助家小秘书</span>
       </div>
 
-      <img class="section-icon-link" src="../../assets/images/link.png">
-    </router-link>
-  </div>
+      <div class="flex-row">
+        <span class="section-tips">客户服务和意见反馈</span>
 
-  <div class="user-group" v-if="this.userInfo.phoneNumber">
-    <a class="user-section logout" @click="logout">退出登录</a>
-  </div>
+        <img class="section-icon-link" src="../../assets/images/link.png">
+      </div>
+    </a>
+  </section>
+
+  <section class="user-group logout" v-if="this.userInfo.phoneNumber">
+    <a class="user-section logout" @click="DialogConfig.IsDialog = '1'">退出登录</a>
+  </section>
+
+  <section class="customer-service">
+    <p class="row">服务热线：<a class="tel" href="tel:400822262056">4008-262-056</a></p>
+    <p class="row">工作时间：8:00 - 21:00</p>
+  </section>
+
+  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="DialogConfig.IsDialog = '0'" @dialog-confirm="logout"></m-dialog>
 </div>
 </template>
 
@@ -96,9 +107,31 @@ export default {
         balance: '0',
         couponCount: 0,
       },
+      DialogConfig: { //对话框配置信息
+        IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
+        DialogTitle: '注销确认', // 对话框标题
+        DialogContent: '确定注销账号吗？', // 对话框内容
+        DialogBtns: ['取消', '确定'], // 对话框按钮文本
+      },
     }
   },
   mounted() {
+    window.easemobim = window.easemobim || {};
+    easemobim.config = {
+      configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
+      hideKeyboard: true,
+      visitor: {
+        trueName: '',
+        qq: '',
+        phone: this.$store.state.UserInfo.PhoneNumber,
+        companyName: '',
+        userNickname: this.$store.state.UserInfo.NickName,
+        description: '',
+        email: ''
+      },
+      onready: function() {
+      },
+    };
     // 获取
     this.getUserInfo();
 
@@ -115,11 +148,7 @@ export default {
     getUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
         Token: this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           this.userInfo.nickName = res.data.Body.Info.NickName;
           this.userInfo.phoneNumber = res.data.Body.Info.PhoneNumber;
@@ -138,11 +167,7 @@ export default {
     getWxUserInfo() {
       axios.post(API.GetWxUserInfo, qs.stringify({
         OpenId: this.OpenId,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.userInfo.nickName = res.data.Body.NickName;
           this.userInfo.avatar = res.data.Body.HeadImgUrl;
@@ -156,11 +181,7 @@ export default {
     getUserSettlement() {
       axios.post(API.MySettlement, qs.stringify({
         Token: this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           this.userInfo.balance = res.data.Body.SettlementBalance;
         } else {
@@ -173,15 +194,14 @@ export default {
     getCouponAmount() {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           let date = new Date();
           res.data.Body.CouponList.map(value => {
-            if((value.ServiceItem == null || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
+            // if((value.ServiceItem == null || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
+            //   this.userInfo.couponCount++;
+            // }
+            if(date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
               this.userInfo.couponCount++;
             }
           });
@@ -193,11 +213,10 @@ export default {
       });
     },
     logout() {
+      this.DialogConfig.IsDialog = '0';
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
       this.$store.commit('SetIsLogin', '0');
-      this.$store.commit('SetThreeServiceId', '');
-      this.$store.commit('SetThreeServiceName', '');
       this.$store.commit('SetUserId', '0');
       this.userInfo = {
         nickName: this.userInfo.nickName,
@@ -226,6 +245,7 @@ export default {
 <style scoped lang="scss">
 .wrapper
 {
+  height: 100%;
   overflow: auto;
   .user-group
   {
@@ -239,8 +259,8 @@ export default {
       font-size: 17px;
       &.user-info
       {
-        justify-content: flex-start;
-        -webkit-justify-content: flex-start;
+        -webkit-justify-content: initial;
+        justify-content: initial;
         padding-top: 0.426667rem;
         padding-bottom: 0.426667rem;
         .user-avatar
@@ -251,24 +271,21 @@ export default {
         }
         .section-info.user-info
         {
-          flex-direction: column;
-          -webkit-flex-direction: column;
-          justify-content: center;
-          -webkit-justify-content: center;
           box-sizing: border-box;
-          align-items: flex-start;
-          -webkit-align-items: flex-start;
           height: 1.6rem;
           padding: 0.213333rem 0;
           margin-left: 0.32rem;
           .user-name
           {
             display: block;
+            line-height: 100%;
             color: #333639;
           }
           .user-phone
           {
             display: block;
+            line-height: 100%;
+            margin-top: 0.2rem;
             color: #333639;
             font-size: 14px;
           }
@@ -288,9 +305,14 @@ export default {
         height: 0.72rem;
         margin-right: 0.32rem;
       }
+      .section-tips
+      {
+        color: #ccc;
+        font-size: 15px;
+      }
       .section-icon-link
       {
-        display: block;
+        display: inline-block;
         width: 0.213333rem;
         margin-left: 0.266667rem;
       }
@@ -322,6 +344,24 @@ export default {
       margin-left: 0.4rem;
       height: 1px;
       background-color: #e5e5e5;
+    }
+  }
+  .customer-service
+  {
+    position: absolute;
+    bottom: 2.3rem;
+    left: 0;
+    width: 100%;
+    margin-top: 2.666667rem;
+    color: #333639;
+    .row
+    {
+      padding: 0.133333rem 0;
+      text-align: center;
+      .tel
+      {
+        color: #27b8f3;
+      }
     }
   }
 }

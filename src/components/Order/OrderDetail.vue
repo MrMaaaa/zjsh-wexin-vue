@@ -1,15 +1,17 @@
 <template>
 <div>
   <header class="order-header flex-row">
-    <a class="header-title" @click="switchTab(0)">订单状态</a>
-    <a class="header-title" @click="switchTab(1)">订单信息</a>
-    <i class="header-index" :class="{ right: tabIndex == '1' }" ref="tabIndex"></i>
+    <a class="header-title" :class="{ active: tabIndex == '0' }" @click="switchTab(0)">订单状态</a>
+    <a class="header-title" :class="{ active: tabIndex == '1' }" @click="switchTab(1)">订单信息</a>
+    <i class="header-index trans" :class="{ toggle: tabIndex == '1' }" ref="tabIndex"></i>
+
+    <img class="header-more" @click="isMoreOperate='1'" src="../../assets/images/more.png">
   </header>
 
   <div class="order-content" ref="sliderContainer">
-    <div class="float-container"ref="sliderWrapper" :class="{ right: tabIndex == '1' }">
-      <div class="order-status" v-if="orderStatus && orderStatus.DateStatus.length > 0">
-        <section class="status-group" v-for="item in orderStatus.DateStatus">
+    <div class="order-status trans" :class="{ toggle: tabIndex == '1' }" ref="orderStatus">
+      <div v-if="orderStatus && orderStatus.DateStatus.length > 0">
+        <section class="status-group"  v-for="item in orderStatus.DateStatus">
           <header class="group-title flex-row">
             <div class="title-time">{{ item.Date }}</div>
             <img class="icon-order-step-down title-icon" src="../../assets/images/order-detail-down.png">
@@ -24,8 +26,8 @@
             </div>
           </section>
 
-          <section class="next-step flex-row" v-if="orderStatus.NextStatus">
-            <div class="step-time">{{ orderStatus.NextStatus.CountDown }}</div>
+          <section class="next-step flex-row" v-if="orderStatus.NextStatus.Status">
+            <div class="step-time" :class="{ hide: !orderStatus.NextStatus.CountDown || orderStatus.NextStatus.CountDown <= 0 }">{{ orderStatus.NextStatus.CountDown | formatCountDown }}</div>
             <i class="step-icon flex-row"><i class="step-inner-icon"></i></i>
             <div class="step-desc">
               <div class="desc-status">{{ orderStatus.NextStatus.Status }}</div>
@@ -35,61 +37,77 @@
           <i class="group-line"></i>
         </section>
       </div>
+    </div>
 
-      <div class="order-info" v-if="orderDetail">
+    <div class="order-info trans" :class="{ toggle: tabIndex == '1' }" ref="orderInfo">
+      <div v-if="orderDetail">
         <div class="info-row flex-row">
           <div class="row-left">服务类型</div>
-          <div class="row-right">{{ orderDetail.Service.ServiceName }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.ServiceName }}</div>
         </div>
         <div class="info-row flex-row">
           <div class="row-left">服务时间</div>
-          <div class="row-right">{{ orderDetail.Service.ServiceStartTime | formatDate }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.ServiceStartTime | formatDate }}</div>
         </div>
-        <div class="info-row flex-row">
+        <div class="info-row flex-row" v-if="orderDetail.DepositInfo">
+          <div class="row-left">订金</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.DepositInfo.DepositAmount | formatAmount }}</div>
+        </div>
+        <div class="info-row flex-row" v-if="orderDetail.Price">
           <div class="row-left">服务价格</div>
-          <div class="row-right">{{ orderDetail.Price | formatAmount }} × {{ orderDetail.Total }}{{ orderDetail.UnitName }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Price | formatAmount }} × {{ orderDetail.Total }}{{ orderDetail.UnitName }}</div>
         </div>
         <div class="info-row flex-row" v-if="orderDetail.ClaimsInfo">
           <div class="row-left">一元保险</div>
-          <div class="row-right">{{ orderDetail.ClaimsInfo.ClaimsAmount | formatAmount }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.ClaimsInfo.ClaimsAmount | formatAmount }}</div>
         </div>
-        <div class="info-row flex-row">
+        <div class="info-row flex-row" v-if="orderDetail.TotalPrice">
           <div class="row-left">订单总价</div>
-          <div class="row-right">{{ orderDetail.TotalPrice | formatAmount }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.TotalPrice | formatAmount }}</div>
         </div>
         <div class="info-row flex-row" v-if="orderDetail.DiscountAmount && orderDetail.DiscountAmount > 0">
           <div class="row-left">{{ orderDetail.DiscountInfo }}</div>
-          <div class="row-right">-{{ orderDetail.DiscountAmount | formatAmount }}</div>
+          <div class="row-right txt-over-hide">-{{ orderDetail.DiscountAmount | formatAmount }}</div>
         </div>
         <div class="info-row flex-row" v-for="dis in orderDetail.ActivityNgs.ServiceTypeRules" v-if="orderDetail.ActivityNgs && orderDetail.ActivityNgs.ServiceTypeRules.length > 0">
           <div class="row-left">{{ dis.Details[0].Title }}</div>
-          <div class="row-right">-{{ dis.Details[0].Rules[0].Minus | formatAmount }}</div>
+          <div class="row-right txt-over-hide">-{{ dis.Details[0].Rules[0].Minus | formatAmount }}</div>
         </div>
         <div class="info-row flex-row" v-if="orderDetail.IsPayOff === '1'">
           <div class="row-left">实付</div>
-          <div class="row-right">{{ orderDetail.PayAmount | formatAmount }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.PayAmount | formatAmount }}</div>
         </div>
         <div class="info-row flex-row" v-else>
           <div class="row-left">待支付</div>
-          <div class="row-right">{{ orderDetail.PayAmount | formatAmount }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.PayAmount | formatAmount }}</div>
         </div>
         <div class="info-line"></div>
         <div class="info-row flex-row">
           <div class="row-left">备注</div>
-          <div class="row-right">{{ orderDetail.Service.Content && orderDetail.Service.Content.join('；') }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.Content && orderDetail.Service.Content.join('；') }}</div>
+        </div>
+        <div class="info-line" v-if="orderDetail.Refunds.length > 0"></div>
+        <div class="info-row flex-row" v-if="orderDetail.Refunds.length > 0">
+          <div class="row-left">退款记录</div>
+          <div class="row-right txt-over-hide"></div>
+        </div>
+        <div class="info-row flex-row" v-for="item in orderDetail.Refunds">
+          <div>{{ item.RefundTime | formatDate }}</div>
+          <div class="row-center">{{ item.RefundStatus }}</div>
+          <div>{{ item.RefundAmount | formatAmount }}</div>
         </div>
         <div class="info-line"></div>
         <div class="info-row contact flex-row">
           <div class="row-left">联系人</div>
-          <div class="row-right">{{ orderDetail.Service.AddressInfo.Contact }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.AddressInfo.Contact }}</div>
         </div>
         <div class="info-row contact flex-row">
           <div class="row-left">联系电话</div>
-          <div class="row-right">{{ orderDetail.Service.AddressInfo.PhoneNumber }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.AddressInfo.PhoneNumber }}</div>
         </div>
         <div class="info-row contact flex-row">
           <div class="row-left">服务地址</div>
-          <div class="row-right">{{ orderDetail.Service.AddressInfo.Address1 }} {{ orderDetail.Service.AddressInfo.Address2 }}</div>
+          <div class="row-right txt-over-hide">{{ orderDetail.Service.AddressInfo.Address1 }} {{ orderDetail.Service.AddressInfo.Address2 }}</div>
         </div>
         <div class="info-line"></div>
         <div class="info-row contact flex-row">
@@ -100,12 +118,37 @@
     </div>
   </div>
 
+  <div class="order-operation flex-row" v-if="orderDetail">
+    <a class="btn oppo" @click="orderConfirmDialog" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'">确认订单</a>
+    <a class="btn" @click="orderStatusAlter(3)" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'">删除订单</a>
+    <a class="btn" @click="isEvaluate = '1'" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a>
+    <a class="btn oppo" @click="orderPay()" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoPayBtn === '1'">立即支付</a>
+  </div>
+
+  <div class="order-more" v-show="isMoreOperate=='1'">
+    <div class="more-wrapper" @click="isMoreOperate='0'"></div>
+
+    <div class="more-content">
+      <a class="content-btn" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'>联系客服</a>
+      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayCancelOrderBtn" @click="orderCancel">取消订单</a>
+      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayComplaintsBtn" @click="orderComplaint">投诉</a>
+    </div>
+  </div>
+
+  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="dialogClose" @dialog-confirm="orderProcess"></m-dialog>
+
+  <order-evaluate :show-evaluate="isEvaluate" :order-code="orderCodeForEvaluate" :service-type-id="serviceTypeIdForEvaluate" @evaluate-finish="evaluateFinish"></order-evaluate>
+
+  <order-confirm :show-confirm="isConfirm" :order-id="orderId" :order-title="orderTitleForConfirm" @confirm-finish="confirmFinish"></order-confirm>
+
   <m-loading :bg-style="loadingBgStyle" v-show="isLoading"></m-loading>
 </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
+import OrderEvaluate from '../Plugs/m-dialog-evaluate';
+import OrderConfirm from '../Plugs/m-dialog-confirm';
 import API from '../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
@@ -122,41 +165,68 @@ export default {
       touchStartY: 0,
       loadingBgStyle: '1',
       isLoading: true,
+      dialogType: 0,
+      interval: null, // 计时器
+      DialogConfig: { // 对话框配置信息
+        IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
+        DialogTitle: '取消订单', // 对话框标题
+        DialogContent: '确定取消订单吗？', // 对话框内容
+        DialogBtns: ['取消', '确定'], // 对话框按钮文本
+      },
+      isConfirm: '0',
+      orderTitleForConfirm: '',
+      isMoreOperate: '0',
+      orderCodeForEvaluate: '',
+      serviceTypeIdForEvaluate: '',
+      isEvaluate: '0',
     }
   },
   mounted() {
+    this.isLoading = true;
+    var responseTime = 15; // 修改translate距离的时间差
+    var lastTime = new Date().getTime(); // 上一次修改的毫秒数
+    // 以下代码参考自订单列表
     this.$refs.sliderContainer.addEventListener('touchstart', event => {
-      this.touchStartX = event.changedTouches[0].clientX;
-      this.touchStartY = event.changedTouches[0].clientY;
+      this.touchStartX = event.targetTouches[0].pageX;
+      this.touchStartY = event.targetTouches[0].pageY;
+      this.$refs.tabIndex.classList.remove('trans');
+      this.$refs.orderStatus.classList.remove('trans');
+      this.$refs.orderInfo.classList.remove('trans');
     });
     this.$refs.sliderContainer.addEventListener('touchmove', event => {
-      if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) <= 20) {
-        event.preventDefault();
-      } else {
-        if(this.tabIndex == '0' && event.changedTouches[0].clientX - this.touchStartX < 0) {
-          // 向左滑动
-          var transDis = Math.ceil(Math.abs(event.changedTouches[0].clientX - this.touchStartX) / screen.availWidth * 100 * 1.2); // 计算滑动距离并转为百分比
-          if(transDis > 100) {
-            // 百分比不超过100
-            transDis = 100;
+      var nowTime = new Date().getTime(); // 当前毫秒
+      if(nowTime - lastTime > responseTime) {
+        lastTime = nowTime;
+        if (Math.abs(event.targetTouches[0].pageY - this.touchStartY) <= 20) {
+          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+            // 向左滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+            this.$refs.orderStatus.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+            this.$refs.orderInfo.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+            // 向右滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+            this.$refs.orderStatus.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+            this.$refs.orderInfo.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
           }
-          this.$refs.tabIndex.style.transform = 'translateX(' + transDis + '%)'; // 最大移动100%
-          this.$refs.sliderWrapper.style.transform = 'translateX(-' + transDis / 2 + '%)'; // 最大移动50%
-        } else if(this.tabIndex == '1' && event.changedTouches[0].clientX - this.touchStartX > 0) {
-          // 向右滑动
-          console.log(event.changedTouches[0].clientX - this.touchStartX);
-          var transDis = Math.ceil(Math.abs(event.changedTouches[0].clientX - this.touchStartX) / screen.availWidth * 100 * 1.2);
-          if(transDis > 100) {
-            transDis = 100;
-          }
-          this.$refs.tabIndex.style.transform = 'translateX(' + (100 - transDis) + '%)';
-          this.$refs.sliderWrapper.style.transform = 'translateX(-' + (100 - transDis) / 2 + '%)';
         }
       }
     });
     this.$refs.sliderContainer.addEventListener('touchend', event => {
       this.$refs.tabIndex.removeAttribute('style');
-      this.$refs.sliderWrapper.removeAttribute('style');
+      this.$refs.orderStatus.removeAttribute('style');
+      this.$refs.orderInfo.removeAttribute('style');
+      this.$refs.tabIndex.classList.add('trans');
+      this.$refs.orderStatus.classList.add('trans');
+      this.$refs.orderInfo.classList.add('trans');
       if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 3) {
         this.tabIndex = this.tabIndex == '0' ? '1' : '0';
       }
@@ -164,55 +234,216 @@ export default {
   },
   activated() {
     this.orderId = this.$route.params.orderId;
+    this.tabIndex = '0';
     this.getOrderStatus();
+    clearInterval(this.interval);
   },
   methods: {
     switchTab(index) {
-      this.tabIndex = index.toString();
+      this.tabIndex = index + '';
     },
     getOrderStatus() {
       this.isLoading = true;
       axios.post(API.TrackOrderStatus, qs.stringify({
         Token: this.Token,
         OrderId: this.orderId,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
           this.orderStatus = res.data.Body;
+          this.orderStatus.NextStatus.CountDown = Math.ceil(this.orderStatus.NextStatus.CountDown);
+          if(this.orderStatus.NextStatus.CountDown && this.orderStatus.NextStatus.CountDown > 0) {
+            this.interval = setInterval(() => {
+              this.orderStatus.NextStatus.CountDown -= 1;
+              if(this.orderStatus.NextStatus.CountDown <= 0) {
+                this.getOrderStatus();
+                clearInterval(this.interval);
+              }
+            }, 1000);
+          }
           this.getOrderDetail();
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getOrderDetail() {
       axios.post(API.GetOrderInfoEx, qs.stringify({
         Token: this.Token,
         OrderId: this.orderId,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
           this.orderDetail = res.data.Body.Order;
+          this.orderCodeForEvaluate = this.orderDetail.OrderCode;
+          this.serviceTypeIdForEvaluate = this.orderDetail.Service.ServiceId;
+
+          // 环信，发送订单数据
+          let that = this;
+          window.easemobim = window.easemobim || {};
+          easemobim.config = {
+            configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
+            hideKeyboard: true,
+            visitor: {
+              trueName: '',
+              qq: '',
+              phone: this.$store.state.UserInfo.PhoneNumber,
+              companyName: '',
+              userNickname: this.$store.state.UserInfo.NickName,
+              description: '',
+              email: ''
+            },
+            onready: function() {
+              easemobim.sendExt({
+                ext: {
+                  "imageName": "",
+                  //custom代表自定义消息，无需修改
+                  "type": "custom",
+                  "msgtype": {
+                    "order": {
+                      "img_url": "",
+                      "title": "服务：" + that.orderDetail.Service.ServiceName,
+                      "desc": "服务：" + that.orderDetail.Service.ServiceName,
+                      "order_title": "订单号：" + that.orderDetail.OrderCode,
+                      "price": "总价：￥" + that.orderDetail.TotalPrice,
+                      "item_url": ""
+                    }
+                  }
+                }
+              });
+            },
+          };
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
+    orderStatusAlter(type) {
+      this.dialogType = type;
+      if(type == '3') {
+        this.DialogConfig = {
+          IsDialog: '1',
+          DialogTitle: '删除订单',
+          DialogContent: '确定删除订单吗？',
+          DialogBtns: ['取消', '确定'],
+        };
+      }
+    },
+    orderProcess() {
+      this.DialogConfig.IsDialog = '0';
+      if(this.dialogType == '3') {
+        this.orderDelete();
+      }
+    },
+    dialogClose() {
+      this.isMoreOperate = '0';
+      this.DialogConfig.IsDialog = '0';
+    },
+    orderCancel() {
+      this.isMoreOperate = '0';
+      if(this.orderDetail.OrderBtnInfo.IsDisplayCancelOrderBtn == '1' && this.orderDetail.OrderBtnInfo.IsGotoCancelPage == '1') {
+        this.$router.push({
+          name: 'order_cancel_reason',
+          params: {
+            orderId: this.orderId
+          }
+        });
+      } else {
+        this.DialogConfig = {
+          IsDialog: '1',
+          DialogTitle: '取消订单',
+          DialogContent: '您已完成支付，是否联系客服取消订单？',
+          DialogBtns: ['取消', '确定'],
+          DialogBtnsHref: ['javascript: void(0);', 'tel:4008-262-056']
+        }
+      }
+    },
+    orderComplaint() {
+      this.isMoreOperate = '0';
+      this.$router.push({
+        name: 'order_complaint_reason',
+        params: {
+          orderId: this.orderId
+        }
+      });
+    },
+    orderDelete() {
+      axios.post(API.RemoveOrderEx, qs.stringify({
+        Token: this.Token,
+        OrderId: this.orderId,
+      })).then(res => {
+        if(res.data.Meta.ErrorCode === '0') {
+          this.alert('删除成功', () => {
+            this.$router.replace({
+              name: 'order'
+            });
+          });
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(err => {
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      });
+    },
+    evaluateFinish(status) {
+      this.isEvaluate = '0';
+      if (status) {
+        if (status.ErrorCode == '0') {
+          this.alert('评价成功');
+          this.getOrderStatus();
+        } else {
+          this.alert(status.ErrorMsg);
+        }
+      }
+    },
+    orderConfirmDialog() {
+      this.isConfirm = '1';
+      var time = this.orderDetail.Service.ServiceStartTime;
+      var date = new Date(Number(time + '000'));
+      var year = date.getFullYear();
+      var month = date.getMonth() + 1;
+      month = month < 10 ? '0' + month : month;
+      var day = date.getDate();
+      day = day < 10 ? '0' + day : day;
+      var hour = date.getHours();
+      hour = hour < 10 ? '0' + hour : hour;
+      var minute = date.getMinutes();
+      minute = minute < 10 ? '0' + minute : minute;
+      var second = date.getSeconds();
+      second = second < 10 ? '0' + second : second;
+      time = year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
+      this.orderTitleForConfirm = time + ' 的' + this.orderDetail.Service.ServiceName + '服务';
+    },
+    confirmFinish(status) {
+      this.isConfirm = '0';
+      if(status) {
+        if (status.ErrorCode == '0') {
+          this.alert('确认成功');
+          this.getOrderStatus();
+        } else {
+          this.alert(status.ErrorMsg);
+        }
+      }
+    },
+    orderPay() {
+      this.$router.push({
+        name: 'order_pay',
+        params: {
+          orderId: this.orderId
+        }
+      });
+    }
   },
   computed: {
-    ...mapState(['Token'])
+    ...mapState(['Token', 'ALERT_MSG']),
+  },
+  components: {
+    OrderEvaluate,
+    OrderConfirm,
   },
   filters: {
     formatDate(val) {
@@ -221,23 +452,30 @@ export default {
       var year = date.getFullYear();
       var month = date.getMonth() + 1;
       month = month < 10 ? '0' + month : month;
-      // month = month.toString().padStart(2, '0');
       var day = date.getDate();
       day = day < 10 ? '0' + day : day;
-      // day = day.toString().padStart(2, '0');
       var hour = date.getHours();
       hour = hour < 10 ? '0' + hour : hour;
-      // hour = hour < 10 ? '0' + hour : hour;
       var minute = date.getMinutes();
       minute = minute < 10 ? '0' + minute : minute;
-      // minute = minute.toString().padStart(2, '0');
       var second = date.getSeconds();
       second = second < 10 ? '0' + second : second;
-      // second = second.toString().padStart(2, '0');
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ':' + second;
     },
+    formatCountDown(val) {
+      if(!val || isNaN(val) || val <= 0) {
+        return 0;
+      } else {
+        val = Math.ceil(val);
+        var minute = Math.floor(val / 60);
+        minute = minute < 10 ? '0' + minute : minute;
+        var second = Math.ceil((val - minute * 60) % 60);
+        second = second < 10 ? '0' + second : second;
+        return minute + '\"' + second + '\'';
+      }
+    },
     formatAmount(amount) {
-      let a = amount.toString();
+      let a = amount + '';
       if(a.indexOf('.') === -1) {
         return '￥' + amount + '.00';
       } else {
@@ -251,6 +489,13 @@ export default {
 <style scoped lang="scss">
 $text-normal: #333639;
 $text-light: #999;
+$text-warn: #f56165;
+.router-view
+{
+  position: relative;
+  box-sizing: border-box;
+  padding-bottom: 1.946667rem;
+}
 .icon-order-step-down
 {
   width: 0.32rem;
@@ -258,9 +503,10 @@ $text-light: #999;
 }
 .order-header
 {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
+  transform: translateZ(0);
   z-index: 10;
   width: 100%;
   height: 1.066667rem;
@@ -275,6 +521,10 @@ $text-light: #999;
     line-height: 0.933333rem;
     font-size: 15px;
     text-align: center;
+    &.active
+    {
+      color: $text-warn;
+    }
   }
   .header-index
   {
@@ -283,212 +533,326 @@ $text-light: #999;
     left: 0;
     width: 50%;
     height: 4px;
-    background-color: #f56165;
-    transition: all .3s;
-    &.right
+    background-color: $text-warn;
+    &.trans
+    {
+      transition: all .3s;
+    }
+    &.toggle
     {
       transform: translateX(100%);
     }
   }
+  .header-more
+  {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    z-index: 21;
+    width: 0.586667rem;
+  }
 }
 .order-content
 {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  min-height: 100%;
-  margin-top: 1.322223rem;
+  height: 100%;
   overflow: hidden;
-  .float-container
+  .order-status
   {
-    width: 200%;
-    min-height: 100%;
-    overflow: hidden;
-    transition: all .3s;
-    &::before,
-    &::after
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    padding-top: 2.213333rem;
+    padding-bottom: 2rem;
+    padding-left: 0.76rem;
+    padding-right: 0.426667rem;
+    background-color: #fff;
+    color: $text-light;
+    overflow-y: scroll;
+    &.trans
     {
-      content: '';
-      display: block;
-      width: 0;
-      height: 0;
-      clear: both;
-    }
-    &.right
-    {
-      transform: translateX(-50%);
       transition: all .3s;
     }
-    .order-status
+    &.toggle
     {
-      box-sizing: border-box;
-      float: left;
-      width: 50%;
-      padding-top: 0.88rem;
-      padding-bottom: 0.88rem;
-      padding-left: 0.76rem;
-      padding-right: 0.426667rem;
-      background-color: #fff;
-      color: $text-light;
-      .status-group
+      transform: translateX(-100%);
+    }
+    .status-group
+    {
+      position: relative;
+      .group-title
       {
-        position: relative;
-        .group-title
+        -webkit-justify-content: initial;
+        justify-content: initial;
+        margin-bottom: 0.533333rem;
+        .title-time
         {
-          justify-content: flex-start;
-          margin-bottom: 0.533333rem;
-          .title-time
-          {
-            flex-basis: 1.9rem;
-            font-size: 14px;
-            text-align: right;
-          }
-          .title-icon
-          {
-            position: relative;
-            z-index: 2;
-            margin: 0 0.533333rem;
-          }
-          .step-line
-          {
-            position: absolute;
-            left: 2.566666rem;
-            top: 50%;
-            width: 0px;
-            height: 100%;
-            border-left: 2px dotted #ccc;
-          }
+          flex-basis: 1.9rem;
+          font-size: 14px;
+          text-align: right;
         }
-        .group-step
+        .title-icon
         {
-          justify-content: flex-start;
-          &:not(:first-child)
-          {
-            margin-top: 1.08rem;
-          }
-          .step-time
-          {
-            flex-basis: 1.9rem;
-            font-size: 14px;
-            text-align: right;
-          }
-          .step-icon
-          {
-            display: block;
-            width: 0.266667rem;
-            height: 0.266667rem;
-            margin: 0 0.533333rem;
-            border: 1px solid #fff;
-            border-radius: 50%;
-            background-color: #ccc;
-          }
-          .step-desc
-          {
-            flex: 1;
-            width: 1px;
-            .desc-status
-            {
-              font-size: 15px;
-            }
-          }
+          position: relative;
+          z-index: 2;
+          margin: 0 0.533333rem;
         }
-        .next-step
-        {
-          justify-content: flex-start;
-          color: $text-normal;
-          &:not(:first-child)
-          {
-            margin-top: 1.08rem;
-          }
-          .step-time
-          {
-            flex-basis: 1.9rem;
-            font-size: 14px;
-            text-align: right;
-          }
-          .step-icon
-          {
-            justify-content: center;
-            position: relative;
-            z-index: 1;
-            width: 0.3rem;
-            height: 0.3rem;
-            margin: 0 0.52rem;
-            border: 1px solid $text-normal;
-            border-radius: 50%;
-            background-color: #fff;
-            .step-inner-icon
-            {
-              display: block;
-              width: 0.23rem;
-              height: 0.23rem;
-              border-radius: 50%;
-              background-color: $text-normal;
-            }
-          }
-          .step-desc
-          {
-            flex: 1;
-            width: 1px;
-            .desc-status
-            {
-              font-size: 15px;
-            }
-          }
-        }
-        .group-line
+        .step-line
         {
           position: absolute;
           left: 2.566666rem;
-          bottom: 0;
+          top: 50%;
           width: 0px;
           height: 100%;
-          border-left: 2px dashed #ccc;
+          border-left: 2px dotted #ccc;
         }
       }
-    }
-    .order-info
-    {
-      box-sizing: border-box;
-      float: left;
-      width: 50%;
-      padding-top: 0.533333rem;
-      padding-bottom: 0.533333rem;
-      background-color: #fff;
-      color: $text-normal;
-      font-size: 14px;
-      .info-row
+      .group-step
       {
-        margin-left: 0.426667rem;
-        margin-right: 0.426667rem;
+        -webkit-justify-content: initial;
+        justify-content: initial;
         &:not(:first-child)
         {
-          margin-top: 0.306667rem;
+          margin-top: 1.08rem;
         }
-        &.contact
+        .step-time
         {
-          .row-right
-          {
-            color: $text-light;
-            text-align: left;
-          }
+          flex-basis: 1.9rem;
+          font-size: 14px;
+          text-align: right;
         }
-        .row-left
+        .step-icon
         {
-          flex-basis: 1.866667rem;
+          display: block;
+          width: 0.266667rem;
+          height: 0.266667rem;
+          margin: 0 0.533333rem;
+          border: 1px solid #fff;
+          border-radius: 50%;
+          background-color: #ccc;
         }
-        .row-right
+        .step-desc
         {
           flex: 1;
           width: 1px;
-          margin-left: 0.4rem;
-          text-align: right;
+          .desc-status
+          {
+            font-size: 15px;
+          }
         }
       }
-      .info-line
+      .next-step
       {
-        height: 1px;
+        -webkit-justify-content: initial;
+        justify-content: initial;
+        color: $text-normal;
+        &:not(:first-child)
+        {
+          margin-top: 1.08rem;
+        }
+        .step-time
+        {
+          flex-basis: 1.9rem;
+          font-size: 14px;
+          text-align: right;
+          &.hide
+          {
+            visibility: hidden;
+          }
+        }
+        .step-icon
+        {
+          justify-content: center;
+          position: relative;
+          z-index: 1;
+          width: 0.3rem;
+          height: 0.3rem;
+          margin: 0 0.52rem;
+          border: 1px solid $text-normal;
+          border-radius: 50%;
+          background-color: #fff;
+          .step-inner-icon
+          {
+            display: block;
+            width: 0.25rem;
+            height: 0.25rem;
+            border-radius: 50%;
+            background-color: $text-normal;
+          }
+        }
+        .step-desc
+        {
+          flex: 1;
+          width: 1px;
+          .desc-status
+          {
+            font-size: 15px;
+          }
+        }
+      }
+      .group-line
+      {
+        position: absolute;
+        left: 2.566666rem;
+        bottom: 0;
+        width: 0px;
+        height: 100%;
+        border-left: 2px dashed #ccc;
+      }
+    }
+  }
+  .order-info
+  {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    padding-top: 1.866667rem;
+    padding-bottom: 0.533333rem;
+    background-color: #fff;
+    color: $text-normal;
+    font-size: 14px;
+    overflow-y: scroll;
+    &.trans
+    {
+      transition: all .3s;
+    }
+    &.toggle
+    {
+      transform: translateX(-100%);
+    }
+    .info-row
+    {
+      margin-left: 0.426667rem;
+      margin-right: 0.426667rem;
+      &:not(:first-child)
+      {
         margin-top: 0.306667rem;
-        margin-left: 0.426667rem;
-        background-color: #eef2f5;
+      }
+      &.contact
+      {
+        .row-right
+        {
+          color: $text-light;
+          text-align: left;
+        }
+      }
+      .row-left
+      {
+        flex-basis: 1.866667rem;
+      }
+      .row-center
+      {
+        color: $text-warn;
+      }
+      .row-right
+      {
+        flex: 1;
+        width: 1px;
+        margin-left: 0.4rem;
+        text-align: right;
+      }
+    }
+    .info-line
+    {
+      height: 1px;
+      margin-top: 0.306667rem;
+      margin-left: 0.426667rem;
+      background-color: #eef2f5;
+    }
+  }
+}
+.order-operation
+{
+  -webkit-justify-content: flex-end;
+  justify-content: flex-end;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 1.946667rem;
+  padding: 0 0.666667rem;
+  border-top: 1px solid #eef2f5;
+  background-color: #fff;
+  .btn
+  {
+    display: block;
+    width: 2.0rem;
+    line-height: 100%;
+    padding: 0.2rem 0;
+    border: 1px solid $text-warn;
+    border-radius: 3px;
+    color: $text-warn;
+    font-size: 13px;
+    text-align: center;
+    &:not(:first-child)
+    {
+      margin-left: 0.266667rem;
+    }
+    &.oppo
+    {
+      background-color: $text-warn;
+      color: #fff;
+    }
+  }
+}
+.order-more
+{
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  width: 100%;
+  height: 100%;
+  .more-wrapper
+  {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,.4);
+  }
+  .more-content
+  {
+    position: absolute;
+    top: 1.266667rem;
+    right: 0.266667rem;
+    width: 3.626667rem;
+    border-radius: 4px;
+    background-color: #fff;
+    &::before
+    {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: 0.266667rem;
+      display: block;
+      width: 0;
+      height: 0;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid #fff;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+    }
+    .content-btn
+    {
+      display: block;
+      width: 100%;
+      height: 1.333333rem;
+      line-height: 1.333333rem;
+      color: #323232;
+      font-size: 15px;
+      text-align: center;
+      &:not(:first-child)
+      {
+        border-top: 1px solid #eef2f5;
       }
     }
   }

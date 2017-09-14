@@ -1,6 +1,6 @@
 <template>
 <li class="list-item">
-  <header class="item-header flex-row">
+  <header class="item-header flex-row" @click="showOrderDetail(orderItem)">
     <span class="header-name">{{ orderItem.Service.ServiceName }}</span>
     <span class="header-status" v-if="orderItem.IsKdEOrder !== '1'">{{ orderItem.OrderBtnInfo.Title }}</span>
   </header>
@@ -10,7 +10,7 @@
   <div class="item-info" v-if="orderItem.IsKdEOrder === '0'" @click="showOrderDetail(orderItem)">
     <div class="info-row flex-row">
       <div class="row-left">服务地址</div>
-      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }} {{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
     </div>
 
     <div class="info-row flex-row">
@@ -18,7 +18,12 @@
       <div class="row-right txt-over-hide">{{ orderItem.Service.ServiceStartTime | formatDate }}</div>
     </div>
 
-    <div class="info-row flex-row">
+    <div class="info-row flex-row" v-if="orderItem.DepositInfo && orderItem.DepositInfo.DepositIsPayOff == '0'">
+      <div class="row-left">订金</div>
+      <div class="row-right txt-over-hide">{{ orderItem.DepositInfo.DepositAmount }}元</div>
+    </div>
+
+    <div class="info-row flex-row" v-else>
       <div class="row-left">订单总价</div>
       <div class="row-right txt-over-hide" v-if="orderItem.IsNegotiable === '1'">{{ orderItem.StartingPrice }}元起</div>
       <div class="row-right txt-over-hide" v-else>{{ orderItem.TotalPrice }}元</div>
@@ -27,7 +32,8 @@
     <div class="info-row flex-row">
       <div class="row-left" v-if="orderItem.PayStatus === '0'">实付金额</div>
       <div class="row-left" v-else>待付金额</div>
-      <div class="row-right txt-over-hide" v-if="orderItem.PayAmount == null">待付款</div>
+      <div class="row-right txt-over-hide" v-if="orderItem.DepositInfo && orderItem.DepositInfo.DepositIsPayOff == '0'">{{ orderItem.DepositInfo.DepositAmount }}元</div>
+      <div class="row-right txt-over-hide" v-else-if="orderItem.PayAmount == null">待付款</div>
       <div class="row-right txt-over-hide" v-else>{{ orderItem.PayAmount | clearStr }}元</div>
     </div>
 
@@ -45,12 +51,12 @@
 
     <div class="info-row flex-row">
       <div class="row-left">发件地址</div>
-      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }} {{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
     </div>
 
     <div class="info-row flex-row">
       <div class="row-left">收件地址</div>
-      <div class="row-right txt-over-hide">{{ orderItem.KdEOrderInfo.TargetAddress.Address1 }}{{ orderItem.KdEOrderInfo.TargetAddress.Address2 | clearStr }}</div>
+      <div class="row-right txt-over-hide">{{ orderItem.KdEOrderInfo.TargetAddress.Address1 }} {{ orderItem.KdEOrderInfo.TargetAddress.Address2 | clearStr }}</div>
     </div>
 
     <div class="info-row flex-row">
@@ -67,12 +73,12 @@
 
     <div class="info-row flex-row">
       <div class="row-left">发件地址</div>
-      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }}{{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
+      <div class="row-right txt-over-hide">{{ orderItem.Service.AddressInfo.Address1 }} {{ orderItem.Service.AddressInfo.Address2 | clearStr }}</div>
     </div>
 
     <div class="info-row flex-row">
       <div class="row-left">收件地址</div>
-      <div class="row-right txt-over-hide">{{ orderItem.ExpressOrderInfo.TargetAddress.Address1 }}{{ orderItem.ExpressOrderInfo.TargetAddress.Address2 | clearStr }}</div>
+      <div class="row-right txt-over-hide">{{ orderItem.ExpressOrderInfo.TargetAddress.Address1 }} {{ orderItem.ExpressOrderInfo.TargetAddress.Address2 | clearStr }}</div>
     </div>
 
     <div class="info-row flex-row">
@@ -82,17 +88,18 @@
   </div>
 
   <div class="item-operation flex-row" v-if="orderItem.OrderBtnInfo.IsShowBtnInfo">
-    <div class="remain-pay-time" :class="{ hide: orderItem.ResidualTime === null || orderItem.ResidualTime <= 0 }">剩余支付时间{{ orderItem.ResidualTime | payCountdown }}</div>
+    <div class="refund-status" :class="{ hide: !orderItem.RefundStatus || orderItem.RefundStatus =='' }">{{ orderItem.RefundStatus }}</div>
 
     <div class="operation-btns flex-row">
-      <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="$emit('order-cancel-dialog', { orderId: orderItem.OrderId })">取消订单</a>
+      <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1' && orderItem.OrderBtnInfo.IsGotoCancelPage === '1'" @click="$emit('order-cancel-dialog', orderItem.OrderId)">取消订单</a>
       <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
       <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
-      <!-- <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a> -->
+      <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'" @click="$emit('order-evaluate-dialog', orderItem.OrderCode, orderItem.Service.ServiceId)">评价订单</a>
+      <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayAddServiceBtn === '1'" @click="$emit('order-add-pay', orderItem)">￥增加服务</a>
       <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayGotoPayBtn === '1'" @click="$emit('order-pay', orderItem)">立即支付</a>
 
       <!-- 目前联系客服按钮只在“未支付”状态不显示 -->
-      <a class="btn oppo" v-if="(orderItem.OrderStatus !== '1' && orderItem.OrderStatus !== '10') || orderItem.IsPayOff !== '0'" href="tel:4008-262-056">联系客服</a>
+      <!-- <a class="btn oppo" v-if="(orderItem.OrderStatus !== '1' && orderItem.OrderStatus !== '10') || orderItem.IsPayOff !== '0'" href="tel:4008-262-056">联系客服</a> -->
     </div>
   </div>
 </li>
@@ -110,19 +117,19 @@ export default {
   props: ['orderItem'],
   mounted() {
     // 设置支付倒计时
-    let interval = null;
-    if(this.orderItem.ResidualTime && this.orderItem.ResidualTime > 0) {
-      interval = setInterval(() => {
-        this.orderItem.ResidualTime--;
-        if((this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) && this.orderItem.OrderStatus != '50') {
-          this.$emit('order-cancel-dialog', {
-            orderId: this.orderItem.OrderId,
-            autoCancel: '1'
-          });
-          clearInterval(interval);
-        }
-      }, 1000);
-    }
+    // let interval = null;
+    // if(this.orderItem.ResidualTime && this.orderItem.ResidualTime > 0) {
+    //   interval = setInterval(() => {
+    //     this.orderItem.ResidualTime--;
+    //     if((this.orderItem.ResidualTime <= 0 || !this.orderItem.ResidualTime) && this.orderItem.OrderStatus != '50') {
+    //       this.$emit('order-cancel-dialog', {
+    //         orderId: this.orderItem.OrderId,
+    //         autoCancel: '1'
+    //       });
+    //       clearInterval(interval);
+    //     }
+    //   }, 1000);
+    // }
   },
   methods: {
     showOrderDetail(item) {
@@ -251,10 +258,10 @@ $color_txt_warn: #f56165;
     height: 1.333333rem;
     border-top: 1px solid $color_split_line;
     padding: 0 0.533333rem;
-    .remain-pay-time
+    .refund-status
     {
-      //margin-right: 0.76rem;
-      color: #333639;
+      margin-right: 0.76rem;
+      color: $color_txt_warn;
       font-size: 15px;
       &.hide
       {

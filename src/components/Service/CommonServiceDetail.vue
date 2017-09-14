@@ -1,5 +1,6 @@
 <template>
 <div>
+  <a class="icon-customer-service" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'></a>
   <div v-if="pageData">
     <header class="header-img">
         <img :src="pageData.headImg">
@@ -18,14 +19,14 @@
           <tbody id="content_table">
             <tr v-for="item in serviceList">
               <td>{{ item.ServiceName }}</td>
-              <td>{{ item.DepositAmount | clearDeposit }}</td>
+              <td>{{ item.DepositAmount | formatDeposit }}</td>
               <td>{{ item.Price }}元/{{ item.Unit }}</td>
             </tr>
           </tbody>
         </table>
     </div>
 
-    <div class="region" v-if="pageData.standard">
+    <div class="region" v-if="pageData.standard && pageData.standard.length > 0">
         <div class="region-title">服务标准</div>
         <p v-if="typeof pageData.standard == 'string'">{{ pageData.standard }}</p>
         <p v-else>
@@ -70,14 +71,27 @@
         </div>
     </div>
 
-      <div class="section" v-if="pageData.process">
-        <div class="section-header">
-          <span class="header-title">服务流程</span>
-        </div>
+    <div class="section" v-if="pageData.process">
+      <div class="section-header">
+        <span class="header-title">服务流程</span>
+      </div>
 
-        <div class="section-intro">
-          <img class="intro-img" :src="pageData.process">
-        </div>
+      <div class="section-intro">
+        <img class="intro-img" :src="pageData.process">
+      </div>
+    </div>
+
+    <div class="section" v-for="item in pageData.custom">
+      <div class="section-header">
+        <span class="header-title">{{ item.title }}</span>
+      </div>
+
+      <div class="header-img">
+        <p v-for="info in item.content">
+          <img v-if="/\.(png|jpg)/.test(info)" :src="info">
+          <span v-else>{{ info }}</span>
+        </p>
+      </div>
     </div>
 
     <div class="region" v-if="pageData.warn && pageData.warn.length > 0">
@@ -113,7 +127,6 @@
                 <span class="info-title">隐私保障</span>
               <span class="info-intro">服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！</span>
           </div>
-
       </div>
     </div>
 
@@ -142,11 +155,45 @@ export default {
     }
   },
   activated() {
-    document.body.scrollTop = 0;
-    document.documentElement.scrollTop = 0;
+    let that = this;
+    window.easemobim = window.easemobim || {};
+    easemobim.config = {
+      configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
+      hideKeyboard: true,
+      visitor: {
+        trueName: '',
+        qq: '',
+        phone: this.$store.state.UserInfo.PhoneNumber,
+        companyName: '',
+        userNickname: this.$store.state.UserInfo.NickName,
+        description: '',
+        email: ''
+      },
+      onready: function() {
+        var img = that.$route.params.img || '';
+        var url = that.$route.params.url || '';
+        console.log(url);
+        easemobim.sendExt({
+          ext: {
+            "imageName": "abc.png",
+            //custom代表自定义消息，无需修改
+            "type": "custom",
+            "msgtype": {
+              "track": {
+                "title": '我正在看',
+                "price": "",
+                "desc": that.pageData.title,
+                "img_url": img,
+                "item_url": url,
+              }
+            }
+          }
+        });
+      },
+    };
     // 当服务id不同时刷新数据
     let oldId = this.threeId;
-    this.threeId = this.$route.params.id;
+    this.threeId = this.$route.query.id;
     document.title = data[this.threeId].title;
     this.pageData = data[this.threeId];
     if(oldId !== this.threeId) {
@@ -158,18 +205,12 @@ export default {
     getServicePrice() {
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.threeId
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
         this.serviceList.splice(0);
         if (res.data.Meta.ErrorCode === '0') {
-          this.$store.commit('SetThreeServiceId', res.data.Body.Service.ServiceId);
-          this.$store.commit('SetThreeServiceName', res.data.Body.Service.ServiceName);
           res.data.Body.Service.SubItems.map(value => {
             this.serviceList.push(value);
           })
@@ -192,7 +233,10 @@ export default {
         this.routerTo({
           name: 'order_place',
           params: {
-            fromDetailPage: '1'
+            fromDetailPage: '1',
+          },
+          query: {
+            id: this.threeId
           }
         }, false);
       } else {
@@ -211,7 +255,7 @@ export default {
     ...mapState(['IsLogin', 'ALERT_MSG']),
   },
   filters: {
-    clearDeposit(str) {
+    formatDeposit(str) {
       return str ? str + '元' : '/';
     }
   }
@@ -221,51 +265,25 @@ export default {
 <style scoped>
 .router-view
 {
-  height: auto;
-  padding-bottom: 75px;
+  position: relative;
+  box-sizing: border-box;
+  padding-bottom: 2.0rem;
   font-size: 14px;
 }
-html, body, p, span, input, button, ul, li,table, thead, tbody, tr, td, img
+.icon-customer-service
 {
-  margin: 0;
-  padding: 0;
-
-  outline: none;
-  font-size: 14px;
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
-}
-a, button
-{
-  star:expression_r(this.onFocus=this.blur());
-}
-div[style *= "fixed"],
-a[style *= "fixed"],
-button[style *= "fixed"],
-p[style *= "fixed"],
-span[style *= "fixed"]
-{
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-img
-{
-  width: 100%;
-}
-body
-{
-  padding-bottom: 75px;
-
-  background-color: #eaeff3;
-}
-#app
-{
-  width: 100%;
-  height: 100%!important;
-  overflow: scroll;
-  background-color: #eaeff3;
+  position: absolute;
+  top: 0.266667rem;
+  right: 0.266667rem;
+  display: block;
+  width: 0.533333rem;
+  height: 0.533333rem;
+  border: 5px solid #fff;
+  border-radius: 4px;
+  background-image: url(../../assets/images/customer_service.png);
+  background-color: #fff;
+  background-repeat: no-repeat;
+  background-size: 100%;
 }
 .section
 {
@@ -551,6 +569,10 @@ body
 .section .section-intro
 {
   padding-bottom: 15px;
+}
+.section .section-intro .intro-img
+{
+  width: 100%;
 }
 
 .btn-wrapper

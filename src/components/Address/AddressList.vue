@@ -66,11 +66,7 @@ export default {
       }
       axios.post(API.GetAddress, qs.stringify({
         Token: addToken || this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
           this.addressList = res.data.Body;
@@ -79,7 +75,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     routerTo(item) {
@@ -87,7 +83,10 @@ export default {
         // 如果作为其他页面的内嵌页面，调用父页面方法传值
         window.parent.getDataFromIFrame(item);
       } else {
-        // 目前只在下单页用到地址，如果有其他地方也会用到，再另行处理
+        // 设置下单页的默认地址id
+        if(this.$route.params.from == 'order_place') {
+          this.$store.commit('SetDefaultAddressId', item.Id);
+        }
         this.$store.commit('SetSelectedAddress', item);
         this.$router.go(-1);
       }

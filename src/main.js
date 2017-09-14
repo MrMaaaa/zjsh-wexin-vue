@@ -1,5 +1,3 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
 import router from './router';
@@ -13,8 +11,6 @@ import { Picker } from 'mint-ui'
 
 Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
-
 // 在实例化之前注册组件
 Vue.component('warn-info', WarnInfo);
 Vue.component('m-dialog', MDialog);
@@ -25,10 +21,11 @@ Vue.component(Picker.name, Picker);
 Vue.mixin({
   methods: {
     // 用于显示文本（一般用于接口的结果显示）
-    alert(alertMsg, alertTimeout=1000) {
+    alert(alertMsg, alertTimeout=1000, alertCallback) {
       this.$store.dispatch('SetAlert', {
-        alertMsg: alertMsg,
-        alertTimeout: alertTimeout
+        alertMsg,
+        alertTimeout: (typeof alertTimeout) == 'function' ? 1000 : alertTimeout,
+        alertCallback: (typeof alertTimeout) == 'function' ? alertTimeout : alertCallback,
       });
     },
     openLogin() {

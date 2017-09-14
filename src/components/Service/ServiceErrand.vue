@@ -231,7 +231,7 @@ export default {
         }
       },
       nameFlag: '-1', //选中的物品名称的index（非自定义）
-      addrFlag: '1', //地址类型： 0 无；1 寄件地址；2 收件地址
+      addrFlag: '0', //地址类型： 0 无；1 寄件地址；2 收件地址
       estimatedPrice: '0',
       isLoading: false,
     }
@@ -250,7 +250,9 @@ export default {
     this.selData.name = '其他';
   },
   activated() {
-    this.updateAddress();
+    if(this.addrFlag != '0') {
+      this.updateAddress();
+    }
   },
   methods: {
     onDateTimeChange(picker, values) {
@@ -461,11 +463,7 @@ export default {
           SenderAddressId: this.addrData.sender.id,
           ReceiverAddressId: this.addrData.receiver.id,
           SubscribeTime: this.selData.date,
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
             this.estimatedPrice = res.data.Body.Price;
@@ -494,11 +492,7 @@ export default {
           OrderFrom: '210',
           ServiceTime: this.selData.date,
           GoodsWeight: this.selData.weight
-        }), {
-          header: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }).then(res => {
+        })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
             this.alert('订单已提交', 1000);

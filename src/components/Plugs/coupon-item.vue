@@ -11,7 +11,22 @@ couponTypeByVue: 0:未使用 1:已使用 2:已过期
 
   <div class="item-split"></div>
 
-  <div class="right">
+  <div class="right flex-row" v-if="couponItem.couponTypeByVue == '0'">
+    <div class="item-info">
+      <header class="item-title txt-over-hide">{{ couponItem.Title }}</header>
+
+      <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes && couponItem.ServiceTypes.length >  0">
+        <span class="service-type" v-for="(type, t_index) in couponItem.ServiceTypes"><span v-if="t_index > 0">、</span>{{ type.ServiceName }}</span>
+      </p>
+      <p class="item-limit-service" v-else>全品类可用</p>
+
+      <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
+    </div>
+
+    <span class="use-now">立即使用</span>
+  </div>
+
+  <div class="right" v-else>
     <header class="item-title txt-over-hide">{{ couponItem.Title }}</header>
 
     <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes && couponItem.ServiceTypes.length >  0">
@@ -154,6 +169,12 @@ export default {
     -webkit-flex-grow: 1;
     width: 1px;
     height: 100%;
+    .item-info
+    {
+      -webkit-flex: 1;
+      flex: 1;
+      width: 1px;
+    }
     .item-title
     {
       line-height: 100%;
@@ -174,6 +195,16 @@ export default {
       margin-top: 0.16rem;
       color: #666;
       font-size: 11px;
+    }
+    .use-now
+    {
+      height: 0.6rem;
+      line-height: 0.6rem;
+      margin-right: 0.2rem;
+      padding: 0 0.133333rem;
+      border: 1px solid #ab49ea;
+      border-radius: 0.3rem;
+      color: #ab49ea;
     }
   }
   .item-status

@@ -54,10 +54,12 @@ export default {
   left: 50%;
 
   padding: 20px;
+  -webkit-border-radius: 4px;
   border-radius: 4px;
 
   background-color: rgba(0,0,0,.6);
   text-align: center;
+  -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
 .loading-content .loading-txt
@@ -78,36 +80,70 @@ export default {
   width: 1.5rem;
   margin: 0 auto;
 }
+@-webkit-keyframes bouncedelay
+{
+  0% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+  40% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+  80% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+  100% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+}
+@keyframes bouncedelay
+{
+  0% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+  40% {
+    -webkit-transform: scale(1, 1);
+    transform: scale(1, 1);
+  }
+  80% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+  100% {
+    -webkit-transform: scale(0, 0);
+    transform: scale(0, 0);
+  }
+}
 .loading-animate .object
 {
   display: inline-block;
 
-  width: 0.3rem;
-  height: 0.3rem;
-  padding: 1px;
+  width: 0.34rem;
+  height: 0.34rem;
+  -webkit-border-radius: 100%;
   border-radius: 100%;
 
   background-color: #fff;
-  -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
-  animation: bouncedelay 1.4s infinite ease-in-out;
+  /*-webkit-animation: bouncedelay 1.4s infinite ease-in-out;
+  animation: bouncedelay 1.4s infinite ease-in-out;*/
+  -webkit-animation-name: bouncedelay;
+  animation-name: bouncedelay;
+  -webkit-animation-duration: 1.4s;
+  -webkit-animation-timing-function: ease-in-out;
+  animation-timing-function: ease-in-out;
+  -webkit-animation-delay: 0s;
+  animation-delay: 0s;
+  -webkit-animation-iteration-count: infinite;
+  animation-iteration-count: infinite;
+  -webkit-animation-direction: normal;
+  animation-direction: normal;
   /* Prevent first frame from flickering when animation starts */
   -webkit-animation-fill-mode: none;
   animation-fill-mode: none;
-}
-@-webkit-keyframes bouncedelay
-{
-  0%, 80%, 100% { -webkit-transform: scale(0.0) }
-  40% { -webkit-transform: scale(1.0) }
-}
-@keyframes bouncedelay
-{
-  0%, 80%, 100% {
-    transform: scale(0.0);
-    -webkit-transform: scale(0.0);
-  } 40% {
-    transform: scale(1.0);
-    -webkit-transform: scale(1.0);
-  }
 }
 .loading-content .object1
 {

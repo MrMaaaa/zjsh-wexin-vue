@@ -1,8 +1,8 @@
 <template>
 <div>
-  <img class="logo" v-if="AppName === '助家生活'" src="../../assets/images/logo_zhujiashenghuo.png">
-  <img class="logo" v-if="AppName === '快递上门'" src="../../assets/images/logo_kuaidishangmen.png">
-  <img class="logo" v-if="AppName === '同城家政'" src="../../assets/images/logo_tongchengjiazheng.png">
+  <img class="logo" v-if="AppName === '助家生活'" src="../../../assets/static/images/logo_zhujiashenghuo.png">
+  <img class="logo" v-if="AppName === '快递上门'" src="../../../assets/static/images/logo_kuaidishangmen.png">
+  <img class="logo" v-if="AppName === '同城家政'" src="../../../assets/static/images/logo_tongchengjiazheng.png">
   <span class="app-name">{{ AppName }}</span>
   <article class="content">
     <p>为什么选择{{ AppName }}？<br>{{ AppName }}，成立于2014年，是杭州芸瑾网络科技有限公司旗下的生活服务O2O平台。服务覆盖全国48个城市，平台认证服务者上万人，迄今已为超过100万的用户提供优质服务。</p>
