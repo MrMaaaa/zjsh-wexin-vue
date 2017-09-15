@@ -3,7 +3,7 @@
   <div class="wrapper" @click="$emit('confirm-finish')"></div>
 
   <div class="container">
-    <header class="container-title">确认完成<img class="btn-close" @click="$emit('confirm-finish')" src="../../assets/images/close.png"></header>
+    <header class="container-title">确认完成<img class="btn-close" @click="$emit('confirm-finish')" src="../../assets/images/close2.png"></header>
     <p class="container-desc">{{ orderTitle }}</p>
     <a class="btn-submit" :class="{ disable: isSubmit == '0' }" @click="orderConfirm">服务已完成</a>
     <router-link class="btn-complaint" :to="{ name: 'order_complaint_reason', params: { orderId: orderId } }">服务遇到问题？</router-link>

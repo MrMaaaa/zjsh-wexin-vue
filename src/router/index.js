@@ -111,7 +111,7 @@ let router = new Router({
     name: 'sf_activity',
     component: SFActivity,
   }, {
-    path: '/service/detail/',
+    path: '/menu/index/detail/:id',
     name: 'service_detail',
     component: ServiceDetail
   }, {
@@ -119,7 +119,7 @@ let router = new Router({
     name: 'recommend_more',
     component: RecommendMoreServiceDetail
   }, {
-    path: '/order/order_place',
+    path: '/menu/order/order_place',
     name: 'order_place',
     component: OrderPlace
   }, {

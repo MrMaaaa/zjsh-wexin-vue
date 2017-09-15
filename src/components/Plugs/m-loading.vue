@@ -3,9 +3,9 @@
     <div class="loading-content">
       <div class="loading-txt txt-top" v-if="txtTop">{{ txtTop }}</div>
       <div class="loading-animate flex-row">
-        <div class="object object1"></div>
+        <!-- <div class="object object1"></div>
         <div class="object object2"></div>
-        <div class="object object3"></div>
+        <div class="object object3"></div> -->
       </div>
       <div class="loading-txt txt-bottom" v-if="txtBottom">{{ txtBottom }}</div>
     </div>
@@ -53,7 +53,7 @@ export default {
   top: 50%;
   left: 50%;
 
-  padding: 20px;
+  padding: 0.266667rem;
   -webkit-border-radius: 4px;
   border-radius: 4px;
 
@@ -76,6 +76,35 @@ export default {
   margin-top: 0.266667rem;
 }
 .loading-content .loading-animate
+{
+  position: relative;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin: 0 auto;
+  font-size: 10px;
+  text-indent: -9999rem;
+  border-radius: 50%;
+  border-top: 0.08rem solid rgba(255, 255, 255, 0.2);
+  border-right: 0.08rem solid rgba(255, 255, 255, 0.2);
+  border-bottom: 0.08rem solid rgba(255, 255, 255, 0.2);
+  border-left: 0.08rem solid #fff;
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+}
+@keyframes load8
+{
+  0%
+  {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100%
+  {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+/*.loading-content .loading-animate
 {
   width: 1.5rem;
   margin: 0 auto;
@@ -128,8 +157,6 @@ export default {
   border-radius: 100%;
 
   background-color: #fff;
-  /*-webkit-animation: bouncedelay 1.4s infinite ease-in-out;
-  animation: bouncedelay 1.4s infinite ease-in-out;*/
   -webkit-animation-name: bouncedelay;
   animation-name: bouncedelay;
   -webkit-animation-duration: 1.4s;
@@ -141,7 +168,6 @@ export default {
   animation-iteration-count: infinite;
   -webkit-animation-direction: normal;
   animation-direction: normal;
-  /* Prevent first frame from flickering when animation starts */
   -webkit-animation-fill-mode: none;
   animation-fill-mode: none;
 }
@@ -154,5 +180,5 @@ export default {
 {
   -webkit-animation-delay: -0.16s;
   animation-delay: -0.16s;
-}
+}*/
 </style>

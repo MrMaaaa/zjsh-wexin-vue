@@ -51,7 +51,7 @@ export default {
     }
 
     if(this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
-      this.wxConfig();
+      // this.wxConfig();
       // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
       if (this.OpenId == '') {
         this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
@@ -113,7 +113,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getAppName() {
@@ -205,6 +205,7 @@ body,
 .router-view
 {
   height: 100%;
+  background-color: #eef2f5;
 }
 .router-view
 {

@@ -3,7 +3,7 @@
   <div class="wrapper" @click="$emit('confirm-finish')"></div>
 
   <div class="evaluate-container">
-    <header class="container-title">评价本次服务<img class="btn-close" @click="$emit('evaluate-finish')" src="../../assets/images/close.png"></header>
+    <header class="container-title">评价本次服务<img class="btn-close" @click="$emit('evaluate-finish')" src="../../assets/images/close2.png"></header>
 
     <div class="container-main">
       <div class="main-stars">

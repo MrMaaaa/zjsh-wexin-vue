@@ -122,7 +122,7 @@
     </div>
   </div>
 
-  <div class="order-operation flex-row" v-if="orderDetail">
+  <div class="order-operation flex-row" v-if="orderDetail && showBtnPanel">
     <a class="btn oppo" @click="orderConfirmDialog" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'">确认订单</a>
     <a class="btn" @click="orderStatusAlter(3)" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'">删除订单</a>
     <a class="btn" @click="isEvaluate = '1'" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a>
@@ -192,13 +192,13 @@ export default {
     var responseTime = 15; // 修改translate距离的时间差
     var lastTime = new Date().getTime(); // 上一次修改的毫秒数
     // 以下代码参考自订单列表
-    this.$refs.sliderContainer.addEventListener('touchstart', event => {
-      this.touchStartX = event.targetTouches[0].pageX;
-      this.touchStartY = event.targetTouches[0].pageY;
-      this.$refs.tabIndex.classList.remove('trans');
-      this.$refs.orderStatus.classList.remove('trans');
-      this.$refs.orderInfo.classList.remove('trans');
-    });
+    // this.$refs.sliderContainer.addEventListener('touchstart', event => {
+    //   this.touchStartX = event.targetTouches[0].pageX;
+    //   this.touchStartY = event.targetTouches[0].pageY;
+    //   this.$refs.tabIndex.classList.remove('trans');
+    //   this.$refs.orderStatus.classList.remove('trans');
+    //   this.$refs.orderInfo.classList.remove('trans');
+    // });
     // this.$refs.sliderContainer.addEventListener('touchmove', event => {
     //   event.preventDefault();
 
@@ -226,17 +226,22 @@ export default {
     //     }
     //   }
     // });
-    this.$refs.sliderContainer.addEventListener('touchend', event => {
-      this.$refs.tabIndex.removeAttribute('style');
-      this.$refs.orderStatus.removeAttribute('style');
-      this.$refs.orderInfo.removeAttribute('style');
-      this.$refs.tabIndex.classList.add('trans');
-      this.$refs.orderStatus.classList.add('trans');
-      this.$refs.orderInfo.classList.add('trans');
-      if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
-        this.tabIndex = this.tabIndex == '0' ? '1' : '0';
-      }
-    });
+    // this.$refs.sliderContainer.addEventListener('touchend', event => {
+    //   this.$refs.tabIndex.removeAttribute('style');
+    //   this.$refs.orderStatus.removeAttribute('style');
+    //   this.$refs.orderInfo.removeAttribute('style');
+    //   this.$refs.tabIndex.classList.add('trans');
+    //   this.$refs.orderStatus.classList.add('trans');
+    //   this.$refs.orderInfo.classList.add('trans');
+    //   // if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
+    //   //   this.tabIndex = this.tabIndex == '0' ? '1' : '0';
+    //   // }
+    //   if(this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+    //     this.tabIndex = '1';
+    //   } else if(this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+    //     this.tabIndex = '0';
+    //   }
+    // });
   },
   activated() {
     this.orderId = this.$route.params.orderId;
@@ -477,6 +482,13 @@ export default {
   },
   computed: {
     ...mapState(['Token', 'ALERT_MSG']),
+    showBtnPanel() {
+      if (this.orderDetail.OrderBtnInfo.IsDisplayClientConfirmBtn == '1' || this.orderDetail.OrderBtnInfo.IsDisplayDeleteOrderBtn == '1' || this.orderDetail.OrderBtnInfo.IsDisplayGotoEvaluateBtn == '1' || this.orderDetail.OrderBtnInfo.IsDisplayAddServiceBtn == '1' || this.orderDetail.OrderBtnInfo.IsDisplayGotoPayBtn == '1') {
+        return true;
+      } else {
+        return false;
+      }
+    }
   },
   components: {
     OrderEvaluate,
@@ -546,9 +558,9 @@ $text-warn: #f56165;
   transform: translateZ(0);
   z-index: 10;
   width: 100%;
-  height: 1.066667rem;
+  height: 1.5rem;
   background-color: #fff;
-  box-shadow: 0 3px 3px #ddd;
+  box-shadow: 0 5px 16px #ebebeb;
   overflow: hidden;
   .header-title
   {
@@ -566,7 +578,7 @@ $text-warn: #f56165;
   .header-index
   {
     position: absolute;
-    bottom: 2px;
+    bottom: 0.146667rem;
     left: 0;
     width: 50%;
     height: 4px;
@@ -582,7 +594,7 @@ $text-warn: #f56165;
     {
       display: block;
       margin: 0 auto;
-      width: 50%;
+      width: 40%;
       height: 100%;
       background-color: $text-warn;
     }
@@ -590,8 +602,8 @@ $text-warn: #f56165;
   .header-more
   {
     position: absolute;
-    top: 0.2rem;
-    right: 0.2rem;
+    top: 0.4rem;
+    right: 0.4rem;
     z-index: 21;
     width: 0.586667rem;
   }
@@ -614,7 +626,7 @@ $text-warn: #f56165;
     height: 100%;
     box-sizing: border-box;
     padding-top: 2.213333rem;
-    padding-bottom: 2rem;
+    padding-bottom: 3.3rem;
     padding-left: 0.76rem;
     padding-right: 0.426667rem;
     background-color: #fff;
@@ -775,6 +787,7 @@ $text-warn: #f56165;
           }
           .desc-content
           {
+            color: $text-light;
             .tel
             {
               color: #27b8f3;
@@ -789,7 +802,7 @@ $text-warn: #f56165;
         bottom: 0;
         width: 0px;
         height: 100%;
-        border-left: 2px dashed #ccc;
+        border-left: 2px dotted #ccc;
       }
     }
   }
@@ -860,7 +873,7 @@ $text-warn: #f56165;
 {
   -webkit-justify-content: flex-end;
   justify-content: flex-end;
-  position: absolute;
+  position: fixed;
   bottom: 0;
   left: 0;
   z-index: 10;
@@ -872,14 +885,18 @@ $text-warn: #f56165;
   background-color: #fff;
   .btn
   {
-    display: block;
-    width: 3.0rem;
-    line-height: 100%;
-    padding: 0.3rem 0;
+    display: inline-block;
+    // width: 3.0rem;
+    width: auto;
+    height: 1.146667rem;
+    line-height: 1.146667rem;
+    padding: 0 0.893333rem;
+    //line-height: 100%;
+    // padding: 0.3rem 0;
     border: 1px solid $text-warn;
     border-radius: 3px;
     color: $text-warn;
-    font-size: 13px;
+    font-size: 16px;
     text-align: center;
     &:not(:first-child)
     {

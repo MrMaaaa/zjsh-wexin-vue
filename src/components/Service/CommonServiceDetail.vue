@@ -192,7 +192,7 @@ export default {
     };
     // 当服务id不同时刷新数据
     let oldId = this.threeId;
-    this.threeId = this.$route.query.id;
+    this.threeId = this.$route.query.id || this.$route.params.id;
     document.title = data[this.threeId].title;
     this.pageData = data[this.threeId];
     if(oldId !== this.threeId) {

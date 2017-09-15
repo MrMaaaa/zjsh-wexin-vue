@@ -237,6 +237,7 @@ export default {
             id: item.ServiceId
           },
           params: {
+            id: item.ServiceId,
             url: item.DetailUrl,
             img: item.LogoUrl ? item.LogoUrl[0] : '',
           }
@@ -646,16 +647,42 @@ export default {
   {
     box-sizing: border-box;
     width: 100%;
-    text-align: left;
+    text-align: center;
     .category-title
     {
-      margin-left: 0.426667rem;
       &::before,
       &::after
       {
         display: none;
       }
     }
+    .category-more
+      {
+        right: 0;
+        top: 100%;
+        width: 100%;
+        transform: translateY(-1.173333rem);
+        height: 1.173333rem;
+        line-height: 1.173333rem;
+        color: #666;
+        &::before
+        {
+          content: '查看';
+        }
+        &::after
+        {
+          content: '';
+          display: inline-block;
+          width: 0.106667rem;
+          height: 0.16rem;
+          margin-left: 5px;
+          background-image: url(../../assets/images/right.png);
+          background-size: 100%;
+          background-repeat: no-repeat;
+          font-size: 0;
+          vertical-align: middle;
+        }
+      }
   }
 }
 

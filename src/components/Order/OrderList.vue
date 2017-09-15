@@ -100,13 +100,13 @@ export default {
     this.isLoading = true;
     var responseTime = 15; // 修改translate距离的时间差
     var lastTime = new Date().getTime(); // 上一次修改的毫秒数
-    this.$refs.sliderContainer.addEventListener('touchstart', event => {
-      this.touchStartX = event.targetTouches[0].pageX;
-      this.touchStartY = event.targetTouches[0].pageY;
-      this.$refs.tabIndex.classList.remove('trans');
-      this.$refs.nowList.classList.remove('trans');
-      this.$refs.historyList.classList.remove('trans');
-    });
+    // this.$refs.sliderContainer.addEventListener('touchstart', event => {
+    //   this.touchStartX = event.targetTouches[0].pageX;
+    //   this.touchStartY = event.targetTouches[0].pageY;
+    //   this.$refs.tabIndex.classList.remove('trans');
+    //   this.$refs.nowList.classList.remove('trans');
+    //   this.$refs.historyList.classList.remove('trans');
+    // });
     // this.$refs.sliderContainer.addEventListener('touchmove', event => {
     //   // if(Math.abs(event.targetTouches[0].pageX - this.touchStartX) > screen.availWidth / 4) {
     //   // }
@@ -136,17 +136,22 @@ export default {
     //     }
     //   }
     // });
-    this.$refs.sliderContainer.addEventListener('touchend', event => {
-      this.$refs.tabIndex.removeAttribute('style');
-      this.$refs.nowList.removeAttribute('style');
-      this.$refs.historyList.removeAttribute('style');
-      this.$refs.tabIndex.classList.add('trans');
-      this.$refs.nowList.classList.add('trans');
-      this.$refs.historyList.classList.add('trans');
-      if (Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
-        this.tabIndex = this.tabIndex == '0' ? '1' : '0';
-      }
-    });
+    // this.$refs.sliderContainer.addEventListener('touchend', event => {
+    //   this.$refs.tabIndex.removeAttribute('style');
+    //   this.$refs.nowList.removeAttribute('style');
+    //   this.$refs.historyList.removeAttribute('style');
+    //   this.$refs.tabIndex.classList.add('trans');
+    //   this.$refs.nowList.classList.add('trans');
+    //   this.$refs.historyList.classList.add('trans');
+    //   // if (Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
+    //   //   this.tabIndex = this.tabIndex == '0' ? '1' : '0';
+    //   // }
+    //   if(this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+    //     this.tabIndex = '1';
+    //   } else if(this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+    //     this.tabIndex = '0';
+    //   }
+    // });
   },
   activated() {
     if (this.Token === '') {
@@ -527,9 +532,9 @@ $text-warn: #f56165;
     transform: translateZ(0);
     width: 100%;
     // height: 1.066667rem;
-    height: 1.2rem;
+    height: 1.5rem;
     background-color: #fff;
-    box-shadow: 0 3px 3px #ddd;
+    box-shadow: 0 5px 16px #ebebeb;
     overflow: hidden;
     .header-title
     {
@@ -547,7 +552,7 @@ $text-warn: #f56165;
     .header-index
     {
       position: absolute;
-      bottom: 2px;
+      bottom: 0.146667rem;
       left: 0;
       width: 50%;
       height: 4px;
@@ -563,7 +568,7 @@ $text-warn: #f56165;
       {
         display: block;
         margin: 0 auto;
-        width: 50%;
+        width: 40%;
         height: 100%;
         background-color: $text-warn;
       }
@@ -611,7 +616,7 @@ $text-warn: #f56165;
   }
   .order-list-able
   {
-    padding-top: 1.333333rem;
+    padding-top: 1.8rem;
     background-color: #eef2f5;
   }
   .order-list-empty
