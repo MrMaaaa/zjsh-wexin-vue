@@ -3,11 +3,13 @@
   <header class="order-header flex-row">
     <a class="header-title" :class="{ active: tabIndex == '0' }" @click="switchTab(0)">当前订单</a>
     <a class="header-title" :class="{ active: tabIndex == '1' }" @click="switchTab(1)">历史订单</a>
-    <i class="header-index trans" :class="{ right: tabIndex == '1' }" ref="tabIndex"></i>
+    <i class="header-index trans" :class="{ right: tabIndex == '1' }" ref="tabIndex">
+      <span class="index-line"></span>
+    </i>
   </header>
 
   <div class="order-content" ref="sliderContainer">
-    <div class="now-list trans" ref="nowList" :class="{ right: tabIndex == 1 }">
+    <div class="now-list trans" ref="nowList" :class="{ right: tabIndex == '1' }">
       <div class="list-placeholder"></div>
 
       <div class="order-list-able" v-show="orderNowList.length > 0">
@@ -25,7 +27,7 @@
       </div>
     </div>
 
-    <div class="history-list trans" ref="historyList" :class="{ right: tabIndex == 1 }">
+    <div class="history-list trans" ref="historyList" :class="{ right: tabIndex == '1' }">
       <div class="order-list-able" v-show="orderHistoryList.length > 0">
         <ul class="order-list">
           <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog"@order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderHistoryList"></order-item>
@@ -105,44 +107,44 @@ export default {
       this.$refs.nowList.classList.remove('trans');
       this.$refs.historyList.classList.remove('trans');
     });
-    this.$refs.sliderContainer.addEventListener('touchmove', event => {
-      var nowTime = new Date().getTime(); // 当前毫秒
-      if(nowTime - lastTime > responseTime) {
-        lastTime = nowTime;
-        if (Math.abs(event.targetTouches[0].pageY - this.touchStartY) <= 20) {
-          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
-            // 向左滑动
-            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
-            if (transDis > screen.availWidth) {
-              transDis = screen.availWidth;
-            }
-            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
-            this.$refs.nowList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-            this.$refs.historyList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
-            // 向右滑动
-            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
-            if (transDis > screen.availWidth) {
-              transDis = screen.availWidth;
-            }
-            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
-            this.$refs.nowList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-            this.$refs.historyList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-          }
-        }
-      }
-    });
+    // this.$refs.sliderContainer.addEventListener('touchmove', event => {
+    //   // if(Math.abs(event.targetTouches[0].pageX - this.touchStartX) > screen.availWidth / 4) {
+    //   // }
+    //   // event.preventDefault();
+    //   var nowTime = new Date().getTime(); // 当前毫秒
+    //   if (nowTime - lastTime > responseTime) {
+    //     lastTime = nowTime;
+    //     if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+    //       // 向左滑动
+    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+    //       if (transDis > screen.availWidth) {
+    //         transDis = screen.availWidth;
+    //       }
+    //       this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+    //       this.$refs.nowList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+    //       this.$refs.historyList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+    //     } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+    //       // 向右滑动
+    //       event.preventDefault();
+    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+    //       if (transDis > screen.availWidth) {
+    //         transDis = screen.availWidth;
+    //       }
+    //       this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+    //       this.$refs.nowList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+    //       this.$refs.historyList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+    //     }
+    //   }
+    // });
     this.$refs.sliderContainer.addEventListener('touchend', event => {
-      if (Math.abs(event.changedTouches[0].clientY - this.touchStartY) <= 20) {
-        this.$refs.tabIndex.removeAttribute('style');
-        this.$refs.nowList.removeAttribute('style');
-        this.$refs.historyList.removeAttribute('style');
-        this.$refs.tabIndex.classList.add('trans');
-        this.$refs.nowList.classList.add('trans');
-        this.$refs.historyList.classList.add('trans');
-        if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 3) {
-          this.tabIndex = this.tabIndex == '0' ? '1' : '0';
-        }
+      this.$refs.tabIndex.removeAttribute('style');
+      this.$refs.nowList.removeAttribute('style');
+      this.$refs.historyList.removeAttribute('style');
+      this.$refs.tabIndex.classList.add('trans');
+      this.$refs.nowList.classList.add('trans');
+      this.$refs.historyList.classList.add('trans');
+      if (Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
+        this.tabIndex = this.tabIndex == '0' ? '1' : '0';
       }
     });
   },
@@ -524,7 +526,8 @@ $text-warn: #f56165;
     z-index: 10;
     transform: translateZ(0);
     width: 100%;
-    height: 1.066667rem;
+    // height: 1.066667rem;
+    height: 1.2rem;
     background-color: #fff;
     box-shadow: 0 3px 3px #ddd;
     overflow: hidden;
@@ -548,7 +551,6 @@ $text-warn: #f56165;
       left: 0;
       width: 50%;
       height: 4px;
-      background-color: $text-warn;
       &.trans
       {
         transition: all .3s;
@@ -556,6 +558,14 @@ $text-warn: #f56165;
       &.right
       {
         transform: translateX(100%);
+      }
+      .index-line
+      {
+        display: block;
+        margin: 0 auto;
+        width: 50%;
+        height: 100%;
+        background-color: $text-warn;
       }
     }
   }
@@ -566,6 +576,7 @@ $text-warn: #f56165;
     left: 0;
     width: 100%;
     height: 100%;
+    -webkit-overflow-scrolling: touch;
     // min-height: 100%;
     // margin-top: 1.333333rem;
     overflow: hidden;
@@ -578,6 +589,7 @@ $text-warn: #f56165;
       width: 100%;
       height: 100%;
       overflow: scroll;
+      -webkit-overflow-scrolling: touch;
       &.right
       {
         transform: translateX(-100%);

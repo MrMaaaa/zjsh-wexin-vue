@@ -72,7 +72,7 @@ export default {
     }
     .menu-name
     {
-      display: inline-block;
+      display: block;
       line-height: 100%;
       margin-top: 0.146667rem;
     }

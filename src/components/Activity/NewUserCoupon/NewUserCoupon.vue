@@ -166,7 +166,7 @@ export default {
               "PhoneNumber": this.phoneNumber,
               "Password": '_fjw89odAAB_',
               "Captcha": this.captcha,
-              "DeviceId": ""
+              "DeviceId": "",
             })).then((res) => {
               this.isLoading = false;
               this.isDrawCoupon = true;

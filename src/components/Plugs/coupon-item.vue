@@ -21,9 +21,9 @@ couponTypeByVue: 0:未使用 1:已使用 2:已过期
       <p class="item-limit-service" v-else>全品类可用</p>
 
       <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
-    </div>
 
-    <span class="use-now">立即使用</span>
+      <span class="use-now">立即使用</span>
+    </div>
   </div>
 
   <div class="right" v-else>
@@ -119,7 +119,7 @@ export default {
 {
   box-sizing: border-box;
   height: 2.4rem;
-  margin: 0.32rem 0.32rem 0;
+  margin: 0.32rem 0;
   padding-top: 0.426667rem;
   padding-bottom: 0.32rem;
   border-left: 1px solid #eee;
@@ -167,6 +167,7 @@ export default {
   {
     flex-grow: 1;
     -webkit-flex-grow: 1;
+    position: relative;
     width: 1px;
     height: 100%;
     .item-info
@@ -174,37 +175,41 @@ export default {
       -webkit-flex: 1;
       flex: 1;
       width: 1px;
-    }
-    .item-title
-    {
-      line-height: 100%;
-      color: #333;
-      font-size: 18px;
-    }
-    .item-limit-service
-    {
-      line-height: 100%;
-      margin-top: 0.266667rem;
-      padding-right: 0.266667rem;
-      color: #666;
-      font-size: 11px;
-    }
-    .item-limit-date
-    {
-      line-height: 100%;
-      margin-top: 0.16rem;
-      color: #666;
-      font-size: 11px;
-    }
-    .use-now
-    {
-      height: 0.6rem;
-      line-height: 0.6rem;
-      margin-right: 0.2rem;
-      padding: 0 0.133333rem;
-      border: 1px solid #ab49ea;
-      border-radius: 0.3rem;
-      color: #ab49ea;
+      .item-title
+      {
+        line-height: 100%;
+        color: #333;
+        font-size: 18px;
+      }
+      .item-limit-service
+      {
+        width: 4.0rem;
+        line-height: 100%;
+        margin-top: 0.266667rem;
+        padding-right: 0.266667rem;
+        color: #666;
+        font-size: 11px;
+      }
+      .item-limit-date
+      {
+        line-height: 100%;
+        margin-top: 0.16rem;
+        color: #666;
+        font-size: 11px;
+      }
+      .use-now
+      {
+        position: absolute;
+        bottom: 0.133333rem;
+        right: 0;
+        line-height: 100%;
+        margin-top: 0.6rem;
+        margin-right: 0.2rem;
+        padding: 0.1rem 0.133333rem;
+        border: 1px solid #ab49ea;
+        border-radius: 0.3rem;
+        color: #ab49ea;
+      }
     }
   }
   .item-status

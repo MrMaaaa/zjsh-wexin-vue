@@ -37,8 +37,9 @@ export default {
   },
   activated() {
     this.couponListNoUsed.splice(0);
-    this.totalPrice = this.$route.params.totalPrice;
-    this.serviceId = this.$route.params.serviceId;
+    this.totalPrice = this.$route.query.totalPrice;
+    this.serviceId = this.$route.query.serviceId;
+    this.isPay = this.$route.query.isPay;
     this.getCouponList();
   },
   methods: {
@@ -46,7 +47,7 @@ export default {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token,
         ServiceId: this.serviceId,
-        IsPay: '1',
+        IsPay: this.isPay || '0',
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           let d = new Date().getTime();

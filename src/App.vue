@@ -37,6 +37,12 @@ export default {
     }
   },
   created() {
+    document.querySelector('body').addEventListener('touchmove', function(e) {
+      if (!document.querySelector('#app').contains(e.target)) {
+        e.preventDefault();
+      }
+    });
+
     this.getAppName();
 
     // 如果是微信浏览器下跳转到微信页面
@@ -203,7 +209,8 @@ body,
 .router-view
 {
   background-color: #eef2f5;
-  overflow: auto;
+  /*overflow: scroll;
+  -webkit-overflow-scrolling: touch;*/
 }
 /*.bounce-enter-active {
     animation: bounce-in .3s;
@@ -270,7 +277,7 @@ body,
   z-index: 9999;
   transform: translateZ(0) translateY(100%);
   width: 100%;
-  height: 100%;
+  height: 130%;
   background-color: #fff;
   transition: all .5s;
   opacity: 0;

@@ -90,10 +90,22 @@ export default {
     },
     submit() {
       this.isLoading = true;
+      var orderFrom = '210';
+      if (this.AppName == '助家生活') {
+        orderFrom = '210';
+      } else if (this.AppName == '同城家政') {
+        orderFrom = '215';
+      } else if (this.AppName == '快递上门') {
+        orderFrom = '211';
+      } else if (this.AppName == '曹操家政') {
+        orderFrom = '212';
+      } else if (this.AppName == '同城到家') {
+        orderFrom = '213';
+      }
       axios.post(API.QuickLogin, qs.stringify({
         LoginName: this.phoneNumber,
         Captcha: this.captcha,
-        RegisterSource: '210',
+        RegisterSource: orderFrom,
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {

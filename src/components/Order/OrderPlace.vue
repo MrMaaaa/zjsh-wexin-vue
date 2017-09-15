@@ -32,7 +32,7 @@
           <p class="info-price" v-else>{{ item.DepositAmount }}元订金</p>
         </div>
 
-        <img class="icon-selector" v-show="typeIndex != index" src="../../assets/images/orders_choose.png">
+        <img class="icon-selector" v-show="typeIndex != index" src="../../assets/images/address_unselected.png">
         <img class="icon-selector" v-show="typeIndex == index" src="../../assets/images/orders_pitch_on.png">
       </div>
     </li>
@@ -103,10 +103,10 @@
       <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
     </ul>
 
-    <div class="statistics-row flex-row">
+    <div class="statistics-row flex-row" @click="routeTo({ name: 'order_coupon_select', query: { totalPrice: totalPrice, serviceId: OrderInfo.FourServiceId, isPay: '0' } })">
       <span>红包</span>
 
-      <div class="flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: totalPrice, serviceId: OrderInfo.FourServiceId } })">
+      <div class="flex-row">
         <span class="txt-price" v-if="CouponSelected.NoUse === '0'">-￥{{ couponAmount | formatAmount }}</span>
         <span class="txt-price" v-else-if="CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
         <span class="txt-price" v-else>暂无可用红包</span>
@@ -215,9 +215,10 @@ export default {
     }
   },
   activated() {
-    // 重置服务时间
+    // 从订单页进来重置服务时间与备注
     if (this.$route.params.fromDetailPage === '1') {
       this.OrderInfo.DateTime = '';
+      this.OrderInfo.ServiceContent = '';
     }
 
     this.getUserAddress();
@@ -229,6 +230,7 @@ export default {
       this.serviceName = this.valueFromUrl('ServiceName');
 
       this.CouponSelected.NoUse = '1';
+      this.$store.commit('SetCouponSelected', this.CouponSelected);
       this.serviceList.splice(0);
       this.couponList.splice(0);
       this.getActivityServiceDetail();
@@ -238,6 +240,7 @@ export default {
       this.serviceId = this.$route.query.id;
       this.isActivity = this.$route.query.isActivity || '0';
       if(oldId !== this.serviceId || oldIsActivity !== this.isActivity) {
+        // 判断是否为活动id
         if(this.isActivity == '1') {
           this.getActivityServiceDetail();
         } else {
@@ -403,8 +406,9 @@ export default {
         maxDisCoupon.NoUse = '0';
         this.$store.commit('SetCouponSelected', maxDisCoupon);
       } else {
-        this.CouponSelected.NoUse = '1';
-        this.$store.commit('SetCouponSelected', this.CouponSelected);
+        this.$store.commit('SetCouponSelected', {
+          NoUse: '1',
+        });
       }
     },
     getUserAddress() {
@@ -556,6 +560,17 @@ export default {
       } else {
         this.isLoading = true;
         this.txtLoading = '正在提交订单……';
+        if(this.AppName == '助家生活') {
+          this.OrderInfo.OrderFrom = '210';
+        } else if(this.AppName == '同城家政') {
+          this.OrderInfo.OrderFrom = '215';
+        } else if(this.AppName == '快递上门') {
+          this.OrderInfo.OrderFrom = '211';
+        } else if(this.AppName == '曹操家政') {
+          this.OrderInfo.OrderFrom = '212';
+        } else if(this.AppName == '同城到家') {
+          this.OrderInfo.OrderFrom = '213';
+        }
         axios.post(API.SubmitOrder, qs.stringify({
           Token: this.Token,
           ServiceId: this.OrderInfo.FourServiceId,
@@ -599,7 +614,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'AppName', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
@@ -634,10 +649,11 @@ export default {
     },
     // 红包减免金额
     couponAmount() {
-      if(this.CouponSelected.NoUse === '1') {
+      if(this.CouponSelected.NoUse == '0') {
+        return Number(this.CouponSelected.CouponDetails[0].DiscountAmount) || 0;
         return 0;
       } else {
-        return Number(this.CouponSelected.CouponDetails[0].DiscountAmount) || 0;
+        return 0;
       }
     },
     // 支付金额
@@ -645,7 +661,7 @@ export default {
       // 是否使用一元赔付
       let oneSafeAmount = this.oneSafe.isUsed ? 1 : 0;
 
-      return this.totalPrice + oneSafeAmount - this.discountAmount - this.couponAmount;
+      return (this.totalPrice * 100 + oneSafeAmount * 100 - this.discountAmount * 100 - this.couponAmount * 100) / 100;
     },
   },
   filters: {
@@ -656,7 +672,7 @@ export default {
       } else {
         return a.split('.')[0] + '.' + (a.split('.')[1].length === 1 ? a.split('.')[1] + '0' : a.split('.')[1]);
       }
-    }
+    },
   },
   components: {
     OrderServiceTime,
@@ -675,7 +691,7 @@ export default {
         this.couponList.splice(0);
         this.getActivityServiceDetail(this.valueFromUrl('ServiceId'));
       }
-    }
+    },
   }
 }
 </script>
@@ -984,6 +1000,7 @@ export default {
   bottom: 0;
   left: 0;
   transform: translateZ(0);
+  -webkit-overflow-scroll: touch;
   width: 100%;
   height: 1.6rem;
   line-height: 1.6rem;

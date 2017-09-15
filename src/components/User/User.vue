@@ -64,14 +64,10 @@
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_relation.png">
 
-        <span class="section-name">助家小秘书</span>
+        <span class="section-name">联系客服</span>
       </div>
 
-      <div class="flex-row">
-        <span class="section-tips">客户服务和意见反馈</span>
-
-        <img class="section-icon-link" src="../../assets/images/link.png">
-      </div>
+      <img class="section-icon-link" src="../../assets/images/link.png">
     </a>
   </section>
 
@@ -109,15 +105,15 @@ export default {
       },
       DialogConfig: { //对话框配置信息
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
-        DialogTitle: '注销确认', // 对话框标题
-        DialogContent: '确定注销账号吗？', // 对话框内容
+        DialogTitle: '温馨提示', // 对话框标题
+        DialogContent: '确定要退出登录吗？', // 对话框内容
         DialogBtns: ['取消', '确定'], // 对话框按钮文本
       },
     }
   },
   mounted() {
     window.easemobim = window.easemobim || {};
-    easemobim.config = {
+    window.easemobim.config = {
       configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
       hideKeyboard: true,
       visitor: {
@@ -250,6 +246,10 @@ export default {
   .user-group
   {
     margin-top: 0.373333rem;
+    &.logout
+    {
+      margin-top: 0.746667rem;
+    }
     .user-section
     {
       padding: 0.226667rem 0.4rem 0.226667rem 0.426667rem;

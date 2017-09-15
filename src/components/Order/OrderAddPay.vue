@@ -212,28 +212,29 @@ export default {
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
-            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          } else if(browser.versions.android) {
-            var WVJBIframe = document.createElement('iframe');
-            document.title = '支付';
-            WVJBIframe.setAttribute('id', 'alipay');
-            WVJBIframe.setAttribute('frameborder', 'no');
-            WVJBIframe.setAttribute('border', '0');
-            WVJBIframe.setAttribute('width', '100%');
-            WVJBIframe.setAttribute('height', '100%');
-            WVJBIframe.id = 'alipay';
-            WVJBIframe.frameborder = 'no';
-            WVJBIframe.border = '0';
-            WVJBIframe.width = '100%';
-            WVJBIframe.height = '100%';
-            WVJBIframe.style.position = 'fixed';
-            WVJBIframe.style.top = '0';
-            WVJBIframe.style.left = '0';
-            WVJBIframe.style.backgroundColor = '#fff';
-            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            document.documentElement.appendChild(WVJBIframe);
-          }
+          window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          // if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+          //   window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          // } else if(browser.versions.android) {
+          //   var WVJBIframe = document.createElement('iframe');
+          //   document.title = '支付';
+          //   WVJBIframe.setAttribute('id', 'alipay');
+          //   WVJBIframe.setAttribute('frameborder', 'no');
+          //   WVJBIframe.setAttribute('border', '0');
+          //   WVJBIframe.setAttribute('width', '100%');
+          //   WVJBIframe.setAttribute('height', '100%');
+          //   WVJBIframe.id = 'alipay';
+          //   WVJBIframe.frameborder = 'no';
+          //   WVJBIframe.border = '0';
+          //   WVJBIframe.width = '100%';
+          //   WVJBIframe.height = '100%';
+          //   WVJBIframe.style.position = 'fixed';
+          //   WVJBIframe.style.top = '0';
+          //   WVJBIframe.style.left = '0';
+          //   WVJBIframe.style.backgroundColor = '#fff';
+          //   WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          //   document.documentElement.appendChild(WVJBIframe);
+          // }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -408,6 +409,7 @@ export default {
       input
       {
         padding: 0.453333rem 0;
+        font-size: 16px;
         text-align: right;
       }
     }
@@ -443,6 +445,7 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
+    -webkit-overflow-scroll: touch;
     width: 100%;
     height: 1.946667rem;
     border-top: 1px solid #eef2f5;

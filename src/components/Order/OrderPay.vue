@@ -1,6 +1,6 @@
 <template>
 <div class="wrapper">
-  <section class="countdown" v-show="orderDetail.OrderId && countdownTime > 0">
+  <section class="countdown" v-show="orderDetail && orderDetail.OrderId && countdownTime > 0">
     <span class="countdown-title">支付剩余时间</span><span class="countdown-time">{{ countdownTime | payCountdown }}</span>
     <img class="countdown-icon" @click="countdownDialogOpen" src="../../assets/images/pay_alert.png">
   </section>
@@ -9,14 +9,14 @@
     <img class="status-img" src="../../assets/images/order_pay_icon.png">
 
     <div class="status-info">
-      <div class="info-amount" v-if="orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">￥{{ orderDetail.DepositInfo.DepositAmount | formatAmount }}</div>
-      <div class="info-amount" v-else>￥{{ orderDetail.TotalPrice | formatAmount }}</div>
-      <div class="info-name" v-if="orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">订金</div>
-      <div class="info-name" v-else-if="orderDetail.Service">{{ orderDetail.Service.ServiceName }}</div>
+      <div class="info-amount" v-if="orderDetail && orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">￥{{ orderDetail.DepositInfo.DepositAmount | formatAmount }}</div>
+      <div class="info-amount" v-else-if="orderDetail">￥{{ orderDetail.TotalPrice | formatAmount }}</div>
+      <div class="info-name" v-if="orderDetail && orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">订金</div>
+      <div class="info-name" v-else-if="orderDetail && orderDetail.Service">{{ orderDetail.Service.ServiceName }}</div>
     </div>
   </section>
 
-  <section class="order-info" v-if="orderDetail.OrderId && (orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '1' || !orderDetail.DepositInfo)">
+  <section class="order-info" v-if="orderDetail && orderDetail.OrderId && (orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '1' || !orderDetail.DepositInfo)">
     <div class="info-deposit flex-row" v-if="orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '1'">
       <div class="left">已付定金</div>
       <div class="right">-￥{{ orderDetail.DepositInfo.DepositAmount }}</div>
@@ -30,7 +30,7 @@
 
     <div class="pay-split" v-if="activityList.length > 0"></div>
 
-    <div class="info-coupon flex-row" @click="routeTo({ name: 'order_coupon_select', params: { totalPrice: orderDetail.TotalPrice || orderDetail.PayAmount, serviceId: orderDetail.Service.ServiceId } })">
+    <div class="info-coupon flex-row" @click="routeTo({ name: 'order_coupon_select', query: { totalPrice: orderDetail.TotalPrice || orderDetail.PayAmount, serviceId: orderDetail.Service.ServiceId, isPay: '1' } })">
       <div class="left">红包</div>
 
       <div class="right flex-row">
@@ -41,7 +41,7 @@
     </div>
   </section>
 
-  <section class="order-pay-way" v-if="orderDetail.OrderId">
+  <section class="order-pay-way">
     <div class="pay-way-select flex-row" @click="selectPayWay(0)">
       <div class="left">
         <img class="pay-way-icon" src="../../assets/images/pay_ye.png"><span>账户余额支付<span class="user-balance">余额{{ balance | formatAmount }}元</span></span>
@@ -73,7 +73,7 @@
     </div>
   </section>
 
-  <section class="order-btn" v-show="orderDetail.OrderId">
+  <section class="order-btn" v-show="orderDetail && orderDetail.OrderId">
     <a class="btn-pay" @click="orderPay">确认支付￥{{ payAmount | formatAmount }}</a>
   </section>
 
@@ -96,7 +96,7 @@ export default {
       orderId: '',
       balance: '0', // 余额
       discountAmount: 0, // 活动折扣金额
-      orderDetail: {},
+      orderDetail: null,
       isBalancePay: '0',
       isWxPay: '0',
       isZfbPay: '0',
@@ -135,7 +135,11 @@ export default {
     let oldId = this.orderId;
     this.orderId = this.$route.params.orderId;
     if(oldId !== this.orderId) {
-      this.CouponSelected.NoUse = '1'; // 需要先设置红包为不可用，避免上一次的红包带来的错误
+      // 需要先设置红包为不可用，避免上一次的红包带来的错误
+      this.$store.commit('SetCouponSelected', {
+        NoUse: '1',
+      });
+
       this.getOrderDetail();
       this.getUserSettlement();
       this.isBalancePay = '0';
@@ -179,18 +183,22 @@ export default {
                 }
               }, 1000);
             }
-            this.getServiceActivity();
-            this.getCouponList(this.orderDetail.Service.ServiceId);
+
+            // 订金不参与活动与红包
+            if(!this.orderDetail.DepositInfo || this.orderDetail.DepositInfo.DepositIsPayOff == '1') {
+              this.getServiceActivity(this.orderDetail.TotalPrice);
+              this.getCouponList(this.orderDetail.Service.ServiceId);
+            }
           }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isLoading = false;
-        this.alert(this.ALERT_MSG.NET_ERROR);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
-    getServiceActivity() {
+    getServiceActivity(originPrice) {
       this.activityList.splice(0);
       this.orderDetail.ActivityNgs.ServiceTypeRules.map(value => {
         value.Details.map(val => {
@@ -198,7 +206,7 @@ export default {
             upp = 0;
           val.Rules.map(v => {
             // 计算当前优惠规则的最大折扣
-            if (v.Upper >= upp && v.Upper <= this.orderDetail.PayAmount) {
+            if (Number(v.Upper) >= upp && Number(v.Upper) <= Number(originPrice)) {
               upp = Number(v.Upper);
               dis = Number(v.Minus);
             }
@@ -259,7 +267,7 @@ export default {
           res.data.Body.CouponList.forEach((value, index) => {
             this.couponList.push(value);
           });
-          this.getCouponMaxAmount(Number(this.orderDetail.TotalPrice || this.orderDetail.PayAmount));
+          this.getCouponMaxAmount(Number(this.orderDetail.TotalPrice || Number(this.orderDetail.PayAmount)));
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -280,14 +288,11 @@ export default {
       // 选择最大红包
       if (maxDisCoupon) {
         maxDisCoupon.NoUse = '0';
-        Object.keys(maxDisCoupon).map(value => {
-          this.CouponSelected[value] = maxDisCoupon[value];
-        });
+        this.$store.commit('SetCouponSelected', maxDisCoupon);
       } else {
-        Object.keys(this.CouponSelected).map(value => {
-          this.CouponSelected[value] = '';
+        this.$store.commit('SetCouponSelected', {
+          NoUse: '1',
         });
-        this.CouponSelected.NoUse = '1';
       }
     },
     countdownDialogOpen() {
@@ -465,28 +470,29 @@ export default {
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
-            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          } else if(browser.versions.android) {
-            var WVJBIframe = document.createElement('iframe');
-            document.title = '支付';
-            WVJBIframe.setAttribute('id', 'alipay');
-            WVJBIframe.setAttribute('frameborder', 'no');
-            WVJBIframe.setAttribute('border', '0');
-            WVJBIframe.setAttribute('width', '100%');
-            WVJBIframe.setAttribute('height', '100%');
-            WVJBIframe.id = 'alipay';
-            WVJBIframe.frameborder = 'no';
-            WVJBIframe.border = '0';
-            WVJBIframe.width = '100%';
-            WVJBIframe.height = '100%';
-            WVJBIframe.style.position = 'fixed';
-            WVJBIframe.style.top = '0';
-            WVJBIframe.style.left = '0';
-            WVJBIframe.style.backgroundColor = '#fff';
-            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            document.documentElement.appendChild(WVJBIframe);
-          }
+          window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          // if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+          //   window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          // } else if(browser.versions.android) {
+          //   var WVJBIframe = document.createElement('iframe');
+          //   document.title = '支付';
+          //   WVJBIframe.setAttribute('id', 'alipay');
+          //   WVJBIframe.setAttribute('frameborder', 'no');
+          //   WVJBIframe.setAttribute('border', '0');
+          //   WVJBIframe.setAttribute('width', '100%');
+          //   WVJBIframe.setAttribute('height', '100%');
+          //   WVJBIframe.id = 'alipay';
+          //   WVJBIframe.frameborder = 'no';
+          //   WVJBIframe.border = '0';
+          //   WVJBIframe.width = '100%';
+          //   WVJBIframe.height = '100%';
+          //   WVJBIframe.style.position = 'fixed';
+          //   WVJBIframe.style.top = '0';
+          //   WVJBIframe.style.left = '0';
+          //   WVJBIframe.style.backgroundColor = '#fff';
+          //   WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
+          //   document.documentElement.appendChild(WVJBIframe);
+          // }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -513,7 +519,7 @@ export default {
           isBalancePay: '0',
         }
       } else {
-        if(Number(this.balance) < Number(this.orderDetail.PayAmount)) {
+        if(Number(this.balance) < Number(this.orderDetail ? this.orderDetail.PayAmount : 0)) {
           return {
             isMultiple: '1',
             isBalancePay: '1',
@@ -535,27 +541,31 @@ export default {
     },
     // 需要支付的总价（减去红包与折扣）
     payAmount() {
-      if(this.orderDetail.DepositInfo && this.orderDetail.DepositInfo.DepositIsPayOff == '0') {
-        return this.orderDetail.DepositInfo.DepositAmount;
-      } else {
-        if (this.CouponSelected.NoUse == '1') {
-          return Number(this.orderDetail.PayAmount);
+      if(this.orderDetail) {
+        if (this.orderDetail.DepositInfo && this.orderDetail.DepositInfo.DepositIsPayOff == '0') {
+          return this.orderDetail.DepositInfo.DepositAmount;
         } else {
-          var coupon = this.CouponSelected.CouponDetails ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0;
-          return (Number(this.orderDetail.PayAmount) * 100 - Number(coupon) * 100) / 100;
+          if (this.CouponSelected.NoUse == '1') {
+            return Number(Number(this.orderDetail.TotalPrice) * 100 - this.discountAmount * 100) / 100;
+          } else {
+            var coupon = this.CouponSelected.CouponDetails ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0;
+            return (Number(this.orderDetail.TotalPrice) * 100 - Number(coupon) * 100 - this.discountAmount * 100) / 100;
+          }
         }
       }
     },
-    //
+    // 需要支付的总价（不包含折扣，但是包含红包，用来只使用微信或支付宝支付时传的参数，不能用来展示）
     totalPayAmount() {
-      if(this.orderDetail.DepositInfo && this.orderDetail.DepositInfo.DepositIsPayOff == '0') {
-        return this.orderDetail.DepositInfo.DepositAmount;
-      } else {
-        if (this.CouponSelected.NoUse == '1') {
-          return Number(this.orderDetail.TotalPrice);
+      if (this.orderDetail) {
+        if (this.orderDetail.DepositInfo && this.orderDetail.DepositInfo.DepositIsPayOff == '0') {
+          return this.orderDetail.DepositInfo.DepositAmount;
         } else {
-          var coupon = this.CouponSelected.CouponDetails ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0;
-          return (Number(this.orderDetail.TotalPrice) * 100 - Number(coupon) * 100) / 100;
+          if (this.CouponSelected.NoUse == '1') {
+            return Number(this.orderDetail.TotalPrice);
+          } else {
+            var coupon = this.CouponSelected.CouponDetails ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0;
+            return (Number(this.orderDetail.TotalPrice) * 100 - Number(coupon) * 100) / 100;
+          }
         }
       }
     },
@@ -567,22 +577,22 @@ export default {
         return 0;
       } else if(this.isBalancePay == '0' && (this.isZfbPay == '1' || this.isWxPay == '1')) {
         // 不用余额
-        if (this.CouponSelected.NoUse == '1') {
-          return this.totalPayAmount - this.balanceAmount;
-        } else {
-          var coupon = this.CouponSelected.CouponDetails ? Number(this.CouponSelected.CouponDetails[0].DiscountAmount) : 0;
-          return (this.totalPayAmount * 100 - coupon * 100 - this.balanceAmount * 100) / 100;
-        }
+        return this.totalPayAmount - this.balanceAmount;
+        // if (this.CouponSelected.NoUse == '1') {
+        //   return this.totalPayAmount - this.balanceAmount;
+        // } else {
+        //   var coupon = this.CouponSelected.CouponDetails ? Number(this.CouponSelected.CouponDetails[0].DiscountAmount) : 0;
+        //   return (this.totalPayAmount * 100 - coupon * 100 - this.balanceAmount * 100) / 100;
+        // }
       } else {
         // 混合支付
-        return Number((this.payAmount - this.balanceAmount).toFixed(2));
+        return Number((this.totalPayAmount - this.balanceAmount).toFixed(2));
       }
     },
     balanceAmount() {
-      var coupon = this.CouponSelected.NoUse == '0' ? Number(this.CouponSelected.CouponDetails[0].DiscountAmount) : 0;
       if(this.isBalancePay == '1' && this.isZfbPay == '0' && this.isWxPay == '0') {
         // 只用余额
-        return (this.totalPayAmount * 100 - coupon * 100) / 100;
+        return this.totalPayAmount;
       } else if(this.isBalancePay == '0' && (this.isZfbPay == '1' || this.isWxPay == '1')) {
         // 不用余额
         return 0;
@@ -665,7 +675,9 @@ export default {
     -webkit-justify-content: initial;
     justify-content: initial;
     padding: 0.333333rem 0.426667rem;
-    background-color: #fff;
+    background-image: url(../../../assets/static/images/order_pay_bg.png);
+    background-repeat: no-repeat;
+    background-size: 100%;
     color: #333639;
     .status-img
     {
@@ -768,6 +780,7 @@ export default {
     position: fixed;
     bottom: 0;
     left: 0;
+    -webkit-overflow-scroll: touch;
     width: 100%;
     height: 1.946667rem;
     border-top: 1px solid #eef2f5;

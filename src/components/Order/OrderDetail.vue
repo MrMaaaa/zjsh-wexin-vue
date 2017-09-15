@@ -3,7 +3,9 @@
   <header class="order-header flex-row">
     <a class="header-title" :class="{ active: tabIndex == '0' }" @click="switchTab(0)">订单状态</a>
     <a class="header-title" :class="{ active: tabIndex == '1' }" @click="switchTab(1)">订单信息</a>
-    <i class="header-index trans" :class="{ toggle: tabIndex == '1' }" ref="tabIndex"></i>
+    <i class="header-index trans" :class="{ toggle: tabIndex == '1' }" ref="tabIndex">
+      <span class="index-line"></span>
+    </i>
 
     <img class="header-more" @click="isMoreOperate='1'" src="../../assets/images/more.png">
   </header>
@@ -22,16 +24,18 @@
             <i class="step-icon"></i>
             <div class="step-desc">
               <div class="desc-status">{{ step.Status }}</div>
-              <div class="desc-content">{{ step.Description }}</div>
+              <div class="desc-content" v-if="step.Description1">{{ step.Description1 }}<a class="tel" :href="'tel:' + step.OrderProviderInfo.PhoneNumber">{{ step.OrderProviderInfo.PhoneNumber }}</a> {{ step.Description2 }}</div>
+              <div class="desc-content" v-else>{{ step.Description }}</div>
             </div>
           </section>
 
           <section class="next-step flex-row" v-if="orderStatus.NextStatus.Status">
-            <div class="step-time" :class="{ hide: !orderStatus.NextStatus.CountDown || orderStatus.NextStatus.CountDown <= 0 }">{{ orderStatus.NextStatus.CountDown | formatCountDown }}</div>
+            <div class="step-time" :class="{ hide: !countdownTime || countdownTime <= 0 }">{{ countdownTime | formatCountDown }}</div>
             <i class="step-icon flex-row"><i class="step-inner-icon"></i></i>
             <div class="step-desc">
               <div class="desc-status">{{ orderStatus.NextStatus.Status }}</div>
-              <div class="desc-content">{{ orderStatus.NextStatus.Description }}</div>
+              <div class="desc-content" v-if="orderStatus.NextStatus.Description1">{{ orderStatus.NextStatus.Description1 }}<a class="tel" :href="'tel:' + orderStatus.NextStatus.OrderProviderInfo.PhoneNumber">{{ orderStatus.NextStatus.OrderProviderInfo.PhoneNumber }}</a> {{ orderStatus.NextStatus.Description2 }}</div>
+              <div class="desc-content" v-else>{{ orderStatus.NextStatus.Description }}</div>
             </div>
           </section>
           <i class="group-line"></i>
@@ -122,7 +126,8 @@
     <a class="btn oppo" @click="orderConfirmDialog" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'">确认订单</a>
     <a class="btn" @click="orderStatusAlter(3)" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'">删除订单</a>
     <a class="btn" @click="isEvaluate = '1'" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'">评价订单</a>
-    <a class="btn oppo" @click="orderPay()" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoPayBtn === '1'">立即支付</a>
+    <a class="btn oppo" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayAddServiceBtn === '1'" @click="orderAddPay">￥增加服务</a>
+    <a class="btn oppo" @click="orderPay" v-if="orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayGotoPayBtn === '1'">立即支付</a>
   </div>
 
   <div class="order-more" v-show="isMoreOperate=='1'">
@@ -130,8 +135,8 @@
 
     <div class="more-content">
       <a class="content-btn" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'>联系客服</a>
-      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayCancelOrderBtn" @click="orderCancel">取消订单</a>
-      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayComplaintsBtn" @click="orderComplaint">投诉</a>
+      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayCancelOrderBtn === '1'" @click="orderCancel">取消订单</a>
+      <a class="content-btn" v-if="orderDetail && orderDetail.IsKdEOrder !== '1' && orderDetail.OrderBtnInfo.IsDisplayComplaintsBtn === '1'" @click="orderComplaint">投诉</a>
     </div>
   </div>
 
@@ -166,6 +171,7 @@ export default {
       loadingBgStyle: '1',
       isLoading: true,
       dialogType: 0,
+      countdownTime: 0,
       interval: null, // 计时器
       DialogConfig: { // 对话框配置信息
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
@@ -193,33 +199,33 @@ export default {
       this.$refs.orderStatus.classList.remove('trans');
       this.$refs.orderInfo.classList.remove('trans');
     });
-    this.$refs.sliderContainer.addEventListener('touchmove', event => {
-      var nowTime = new Date().getTime(); // 当前毫秒
-      if(nowTime - lastTime > responseTime) {
-        lastTime = nowTime;
-        if (Math.abs(event.targetTouches[0].pageY - this.touchStartY) <= 20) {
-          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
-            // 向左滑动
-            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
-            if (transDis > screen.availWidth) {
-              transDis = screen.availWidth;
-            }
-            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
-            this.$refs.orderStatus.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-            this.$refs.orderInfo.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
-            // 向右滑动
-            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
-            if (transDis > screen.availWidth) {
-              transDis = screen.availWidth;
-            }
-            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
-            this.$refs.orderStatus.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-            this.$refs.orderInfo.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-          }
-        }
-      }
-    });
+    // this.$refs.sliderContainer.addEventListener('touchmove', event => {
+    //   event.preventDefault();
+
+    //   var nowTime = new Date().getTime(); // 当前毫秒
+    //   if(nowTime - lastTime > responseTime) {
+    //     lastTime = nowTime;
+    //     if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+    //       // 向左滑动
+    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+    //       if (transDis > screen.availWidth) {
+    //         transDis = screen.availWidth;
+    //       }
+    //       this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+    //       this.$refs.orderStatus.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+    //       this.$refs.orderInfo.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+    //     } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+    //       // 向右滑动
+    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+    //       if (transDis > screen.availWidth) {
+    //         transDis = screen.availWidth;
+    //       }
+    //       this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+    //       this.$refs.orderStatus.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+    //       this.$refs.orderInfo.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+    //     }
+    //   }
+    // });
     this.$refs.sliderContainer.addEventListener('touchend', event => {
       this.$refs.tabIndex.removeAttribute('style');
       this.$refs.orderStatus.removeAttribute('style');
@@ -227,7 +233,7 @@ export default {
       this.$refs.tabIndex.classList.add('trans');
       this.$refs.orderStatus.classList.add('trans');
       this.$refs.orderInfo.classList.add('trans');
-      if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 3) {
+      if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
         this.tabIndex = this.tabIndex == '0' ? '1' : '0';
       }
     });
@@ -242,7 +248,7 @@ export default {
     switchTab(index) {
       this.tabIndex = index + '';
     },
-    getOrderStatus() {
+    getOrderStatus(callback) {
       this.isLoading = true;
       axios.post(API.TrackOrderStatus, qs.stringify({
         Token: this.Token,
@@ -251,16 +257,37 @@ export default {
         this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
           this.orderStatus = res.data.Body;
-          this.orderStatus.NextStatus.CountDown = Math.ceil(this.orderStatus.NextStatus.CountDown);
-          if(this.orderStatus.NextStatus.CountDown && this.orderStatus.NextStatus.CountDown > 0) {
+
+          var reg = /1[3|4|5|7|8][0-9]\d{8}/ig;
+          this.orderStatus.DateStatus.forEach(value => {
+            value.Status.forEach(val => {
+              if (reg.test(val.Description)) {
+                var phone = val.Description.match(reg);
+                val.Description1 = val.Description.split(phone)[0];
+                val.Description2 = val.Description.split(phone)[1];
+              }
+            });
+          });
+          if(this.orderStatus.NextStatus.Description && reg.test(this.orderStatus.NextStatus.Description)) {
+            var phone = this.orderStatus.NextStatus.Description.match(reg);
+            this.orderStatus.NextStatus.Description1 = this.orderStatus.NextStatus.Description.split(phone)[0];
+            this.orderStatus.NextStatus.Description2 = this.orderStatus.NextStatus.Description.split(phone)[1];
+          }
+
+          this.countdownTime = Math.ceil(this.orderStatus.NextStatus.CountDown || 0);
+          var originTime = Number(new Date().getTime() + this.countdownTime * 1000);
+          if(this.countdownTime > 0) {
+            clearInterval(this.interval);
             this.interval = setInterval(() => {
-              this.orderStatus.NextStatus.CountDown -= 1;
-              if(this.orderStatus.NextStatus.CountDown <= 0) {
+              if(this.countdownTime <= 0) {
                 this.getOrderStatus();
                 clearInterval(this.interval);
+              } else {
+                this.countdownTime = Math.round((originTime - new Date().getTime()) / 1000);
               }
             }, 1000);
           }
+          callback && callback();
           this.getOrderDetail();
         } else {
           this.alert(res.data.Meta.ErrorMsg);
@@ -283,7 +310,7 @@ export default {
           // 环信，发送订单数据
           let that = this;
           window.easemobim = window.easemobim || {};
-          easemobim.config = {
+          window.easemobim.config = {
             configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
             hideKeyboard: true,
             visitor: {
@@ -296,7 +323,7 @@ export default {
               email: ''
             },
             onready: function() {
-              easemobim.sendExt({
+              window.easemobim.sendExt({
                 ext: {
                   "imageName": "",
                   //custom代表自定义消息，无需修改
@@ -423,7 +450,9 @@ export default {
       if(status) {
         if (status.ErrorCode == '0') {
           this.alert('确认成功');
-          this.getOrderStatus();
+          this.getOrderStatus(() => {
+            this.isEvaluate = '1';
+          });
         } else {
           this.alert(status.ErrorMsg);
         }
@@ -432,6 +461,14 @@ export default {
     orderPay() {
       this.$router.push({
         name: 'order_pay',
+        params: {
+          orderId: this.orderId
+        }
+      });
+    },
+    orderAddPay() {
+      this.$router.push({
+        name: 'order_add_pay',
         params: {
           orderId: this.orderId
         }
@@ -533,7 +570,6 @@ $text-warn: #f56165;
     left: 0;
     width: 50%;
     height: 4px;
-    background-color: $text-warn;
     &.trans
     {
       transition: all .3s;
@@ -541,6 +577,14 @@ $text-warn: #f56165;
     &.toggle
     {
       transform: translateX(100%);
+    }
+    .index-line
+    {
+      display: block;
+      margin: 0 auto;
+      width: 50%;
+      height: 100%;
+      background-color: $text-warn;
     }
   }
   .header-more
@@ -560,6 +604,7 @@ $text-warn: #f56165;
   width: 100%;
   height: 100%;
   overflow: hidden;
+  -webkit-overflow-scrolling: touch;
   .order-status
   {
     position: absolute;
@@ -575,6 +620,7 @@ $text-warn: #f56165;
     background-color: #fff;
     color: $text-light;
     overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
     &.trans
     {
       transition: all .3s;
@@ -590,7 +636,20 @@ $text-warn: #f56165;
       {
         -webkit-justify-content: initial;
         justify-content: initial;
+        position: relative;
         margin-bottom: 0.533333rem;
+        &::before
+        {
+          content: '';
+          position: absolute;
+          left: 2.5rem;
+          top: 0;
+          z-index: 1;
+          display: block;
+          width: 0.133333rem;
+          height: 50%;
+          background-color: #fff;
+        }
         .title-time
         {
           flex-basis: 1.9rem;
@@ -600,7 +659,7 @@ $text-warn: #f56165;
         .title-icon
         {
           position: relative;
-          z-index: 2;
+          z-index: 10;
           margin: 0 0.533333rem;
         }
         .step-line
@@ -645,13 +704,33 @@ $text-warn: #f56165;
           {
             font-size: 15px;
           }
+          .desc-content
+          {
+            .tel
+            {
+              color: #27b8f3;
+            }
+          }
         }
       }
       .next-step
       {
         -webkit-justify-content: initial;
         justify-content: initial;
+        position: relative;
         color: $text-normal;
+        &::after
+        {
+          content: '';
+          position: absolute;
+          left: 2.5rem;
+          bottom: 0;
+          z-index: 1;
+          display: block;
+          width: 0.133333rem;
+          height: 50%;
+          background-color: #fff;
+        }
         &:not(:first-child)
         {
           margin-top: 1.08rem;
@@ -670,7 +749,7 @@ $text-warn: #f56165;
         {
           justify-content: center;
           position: relative;
-          z-index: 1;
+          z-index: 10;
           width: 0.3rem;
           height: 0.3rem;
           margin: 0 0.52rem;
@@ -693,6 +772,13 @@ $text-warn: #f56165;
           .desc-status
           {
             font-size: 15px;
+          }
+          .desc-content
+          {
+            .tel
+            {
+              color: #27b8f3;
+            }
           }
         }
       }
@@ -777,6 +863,7 @@ $text-warn: #f56165;
   position: absolute;
   bottom: 0;
   left: 0;
+  z-index: 10;
   box-sizing: border-box;
   width: 100%;
   height: 1.946667rem;
@@ -786,9 +873,9 @@ $text-warn: #f56165;
   .btn
   {
     display: block;
-    width: 2.0rem;
+    width: 3.0rem;
     line-height: 100%;
-    padding: 0.2rem 0;
+    padding: 0.3rem 0;
     border: 1px solid $text-warn;
     border-radius: 3px;
     color: $text-warn;

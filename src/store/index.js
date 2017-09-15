@@ -94,15 +94,15 @@ export default new Vuex.Store({
 
     // 路由-标题映射表
     ROUTER_TO_TITLE: {
-      index: '搜上门服务，用',
+      index: '',
       activity: '活动列表',
       order: '订单列表',
-      user: '我的信息',
-      black_friday: '‘折’就是爱',
+      user: '我的',
+      black_friday: '超级星期五',
       sf_activity: '一字不写发快递',
       service_detail: '服务详情',
       recommend_more: '更多',
-      order_place: '我要下单',
+      order_place: '提交订单',
       order_detail: '订单详情',
       order_complaint_reason: '投诉理由',
       order_cancel_reason: '取消理由',

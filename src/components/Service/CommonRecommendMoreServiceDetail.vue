@@ -89,6 +89,11 @@ export default {
 <style scoped lang="scss">
 $text-normal: #333639;
 $text-light: #666;
+.router-view
+{
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+}
 .service
 {
   margin-top: 0.266667rem;

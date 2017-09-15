@@ -832,11 +832,12 @@ export default {
 .slide-leave-to
 {
   transform: translateY(220px);
+  opacity: 0;
 }
 .slide-enter-active,
 .slide-leave-active
 {
-  transition: all 0.3s;
+  transition: all .3s;
 }
 </style>
 <style>

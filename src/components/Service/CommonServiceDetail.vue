@@ -1,7 +1,7 @@
 <template>
 <div>
   <a class="icon-customer-service" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'></a>
-  <div v-if="pageData">
+  <div class="service-detail" v-if="pageData">
     <header class="header-img">
         <img :src="pageData.headImg">
     </header>
@@ -129,10 +129,10 @@
           </div>
       </div>
     </div>
+  </div>
 
-    <div class="btn-wrapper">
-       <button type="button" class="order-button btn btn-warn" @click="subumitForWx">立即预约</button>
-    </div>
+  <div class="btn-wrapper">
+     <button type="button" class="order-button btn btn-warn" @click="subumitForWx">立即预约</button>
   </div>
 </div>
 </template>
@@ -157,7 +157,7 @@ export default {
   activated() {
     let that = this;
     window.easemobim = window.easemobim || {};
-    easemobim.config = {
+    window.easemobim.config = {
       configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
       hideKeyboard: true,
       visitor: {
@@ -172,8 +172,7 @@ export default {
       onready: function() {
         var img = that.$route.params.img || '';
         var url = that.$route.params.url || '';
-        console.log(url);
-        easemobim.sendExt({
+        window.easemobim.sendExt({
           ext: {
             "imageName": "abc.png",
             //custom代表自定义消息，无需修改
@@ -236,7 +235,7 @@ export default {
             fromDetailPage: '1',
           },
           query: {
-            id: this.threeId
+            id: this.threeId,
           }
         }, false);
       } else {
@@ -267,14 +266,23 @@ export default {
 {
   position: relative;
   box-sizing: border-box;
-  padding-bottom: 2.0rem;
   font-size: 14px;
+}
+.service-detail
+{
+  position: relative;
+  box-sizing: border-box;
+  height: 100%;
+  padding-bottom: 2.2rem;
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 .icon-customer-service
 {
-  position: absolute;
+  position: fixed;
   top: 0.266667rem;
   right: 0.266667rem;
+  z-index: 10;
   display: block;
   width: 0.533333rem;
   height: 0.533333rem;
@@ -581,6 +589,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
+  z-index: 10;
   transform: translateZ(0);
 
   width: 100%;

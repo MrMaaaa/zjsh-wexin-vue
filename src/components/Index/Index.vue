@@ -29,10 +29,10 @@
     </div>
   </section>
 
-  <section class="category clearning" v-for="recommend in recommendList">
+  <section class="category clearning" :style="{ 'padding-bottom': recommend.ServiceId == '1' ? 0 : '1.173333rem'}" v-for="recommend in recommendList">
     <header class="category-title">{{ recommend.Title }}</header>
 
-    <router-link class="category-more" :to="{ name: 'recommend_more', query: { id:recommend.ServiceId } }">更多</router-link>
+    <router-link class="category-more" v-if="recommend.ServiceId != '1'" :to="{ name: 'recommend_more', query: { id:recommend.ServiceId } }">更多</router-link>
 
     <ul class="category-list flex-row">
       <li class="category-item" v-for="item in recommend.Items" @click="routerTo(item)">
@@ -46,7 +46,7 @@
   </section>
 
   <section class="category convenience">
-    <header class="category-title">便民服务</header>
+    <header class="category-title">快递跑腿</header>
 
     <ul class="category-list flex-row">
       <li class="category-item" v-for="item in convenienceList" @click="routerTo(item)">
@@ -87,7 +87,7 @@ export default {
         Unit: '次',
       }, {
         ServiceName: '同城跑腿',
-        ServiceId: '21',
+        ServiceId: '59',
         icon: require('../../../assets/static/images/convenience_service_errand.png'),
         Price: '10',
         Unit: '次',
@@ -96,8 +96,8 @@ export default {
         notNextTick: true,
         slidesPerView: 'auto',
         centeredSlides: true,
-        loop: true,
-        autoplay: 3000,
+        loop: false,
+        autoplay: 3000000,
         autoplayDisableOnInteraction: false,
         pagination: '.swiper-pagination',
         onTransitionStart(swiper) {
@@ -108,11 +108,19 @@ export default {
   },
   created() {
     var type = '';
-    if(this.AppName === '助家生活' || this.AppName === '同城家政') {
+    if(this.AppName === '助家生活') {
       this.appName = 'name-zjsh';
+      type = '2';
+    } else if(this.AppName === '同城家政'){
+      this.appName = 'name-tcjz';
+      type = '2';
     } else if(this.AppName === '同城到家') {
       this.appName = 'name-tcdj';
       type = '2';
+    } else if(this.AppName === '快递上门') {
+      this.appName = 'name-kdsm';
+    } else if(this.AppName === '曹操家政') {
+      this.appName = 'name-ccjz';
     }
 
     this.shortcuts = [{
@@ -189,15 +197,17 @@ export default {
         Token: this.Token,
         IsNewVersion: '1',
       })).then(res => {
+        this.superDiscountList.Items.splice(0);
         if (res.data.Meta.ErrorCode === '0') {
-          this.superDiscountList.Items.splice(0);
           let list = res.data.Body;
           list.Items.forEach((value, index) => {
-            value.IconUrl = require('../../../assets/static/images/super_discount_' + index + '.png');
+            var type = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '2' : '';
+            var source = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '.jpg' : '.png';
+            value.IconUrl = require('../../../assets/static/images/super_discount' + type + '_' + index + source);
           });
           // this.superDiscountList.Title = list.Title;
-          this.superDiscountList.Title = this.appName == 'name-zjsh' ? '最优惠' : '为你推荐';
-          list.Items.map((value, index) => {
+          this.superDiscountList.Title = '最优惠';
+          list.Items.forEach((value, index) => {
             if(value.ServiceName == '小时工') {
               value.ServiceName += '3小时';
             }
@@ -240,16 +250,21 @@ export default {
           name: 'order_place',
           query: {
             id: item.ServiceId,
-            isActivity: '1'
-          }
+            isActivity: '1',
+          },
+          params: {
+            fromDetailPage: '1',
+          },
         });
       } else {
         this.$router.push({
           name: 'order_place',
           query: {
             id: item.ServiceId,
-            isActivity: '0'
-          }
+          },
+          params: {
+            fromDetailPage: '1',
+          },
         });
       }
     }
@@ -279,160 +294,27 @@ export default {
   -webkit-align-items: center;
   align-items: center;
   background-color: #eef2f5;
-  overflow: auto;
 }
 .router-view .menu-router-view.index-wrapper
 {
   padding-bottom: 1.6rem;
 }
-// 助家生活 同城家政样式
-.menu-router-view.index-wrapper.name-zjsh
+
+.swiper-pagination-fraction, .swiper-pagination-custom, .swiper-container-horizontal > .swiper-pagination-bullets
 {
-  @for $item from 0 to 10 {
-    .list-item#{$item}
-    {
-      -webkit-order: $item;
-      order: $item;
-    }
-  }
-  .category
-  {
-    width: 100%;
-    &.clearning
-    {
-      -webkit-order: 2;
-      order: 2;
-    }
-    &.convenience
-    {
-      -webkit-order: 4;
-      order: 4;
-    }
-  }
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+}
+.swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet
+{
+  margin: 2px;
+}
+.swiper-pagination-bullet
+{
+  display: inline-block;
 }
 
-// 同城到家样式
-.menu-router-view.index-wrapper.name-tcdj
-{
-  .swiper-pagination
-  {
-    display: inline-block;
-    left: 50%;
-    transform: translateX(-50%);
-    width: auto;
-    border-radius: 7px;
-    background-color: rgba(0,0,0,.2);
-  }
-  // @for $item from 0 to 10 {
-  //   .list-item#{$item}
-  //   {
-  //     -webkit-order: $item;
-  //     order: $item;
-  //   }
-  // }
-  .shortcut
-  {
-    -webkit-order: 1;
-    order: 1;
-    margin-top: 0.266667rem;
-    .shortcut-list
-    {
-      .list-item
-      {
-        -webkit-order: 2;
-        order: 2;
-        &.list-item8
-        {
-          order: 0;
-        }
-        &.list-item9
-        {
-          order: 1;
-        }
-        .item-img
-        {
-          background: transparent;
-        }
-      }
-    }
-  }
-  .super-discount
-  {
-    -webkit-order: 0;
-    order: 0;
-    margin-top: 0;
-  }
-  .category
-  {
-    width: 100%;
-    &.clearning
-    {
-      -webkit-order: 4;
-      order: 4;
-      padding-bottom: 1.173333rem;
-      .category-list
-      {
-        .category-item
-        {
-          .item-unit-price
-          {
-            color: #f56165;
-            font-size: 15px;
-          }
-        }
-      }
-      .category-more
-      {
-        right: 0;
-        top: 100%;
-        width: 100%;
-        transform: translateY(-1.173333rem);
-        height: 1.173333rem;
-        line-height: 1.173333rem;
-        color: #999;
-        &::before
-        {
-          content: '查看'
-        }
-      }
-    }
-    &.convenience
-    {
-      -webkit-order: 2;
-      order: 2;
-    }
-  }
-}
-
-// 快递上门样式
-.menu-router-view.index-wrapper.name-kdsm
-{
-  @for $item from 0 to 10 {
-    .list-item#{$item}
-    {
-      -webkit-order: 10 - $item;
-      order: 10 - $item;
-    }
-  }
-  .category
-  {
-    &.clearning
-    {
-      -webkit-order: 3;
-      order: 3;
-    }
-    &.appliance
-    {
-      -webkit-order: 4;
-      order: 4;
-    }
-    &.convenience
-    {
-      -webkit-order: 2;
-      order: 2;
-    }
-  }
-}
 .shortcut
 {
   -webkit-order: 0;
@@ -603,30 +485,6 @@ export default {
     }
   }
 }
-.swiper-pagination-fraction, .swiper-pagination-custom, .swiper-container-horizontal > .swiper-pagination-bullets
-{
-  bottom: 20px;
-  left: 0;
-  width: 100%;
-}
-.swiper-container-horizontal > .swiper-pagination-bullets .swiper-pagination-bullet
-{
-  margin: 2px;
-}
-.swiper-pagination-bullet
-{
-  display: inline-block;
-  width: 4px;
-  height: 4px;
-  border-radius: 100%;
-  background: #000;
-  opacity: 0.2;
-}
-.swiper-pagination-bullet-active
-{
-  background: #27b8f3;
-  opacity: 1;
-}
 .category
 {
   position: relative;
@@ -711,6 +569,240 @@ export default {
         }
       }
     }
+  }
+}
+
+// 助家生活、同城家政样式
+.menu-router-view.index-wrapper.name-zjsh,
+.menu-router-view.index-wrapper.name-tcjz
+{
+  @for $item from 0 to 10 {
+    .list-item#{$item}
+    {
+      -webkit-order: $item;
+      order: $item;
+    }
+  }
+  .category
+  {
+    width: 100%;
+    &.clearning
+    {
+      -webkit-order: 2;
+      order: 2;
+    }
+    &.convenience
+    {
+      -webkit-order: 4;
+      order: 4;
+    }
+  }
+  .shortcut
+  {
+    -webkit-order: 1;
+    order: 1;
+    margin-top: 0.266667rem;
+    .shortcut-list
+    {
+      .list-item
+      {
+        .item-img
+        {
+          background: transparent;
+        }
+      }
+    }
+  }
+  .super-discount
+  {
+    -webkit-order: 1;
+    order: 1;
+    width: 100%;
+    margin-top: 0.266667rem;
+    background-color: #fff;
+    text-align: center;
+    .discount-title
+    {
+      // height: 1.173333rem;
+      // line-height: 1.173333rem;
+      height: auto;
+      line-height: 100%;
+      padding-top: 0.32rem;
+      padding-bottom: 0.173333rem;
+    }
+    .slide-item
+    {
+      position: relative;
+      .swiper-icon
+      {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        padding: 0 0.32rem 0.213333rem;
+      }
+    }
+  }
+  .category
+  {
+    box-sizing: border-box;
+    width: 100%;
+    text-align: left;
+    .category-title
+    {
+      margin-left: 0.426667rem;
+      &::before,
+      &::after
+      {
+        display: none;
+      }
+    }
+  }
+}
+
+// 同城到家样式
+.menu-router-view.index-wrapper.name-tcdj
+{
+  // @for $item from 0 to 10 {
+  //   .list-item#{$item}
+  //   {
+  //     -webkit-order: $item;
+  //     order: $item;
+  //   }
+  // }
+  .shortcut
+  {
+    -webkit-order: 1;
+    order: 1;
+    .shortcut-list
+    {
+      .list-item
+      {
+        .item-img
+        {
+          background: transparent;
+        }
+      }
+    }
+  }
+  .category
+  {
+    width: 100%;
+    &.clearning
+    {
+      -webkit-order: 2;
+      order: 2;
+      padding-bottom: 1.173333rem;
+      .category-more
+      {
+        right: 0;
+        top: 100%;
+        width: 100%;
+        transform: translateY(-1.173333rem);
+        height: 1.173333rem;
+        line-height: 1.173333rem;
+        color: #999;
+        &::before
+        {
+          content: '查看'
+        }
+      }
+    }
+    &.convenience
+    {
+      -webkit-order: 3;
+      order: 3;
+    }
+  }
+}
+
+// 快递上门样式
+.menu-router-view.index-wrapper.name-kdsm
+{
+  // @for $item from 0 to 10 {
+  //   .list-item#{$item}
+  //   {
+  //     -webkit-order: 10 - $item;
+  //     order: 10 - $item;
+  //   }
+  // }
+  .list-item
+  {
+    -webkit-order: 1;
+    order: 1;
+  }
+  .list-item8
+  {
+    -webkit-order: 0;
+    order: 0;
+  }
+  .list-item9
+  {
+    -webkit-order: 0;
+    order: 0;
+  }
+  .category
+  {
+    &.clearning
+    {
+      -webkit-order: 3;
+      order: 3;
+    }
+    &.appliance
+    {
+      -webkit-order: 4;
+      order: 4;
+    }
+    &.convenience
+    {
+      -webkit-order: 2;
+      order: 2;
+    }
+  }
+}
+
+// 曹操家政样式
+.menu-router-view.index-wrapper.name-ccjz
+{
+  .super-discount
+  {
+    -webkit-order: 0;
+    order: 0;
+    width: 100%;
+    margin-top: 0;
+    background-color: #fff;
+    text-align: center;
+    .discount-title
+    {
+      // height: 1.173333rem;
+      // line-height: 1.173333rem;
+      height: auto;
+      line-height: 100%;
+      padding-top: 0.32rem;
+      padding-bottom: 0.173333rem;
+    }
+    .slide-item
+    {
+      position: relative;
+      .swiper-icon
+      {
+        box-sizing: border-box;
+        display: block;
+        width: 100%;
+        padding: 0 0.32rem 0.213333rem;
+      }
+    }
+
+  }
+  .shortcut
+  {
+    -webkit-order: 1;
+    order: 1;
+    margin-top: 0.266667rem;
+  }
+  .category
+  {
+    -webkit-order: 2;
+    order: 2;
   }
 }
 </style>
