@@ -15,7 +15,6 @@ import AddressAdd from '@/components/Address/AddressAdd';
 import AddressList from '@/components/Address/AddressList';
 import AddressEdit from '@/components/Address/AddressEdit';
 import AddressSelectInMap from '@/components/Address/AddressSelectInMap';
-import Login from '@/components/Login/Login';
 import About from '@/components/Index/About';
 import ConnectUs from '@/components/Index/ConnectUs';
 import OrderList from '@/components/Order/OrderList';
@@ -154,10 +153,6 @@ let router = new Router({
     path: '/order/order_coupon_select',
     name: 'order_coupon_select',
     component: OrderCouponSelect
-  }, {
-    path: '/login',
-    name: 'login',
-    component: Login
   }, {
     path: '/service/express',
     name: 'express',
