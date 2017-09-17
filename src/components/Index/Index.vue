@@ -602,7 +602,6 @@ export default {
   {
     -webkit-order: 1;
     order: 1;
-    margin-top: 0.266667rem;
     .shortcut-list
     {
       .list-item
