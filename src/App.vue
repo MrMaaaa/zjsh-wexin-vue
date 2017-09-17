@@ -278,10 +278,22 @@ body,
   z-index: 9999;
   transform: translateZ(0) translateY(100%);
   width: 100%;
-  height: 130%;
+  height: 100%;
   background-color: #fff;
   transition: all .5s;
   opacity: 0;
+}
+#module_login::after
+{
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9999;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
 }
 #module_login.active
 {

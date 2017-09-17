@@ -73,6 +73,7 @@ export default {
             id: item.ServiceId
           },
           params: {
+            id: item.ServiceId,
             url: item.DetailUrl,
             img: '',
           }

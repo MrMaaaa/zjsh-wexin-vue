@@ -32,11 +32,7 @@ export default {
     getActivityList() {
       axios.post(API.GetAds, qs.stringify({
         Token: this.Token,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
           this.activities = res.data.Body.Ads;

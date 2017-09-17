@@ -191,57 +191,69 @@ export default {
     this.isLoading = true;
     var responseTime = 15; // 修改translate距离的时间差
     var lastTime = new Date().getTime(); // 上一次修改的毫秒数
-    // 以下代码参考自订单列表
-    // this.$refs.sliderContainer.addEventListener('touchstart', event => {
-    //   this.touchStartX = event.targetTouches[0].pageX;
-    //   this.touchStartY = event.targetTouches[0].pageY;
-    //   this.$refs.tabIndex.classList.remove('trans');
-    //   this.$refs.orderStatus.classList.remove('trans');
-    //   this.$refs.orderInfo.classList.remove('trans');
-    // });
-    // this.$refs.sliderContainer.addEventListener('touchmove', event => {
-    //   event.preventDefault();
+    var isAcross = false; // 是否横向滑动
+    var isCheck = false; // 是否判断过是否为横向滑动
+    this.$refs.sliderContainer.addEventListener('touchstart', event => {
+      this.touchStartX = event.targetTouches[0].pageX;
+      this.touchStartY = event.targetTouches[0].pageY;
+      this.$refs.tabIndex.classList.remove('trans');
+      this.$refs.orderStatus.classList.remove('trans');
+      this.$refs.orderInfo.classList.remove('trans');
+    });
+    this.$refs.sliderContainer.addEventListener('touchmove', event => {
+      if(!isCheck && (Math.abs(event.targetTouches[0].pageY - this.touchStartY) > 10 || Math.abs(event.targetTouches[0].pageX - this.touchStartX) > 10)) {
+        isCheck = true;
+        if(this.isTouchAcross(Math.abs(event.targetTouches[0].pageY - this.touchStartY), Math.abs(event.targetTouches[0].pageX - this.touchStartX))) {
+          isAcross = true;
+        }
+      }
 
-    //   var nowTime = new Date().getTime(); // 当前毫秒
-    //   if(nowTime - lastTime > responseTime) {
-    //     lastTime = nowTime;
-    //     if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
-    //       // 向左滑动
-    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
-    //       if (transDis > screen.availWidth) {
-    //         transDis = screen.availWidth;
-    //       }
-    //       this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
-    //       this.$refs.orderStatus.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-    //       this.$refs.orderInfo.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-    //     } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
-    //       // 向右滑动
-    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
-    //       if (transDis > screen.availWidth) {
-    //         transDis = screen.availWidth;
-    //       }
-    //       this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
-    //       this.$refs.orderStatus.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-    //       this.$refs.orderInfo.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-    //     }
-    //   }
-    // });
-    // this.$refs.sliderContainer.addEventListener('touchend', event => {
-    //   this.$refs.tabIndex.removeAttribute('style');
-    //   this.$refs.orderStatus.removeAttribute('style');
-    //   this.$refs.orderInfo.removeAttribute('style');
-    //   this.$refs.tabIndex.classList.add('trans');
-    //   this.$refs.orderStatus.classList.add('trans');
-    //   this.$refs.orderInfo.classList.add('trans');
-    //   // if(Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
-    //   //   this.tabIndex = this.tabIndex == '0' ? '1' : '0';
-    //   // }
-    //   if(this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
-    //     this.tabIndex = '1';
-    //   } else if(this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
-    //     this.tabIndex = '0';
-    //   }
-    // });
+      if (isAcross) {
+        event.preventDefault();
+        var nowTime = new Date().getTime(); // 当前毫秒
+        if (nowTime - lastTime > responseTime) {
+          lastTime = nowTime;
+          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+            // 向左滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+            this.$refs.orderStatus.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+            this.$refs.orderInfo.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+            // 向右滑动
+            event.preventDefault();
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+            this.$refs.orderStatus.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+            this.$refs.orderInfo.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+          }
+        }
+      }
+    });
+    this.$refs.sliderContainer.addEventListener('touchend', event => {
+      if(isAcross) {
+        this.$refs.tabIndex.removeAttribute('style');
+        this.$refs.orderStatus.removeAttribute('style');
+        this.$refs.orderInfo.removeAttribute('style');
+        this.$refs.tabIndex.classList.add('trans');
+        this.$refs.orderStatus.classList.add('trans');
+        this.$refs.orderInfo.classList.add('trans');
+        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+          this.tabIndex = '1';
+        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+          this.tabIndex = '0';
+        }
+      }
+      // 每一次touch结束后初始化
+      isAcross = false;
+      isCheck = false;
+    });
   },
   activated() {
     this.orderId = this.$route.params.orderId;
@@ -252,6 +264,17 @@ export default {
   methods: {
     switchTab(index) {
       this.tabIndex = index + '';
+    },
+    isTouchAcross(x, y) {
+      x = Math.abs(x);
+      y = Math.abs(y);
+      var angle = Math.atan2(x, y) * 180 / Math.PI;
+      var touchCritical = 30;
+      if(angle <= touchCritical) {
+        return true;
+      } else {
+        return false;
+      }
     },
     getOrderStatus(callback) {
       this.isLoading = true;
@@ -556,7 +579,7 @@ $text-warn: #f56165;
   top: 0;
   left: 0;
   transform: translateZ(0);
-  z-index: 10;
+  z-index: 20;
   width: 100%;
   height: 1.5rem;
   background-color: #fff;
@@ -644,6 +667,18 @@ $text-warn: #f56165;
     .status-group
     {
       position: relative;
+      & section:last-of-type::after
+      {
+        content: '';
+        position: absolute;
+        left: 2.5rem;
+        bottom: 0;
+        z-index: 1;
+        display: block;
+        width: 0.133333rem;
+        height: 50%;
+        background-color: #fff;
+      }
       .group-title
       {
         -webkit-justify-content: initial;
@@ -688,6 +723,7 @@ $text-warn: #f56165;
       {
         -webkit-justify-content: initial;
         justify-content: initial;
+        position: relative;
         &:not(:first-child)
         {
           margin-top: 1.08rem;
@@ -700,6 +736,8 @@ $text-warn: #f56165;
         }
         .step-icon
         {
+          position: relative;
+          z-index: 10;
           display: block;
           width: 0.266667rem;
           height: 0.266667rem;
@@ -714,6 +752,7 @@ $text-warn: #f56165;
           width: 1px;
           .desc-status
           {
+            line-height: 100%;
             font-size: 15px;
           }
           .desc-content
@@ -731,18 +770,6 @@ $text-warn: #f56165;
         justify-content: initial;
         position: relative;
         color: $text-normal;
-        &::after
-        {
-          content: '';
-          position: absolute;
-          left: 2.5rem;
-          bottom: 0;
-          z-index: 1;
-          display: block;
-          width: 0.133333rem;
-          height: 50%;
-          background-color: #fff;
-        }
         &:not(:first-child)
         {
           margin-top: 1.08rem;
@@ -783,6 +810,7 @@ $text-warn: #f56165;
           width: 1px;
           .desc-status
           {
+            line-height: 100%;
             font-size: 15px;
           }
           .desc-content

@@ -3,20 +3,20 @@
   <header class="order-header flex-row">
     <a class="header-title" :class="{ active: tabIndex == '0' }" @click="switchTab(0)">当前订单</a>
     <a class="header-title" :class="{ active: tabIndex == '1' }" @click="switchTab(1)">历史订单</a>
-    <i class="header-index trans" :class="{ right: tabIndex == '1' }" ref="tabIndex">
+    <i class="header-index trans" :class="{ toggle: tabIndex == '1' }" ref="tabIndex">
       <span class="index-line"></span>
     </i>
   </header>
 
   <div class="order-content" ref="sliderContainer">
-    <div class="now-list trans" ref="nowList" :class="{ right: tabIndex == '1' }">
+    <div class="now-list trans" ref="nowList" :class="{ toggle: tabIndex == '1' }">
       <div class="list-placeholder"></div>
 
       <div class="order-list-able" v-show="orderNowList.length > 0">
         <ul class="order-list">
           <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderNowList"></order-item>
         </ul>
-        <infinite-loading :on-infinite="getNowOrderList"  ref="infiniteLoading1">
+        <infinite-loading @infinite="getNowOrderList"  ref="infiniteLoading1">
           <span class="no-result" slot="no-more">没有更多订单了</span>
         </infinite-loading>
       </div>
@@ -27,12 +27,12 @@
       </div>
     </div>
 
-    <div class="history-list trans" ref="historyList" :class="{ right: tabIndex == '1' }">
+    <div class="history-list trans" ref="historyList" :class="{ toggle: tabIndex == '1' }">
       <div class="order-list-able" v-show="orderHistoryList.length > 0">
         <ul class="order-list">
           <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog"@order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderHistoryList"></order-item>
         </ul>
-        <infinite-loading :on-infinite="getHistoryOrderList"  ref="infiniteLoading2">
+        <infinite-loading @infinite="getHistoryOrderList"  ref="infiniteLoading2">
           <span class="no-result" slot="no-more">没有更多订单了</span>
         </infinite-loading>
       </div>
@@ -100,58 +100,69 @@ export default {
     this.isLoading = true;
     var responseTime = 15; // 修改translate距离的时间差
     var lastTime = new Date().getTime(); // 上一次修改的毫秒数
-    // this.$refs.sliderContainer.addEventListener('touchstart', event => {
-    //   this.touchStartX = event.targetTouches[0].pageX;
-    //   this.touchStartY = event.targetTouches[0].pageY;
-    //   this.$refs.tabIndex.classList.remove('trans');
-    //   this.$refs.nowList.classList.remove('trans');
-    //   this.$refs.historyList.classList.remove('trans');
-    // });
-    // this.$refs.sliderContainer.addEventListener('touchmove', event => {
-    //   // if(Math.abs(event.targetTouches[0].pageX - this.touchStartX) > screen.availWidth / 4) {
-    //   // }
-    //   // event.preventDefault();
-    //   var nowTime = new Date().getTime(); // 当前毫秒
-    //   if (nowTime - lastTime > responseTime) {
-    //     lastTime = nowTime;
-    //     if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
-    //       // 向左滑动
-    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
-    //       if (transDis > screen.availWidth) {
-    //         transDis = screen.availWidth;
-    //       }
-    //       this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
-    //       this.$refs.nowList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-    //       this.$refs.historyList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
-    //     } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
-    //       // 向右滑动
-    //       event.preventDefault();
-    //       var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
-    //       if (transDis > screen.availWidth) {
-    //         transDis = screen.availWidth;
-    //       }
-    //       this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
-    //       this.$refs.nowList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-    //       this.$refs.historyList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
-    //     }
-    //   }
-    // });
-    // this.$refs.sliderContainer.addEventListener('touchend', event => {
-    //   this.$refs.tabIndex.removeAttribute('style');
-    //   this.$refs.nowList.removeAttribute('style');
-    //   this.$refs.historyList.removeAttribute('style');
-    //   this.$refs.tabIndex.classList.add('trans');
-    //   this.$refs.nowList.classList.add('trans');
-    //   this.$refs.historyList.classList.add('trans');
-    //   // if (Math.abs(event.changedTouches[0].clientX - this.touchStartX) >= screen.availWidth / 5) {
-    //   //   this.tabIndex = this.tabIndex == '0' ? '1' : '0';
-    //   // }
-    //   if(this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
-    //     this.tabIndex = '1';
-    //   } else if(this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
-    //     this.tabIndex = '0';
-    //   }
-    // });
+    var isAcross = false; // 是否横向滑动
+    var isCheck = false; // 是否判断过是否为横向滑动
+    this.$refs.sliderContainer.addEventListener('touchstart', event => {
+      this.touchStartX = event.targetTouches[0].pageX;
+      this.touchStartY = event.targetTouches[0].pageY;
+      this.$refs.tabIndex.classList.remove('trans');
+      this.$refs.nowList.classList.remove('trans');
+      this.$refs.historyList.classList.remove('trans');
+    });
+    this.$refs.sliderContainer.addEventListener('touchmove', event => {
+      if(!isCheck && (Math.abs(event.targetTouches[0].pageY - this.touchStartY) > 10 || Math.abs(event.targetTouches[0].pageX - this.touchStartX) > 10)) {
+        isCheck = true;
+        if(this.isTouchAcross(Math.abs(event.targetTouches[0].pageY - this.touchStartY), Math.abs(event.targetTouches[0].pageX - this.touchStartX))) {
+          isAcross = true;
+        }
+      }
+
+      if (isAcross) {
+        event.preventDefault();
+        var nowTime = new Date().getTime(); // 当前毫秒
+        if (nowTime - lastTime > responseTime) {
+          lastTime = nowTime;
+          if (this.tabIndex == '0' && event.targetTouches[0].pageX - this.touchStartX < 0) {
+            // 向左滑动
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX); // 计算滑动距离
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + transDis / 2 + 'px, 0px, 0px)';
+            this.$refs.nowList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+            this.$refs.historyList.style.transform = 'translate3d(-' + transDis + 'px, 0px, 0px)';
+          } else if (this.tabIndex == '1' && event.targetTouches[0].pageX - this.touchStartX > 0) {
+            // 向右滑动
+            event.preventDefault();
+            var transDis = Math.abs(event.targetTouches[0].pageX - this.touchStartX);
+            if (transDis > screen.availWidth) {
+              transDis = screen.availWidth;
+            }
+            this.$refs.tabIndex.style.transform = 'translate3d(' + (screen.availWidth - transDis) / 2 + 'px, 0px, 0px)';
+            this.$refs.nowList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+            this.$refs.historyList.style.transform = 'translate3d(-' + (screen.availWidth - transDis) + 'px, 0px, 0px)';
+          }
+        }
+      }
+    });
+    this.$refs.sliderContainer.addEventListener('touchend', event => {
+      if(isAcross) {
+        this.$refs.tabIndex.removeAttribute('style');
+        this.$refs.nowList.removeAttribute('style');
+        this.$refs.historyList.removeAttribute('style');
+        this.$refs.tabIndex.classList.add('trans');
+        this.$refs.nowList.classList.add('trans');
+        this.$refs.historyList.classList.add('trans');
+        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+          this.tabIndex = '1';
+        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+          this.tabIndex = '0';
+        }
+      }
+      // 每一次touch结束后初始化
+      isAcross = false;
+      isCheck = false;
+    });
   },
   activated() {
     if (this.Token === '') {
@@ -178,6 +189,17 @@ export default {
   methods: {
     switchTab(index) {
       this.tabIndex = index + '';
+    },
+    isTouchAcross(x, y) {
+      x = Math.abs(x);
+      y = Math.abs(y);
+      var angle = Math.atan2(x, y) * 180 / Math.PI;
+      var touchCritical = 30;
+      if(angle <= touchCritical) {
+        return true;
+      } else {
+        return false;
+      }
     },
     async getNowOrderList() {
       await axios.post(API.GetOrderListEx, qs.stringify({
@@ -528,7 +550,7 @@ $text-warn: #f56165;
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 10;
+    z-index: 20;
     transform: translateZ(0);
     width: 100%;
     // height: 1.066667rem;
@@ -560,7 +582,7 @@ $text-warn: #f56165;
       {
         transition: all .3s;
       }
-      &.right
+      &.toggle
       {
         transform: translateX(100%);
       }
@@ -595,7 +617,7 @@ $text-warn: #f56165;
       height: 100%;
       overflow: scroll;
       -webkit-overflow-scrolling: touch;
-      &.right
+      &.toggle
       {
         transform: translateX(-100%);
       }

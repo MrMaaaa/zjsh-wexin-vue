@@ -161,11 +161,13 @@ export default {
 {
   position: relative;
   background-color: #fff;
+  overflow: auto;
   .header-tab
   {
     position: fixed;
     top: 0;
     left: 0;
+    z-index: 20;
     width: 100%;
     box-sizing: border-box;
     padding: 0 0.533333rem;
