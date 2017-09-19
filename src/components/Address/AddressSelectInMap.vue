@@ -22,6 +22,8 @@
       <span class="item-address txt-over-hide">{{ item.address }}</span>
     </li>
   </ul>
+
+  <m-loading bg-style="2" v-show="isLoading"></m-loading>
 </div>
 </template>
 
@@ -46,10 +48,13 @@ export default {
       },
       map: null,
       marker: null,
+      isLoading: false,
     }
   },
   mounted() {
     let that = this;
+
+    this.isLoading = true;
 
     document.getElementById('map').style.height = parseInt(screen.height) + 'px';
 
@@ -93,6 +98,7 @@ export default {
       geolocation.getCurrentPosition(function(result) {
         if (this.getStatus() == BMAP_STATUS_SUCCESS) {
           that.point = result.point;
+          that.isLoading = false;
           if(callback) {
             callback();
           }
@@ -208,7 +214,7 @@ a
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 999;
+  z-index: 99;
   transform: translateZ(0);
 
   width: 100%;
@@ -265,13 +271,14 @@ a
   position: fixed;
   left: 0;
   bottom: 0;
+  z-index: 999;
   transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
 
   width: 100%;
   max-height: 135px;
 
   background-color: #fff;
-  z-index: 999;
   overflow-y: scroll;
 }
 

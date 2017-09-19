@@ -9,6 +9,8 @@
       <img v-show="activityStatus == '2' && btn_after" :src="btn_after" class="btn-submit" @click="showInfo('-1')">
     </div>
   </div>
+
+  <m-loading bg-style="1" v-show="isLoading"></m-loading>
 </div>
 </template>
 
@@ -19,7 +21,7 @@ import axios from 'axios';
 import qs from 'qs';
 
 export default {
-  name: 'activity',
+  name: 'black_friday',
   data() {
     return {
       bodyBgImg: '',
@@ -36,6 +38,7 @@ export default {
   },
   methods: {
     getActivityInfo() {
+      this.isLoading = true;
       axios.post(API.BlackFridayEx, qs.stringify({
       })).then(res => {
         this.isLoading = false;

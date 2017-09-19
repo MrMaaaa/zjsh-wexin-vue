@@ -97,7 +97,7 @@ export default {
         slidesPerView: 'auto',
         centeredSlides: true,
         loop: false,
-        autoplay: 3000000,
+        autoplay: 3000,
         autoplayDisableOnInteraction: false,
         pagination: '.swiper-pagination',
         onTransitionStart(swiper) {
@@ -108,7 +108,7 @@ export default {
   },
   created() {
     var type = '';
-    if(this.AppName === '助家生活') {
+    if(this.AppName === '助家生活' || this.AppName === '淘家家政') {
       this.appName = 'name-zjsh';
       type = '2';
     } else if(this.AppName === '同城家政'){
@@ -726,10 +726,23 @@ export default {
         transform: translateY(-1.173333rem);
         height: 1.173333rem;
         line-height: 1.173333rem;
-        color: #999;
+        color: #666;
         &::before
         {
-          content: '查看'
+          content: '查看';
+        }
+        &::after
+        {
+          content: '';
+          display: inline-block;
+          width: 0.106667rem;
+          height: 0.16rem;
+          margin-left: 5px;
+          background-image: url(../../assets/images/right.png);
+          background-size: 100%;
+          background-repeat: no-repeat;
+          font-size: 0;
+          vertical-align: middle;
         }
       }
     }

@@ -3,9 +3,6 @@
     <div class="loading-content">
       <div class="loading-txt txt-top" v-if="txtTop">{{ txtTop }}</div>
       <div class="loading-animate flex-row">
-        <!-- <div class="object object1"></div>
-        <div class="object object2"></div>
-        <div class="object object3"></div> -->
       </div>
       <div class="loading-txt txt-bottom" v-if="txtBottom">{{ txtBottom }}</div>
     </div>
@@ -33,7 +30,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 200;
+  z-index: 9999;
   transform: translateZ(0);
 
   width: 100%;
@@ -88,10 +85,10 @@ export default {
   border-right: 0.08rem solid rgba(255, 255, 255, 0.2);
   border-bottom: 0.08rem solid rgba(255, 255, 255, 0.2);
   border-left: 0.08rem solid #fff;
-  -webkit-animation: load8 1.1s infinite linear;
-  animation: load8 1.1s infinite linear;
+  -webkit-animation: linear m-loading-rotating 1.1s infinite;
+  animation: linear m-loading-rotating 1.1s infinite;
 }
-@keyframes load8
+@keyframes m-loading-rotating
 {
   0%
   {
@@ -100,85 +97,21 @@ export default {
   }
   100%
   {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
+    -webkit-transform: rotate(1turn);
+    transform: rotate(1turn);
   }
 }
-/*.loading-content .loading-animate
+@-webkit-keyframes m-loading-rotating
 {
-  width: 1.5rem;
-  margin: 0 auto;
-}
-@-webkit-keyframes bouncedelay
-{
-  0% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
+  0%
+  {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
   }
-  40% {
-    -webkit-transform: scale(1, 1);
-    transform: scale(1, 1);
-  }
-  80% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
-  }
-  100% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
+  100%
+  {
+    -webkit-transform: rotate(1turn);
+    transform: rotate(1turn);
   }
 }
-@keyframes bouncedelay
-{
-  0% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
-  }
-  40% {
-    -webkit-transform: scale(1, 1);
-    transform: scale(1, 1);
-  }
-  80% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
-  }
-  100% {
-    -webkit-transform: scale(0, 0);
-    transform: scale(0, 0);
-  }
-}
-.loading-animate .object
-{
-  display: inline-block;
-
-  width: 0.34rem;
-  height: 0.34rem;
-  -webkit-border-radius: 100%;
-  border-radius: 100%;
-
-  background-color: #fff;
-  -webkit-animation-name: bouncedelay;
-  animation-name: bouncedelay;
-  -webkit-animation-duration: 1.4s;
-  -webkit-animation-timing-function: ease-in-out;
-  animation-timing-function: ease-in-out;
-  -webkit-animation-delay: 0s;
-  animation-delay: 0s;
-  -webkit-animation-iteration-count: infinite;
-  animation-iteration-count: infinite;
-  -webkit-animation-direction: normal;
-  animation-direction: normal;
-  -webkit-animation-fill-mode: none;
-  animation-fill-mode: none;
-}
-.loading-content .object1
-{
-  -webkit-animation-delay: -0.32s;
-  animation-delay: -0.32s;
-}
-.loading-content .object2
-{
-  -webkit-animation-delay: -0.16s;
-  animation-delay: -0.16s;
-}*/
 </style>

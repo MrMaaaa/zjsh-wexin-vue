@@ -46,7 +46,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 10000;
   width: 100%;
   height: 1.333333rem;
   border-top: 1px solid #e4eaee;

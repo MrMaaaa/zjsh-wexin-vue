@@ -96,8 +96,8 @@
       </div>
       <div class="info-split"></div>
       <div class="operation-btns flex-row">
-        <a class="btn" v-if="orderDetail.IsPayOff === '0' && orderDetail.State > 0" @click="DialogConfig.IsDialog='1'">取消订单</a>
-        <a class="btn oppo" v-if="orderDetail.IsPayOff === '0' && orderDetail.State > 0" @click="orderPay(orderDetail)">支付</a>
+        <a class="btn" v-if="Number(orderDetail.State) > 0" @click="orderCancel">取消订单</a>
+        <a class="btn oppo" v-if="orderDetail.IsPayOff === '0' && Number(orderDetail.State) > 0" @click="orderPay">支付</a>
         <a class="btn oppo" v-if="orderDetail.State > 1" href="tel:4008-262-056">联系客服</a>
       </div>
     </div>
@@ -126,9 +126,9 @@ export default {
       isLoading: true,
       DialogConfig: {
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
-        DialogTitle: '取消订单', // 对话框标题
-        DialogContent: '确定取消订单吗？', // 对话框内容
-        DialogBtns: ['取消', '确定'], // 对话框按钮文本
+        DialogTitle: '', // 对话框标题
+        DialogContent: '', // 对话框内容
+        DialogBtns: [], // 对话框按钮文本
       },
     }
   },
@@ -167,7 +167,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message, 10000);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message, 10000);
       });
     },
     getOrderStatus(LogisticCode, ShipperCode) {
@@ -187,176 +187,49 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message, 10000);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message, 10000);
       });
     },
-    getCouponMaxAmount(serviceId, originPrice, callback) {
-      axios.post(API.GetCoupons, qs.stringify({
-        Token: this.Token,
-        ServiceId: serviceId,
-        IsPay: '1',
-      })).then(res => {
-        if (res.data.Meta.ErrorCode === '0') {
-          // 红包分类
-          let maxDisCoupon = null;
-          let maxDis = 0;
-          res.data.Body.CouponList.forEach((value, index) => {
-            if (maxDis <= value.CouponDetails[0].DiscountAmount && originPrice >= value.CouponDetails[0].Amount) {
-              maxDisCoupon = value;
-              maxDis = Number(value.CouponDetails[0].DiscountAmount);
-            }
-          });
-          this.couponMax = maxDisCoupon;
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
+    orderPay() {
+      this.$router.push({
+        name: 'order_pay',
+        params: {
+          orderId: this.orderId
         }
-        callback && callback();
-      }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPay(orderInfo) {
-      orderInfo.OrderId = this.orderId || orderInfo.OrderId;
-      this.isLoading = true;
-      this.loadingBgStyle = '2';
-      this.txtLoading = '';
-      let couponId = '';
-      this.getCouponMaxAmount('137', orderInfo.Price, () => {
-        let p = Number(orderInfo.Price);
-        if (this.couponMax) {
-          p -= this.couponMax.CouponDetails[0].DiscountAmount;
-          couponId = this.couponMax.Id;
-        }
-
-        if (this.OpenId) {
-          this.orderPayByWx(orderInfo.OrderId, p, couponId);
-        } else {
-          this.orderPayByAli(orderInfo.OrderId, p, couponId);
-        }
-      });
-    },
-    orderPayByWx(orderId, price, couponId) {
-      this.isLoading = true;
-      this.loadingBgStyle = '2';
-      this.txtLoading = '';
-      axios.post(API.GetWxpaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        PayFrom: '0', // 0:微信公众号 1:app
-        OpenId: this.OpenId,
-        WxPay: price,
-        BalancePay: '0',
-        CouponId: couponId || '',
-      })).then(res => {
-        this.isLoading = false;
-        const that = this;
-        if (res.data.Meta.ErrorCode === '0') {
-          function onBridgeReady() {
-            WeixinJSBridge.invoke(
-              'getBrandWCPayRequest', {
-                "appId": res.data.Body.WxpaySign.appid,
-                "timeStamp": res.data.Body.WxpaySign.timestamp,
-                "nonceStr": res.data.Body.WxpaySign.noncestr,
-                "package": res.data.Body.WxpaySign.package,
-                "signType": "MD5",
-                "paySign": res.data.Body.WxpaySign.sign
-              },
-              function(res) {
-                if (res.err_msg == "get_brand_wcpay_request:ok") {
-                  that.$router.push({
-                    name: 'order_pay_status',
-                    params: {
-                      orderId: orderId
-                    }
-                  });
-                } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
-                  that.alert(that.ALERT_MSG.PAY_ERROR);
-                } else {
-                  that.alert(res.err_msg);
-                }
-              }
-            );
-          }
-          if (typeof WeixinJSBridge == "undefined") {
-            if (document.addEventListener) {
-              document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
-            } else if (document.attachEvent) {
-              document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
-              document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
-            }
-          } else {
-            onBridgeReady();
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
-    },
-    orderPayByAli(orderId, price, couponId) {
-      this.isLoading = true;
-      this.bgLoading = '2';
-      this.txtLoading = '';
-      axios.post(API.GetAlipaySign, qs.stringify({
-        Token: this.Token,
-        OrderId: orderId,
-        CouponId: couponId,
-        Alipay: price,
-        BalancePay: '0',
-        SignType: 'web'
-      })).then(res => {
-        this.isLoading = false;
-        const that = this;
-        if (res.data.Meta.ErrorCode === '0') {
-          if(browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
-            window.location.href = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-          } else if(browser.versions.android) {
-            var WVJBIframe = document.createElement('iframe');
-            document.title = '支付';
-            WVJBIframe.setAttribute('id', 'alipay');
-            WVJBIframe.setAttribute('frameborder', 'no');
-            WVJBIframe.setAttribute('border', '0');
-            WVJBIframe.setAttribute('width', '100%');
-            WVJBIframe.setAttribute('height', '100%');
-            WVJBIframe.id = 'alipay';
-            WVJBIframe.frameborder = 'no';
-            WVJBIframe.border = '0';
-            WVJBIframe.width = '100%';
-            WVJBIframe.height = '100%';
-            WVJBIframe.style.position = 'fixed';
-            WVJBIframe.style.top = '0';
-            WVJBIframe.style.left = '0';
-            WVJBIframe.style.backgroundColor = '#fff';
-            // WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            WVJBIframe.src = res.data.Body.GATEWAY_NEW + res.data.Body.AlipaySign;
-            document.documentElement.appendChild(WVJBIframe);
-          }
-        } else {
-          this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
       });
     },
     orderCancel() {
-      axios.post(API.CancelOrderEx, qs.stringify({
-        Token: this.Token,
-        OrderId: this.orderId,
-      })).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
-          this.alert('取消成功');
-          this.orderStatusList.splice(0);
-          this.orderId = this.$route.params.orderId;
-          this.getOrderDetail();
-        } else {
-          this.alert(res.data.Meta.ErrorMsg, 2000);
+      if (this.orderDetail.IsPayOff == '0' && this.orderDetail.State == '1') {
+        this.$router.push({
+          name: 'order_cancel_reason',
+          params: {
+            orderId: this.orderId
+          }
+        });
+      } else {
+        this.DialogConfig = {
+          IsDialog: '1',
+          DialogTitle: '取消订单',
+          DialogContent: '您已完成支付，是否联系客服取消订单？',
+          DialogBtns: ['取消', '确定'],
+          DialogBtnsHref: ['javascript: void(0);', 'tel:4008-262-056']
         }
-      }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
-      });
+      }
+      // axios.post(API.CancelOrderEx, qs.stringify({
+      //   Token: this.Token,
+      //   OrderId: this.orderId,
+      // })).then(res => {
+      //   if(res.data.Meta.ErrorCode === '0') {
+      //     this.alert('取消成功');
+      //     this.orderStatusList.splice(0);
+      //     this.orderId = this.$route.params.orderId;
+      //     this.getOrderDetail();
+      //   } else {
+      //     this.alert(res.data.Meta.ErrorMsg, 2000);
+      //   }
+      // }).catch(err => {
+      //   this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      // });
     },
     orderProcess() {
       this.DialogConfig.IsDialog = '0';

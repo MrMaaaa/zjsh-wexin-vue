@@ -15,7 +15,7 @@ export default {
   // 发送验证码
   "SendCaptcha": wap + "api/v3/Helper/SendCaptcha",
 
-  // 通过Token获取用户信息
+  // 验证Token是否有效
   "VerifyToken": wap + "api/v3/helper/VerifyToken",
 
   // 快捷登录
@@ -89,6 +89,18 @@ export default {
 
   // 增项-微信支付
   "IodOfWxpay": wap + "api/v3/Order/IodOfWxpay",
+
+  // 充值列表
+  "GetReChargeListResponse": wap + "api/v3/Recharge/GetReChargeListResponse",
+
+  // 获取充值信息
+  "GetRechargeInfoByRechargeCode": wap + "api/v3/Recharge/GetRechargeInfoByRechargeCode",
+
+  // 判断是否满足一元首充条件
+  "IsFirstRecharge": wap + "api/v3/wap/IsFirstRecharge",
+
+  // 支付宝充值
+  "GetAlipaySignForWeb": wap + "api/v3/Recharge/GetAlipaySignForWeb",
 
   // 取消订单（仅用于支付页倒计时结束后自动取消订单）
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",

@@ -19,21 +19,30 @@
             <img class="icon-order-step-down title-icon" src="../../assets/images/order-detail-down.png">
           </header>
 
-          <section class="group-step flex-row" v-for="step in item.Status">
-            <div class="step-time">{{ step.Time }}</div>
-            <i class="step-icon"></i>
-            <div class="step-desc">
+          <section class="group-step" v-for="step in item.Status">
+            <div class="header flex-row">
+              <div class="step-time">{{ step.Time }}</div>
+              <i class="step-icon"></i>
               <div class="desc-status">{{ step.Status }}</div>
+            </div>
+            <div class="content flex-row">
+              <div class="step-time"></div>
+              <i class="step-icon"></i>
               <div class="desc-content" v-if="step.Description1">{{ step.Description1 }}<a class="tel" :href="'tel:' + step.OrderProviderInfo.PhoneNumber">{{ step.OrderProviderInfo.PhoneNumber }}</a> {{ step.Description2 }}</div>
               <div class="desc-content" v-else>{{ step.Description }}</div>
             </div>
           </section>
 
-          <section class="next-step flex-row" v-if="orderStatus.NextStatus.Status">
-            <div class="step-time" :class="{ hide: !countdownTime || countdownTime <= 0 }">{{ countdownTime | formatCountDown }}</div>
-            <i class="step-icon flex-row"><i class="step-inner-icon"></i></i>
-            <div class="step-desc">
+          <section class="next-step" v-if="orderStatus.NextStatus.Status">
+            <div class="header flex-row">
+              <div class="step-time" :class="{ hide: !countdownTime || countdownTime <= 0 }">{{ countdownTime | formatCountDown }}</div>
+              <i class="step-icon flex-row" :class="{ countdown: countdownTime && countdownTime > 0 }"><i class="step-inner-icon"></i></i>
               <div class="desc-status">{{ orderStatus.NextStatus.Status }}</div>
+            </div>
+
+            <div class="content flex-row">
+              <div class="step-time"></div>
+              <div class="step-icon"></div>
               <div class="desc-content" v-if="orderStatus.NextStatus.Description1">{{ orderStatus.NextStatus.Description1 }}<a class="tel" :href="'tel:' + orderStatus.NextStatus.OrderProviderInfo.PhoneNumber">{{ orderStatus.NextStatus.OrderProviderInfo.PhoneNumber }}</a> {{ orderStatus.NextStatus.Description2 }}</div>
               <div class="desc-content" v-else>{{ orderStatus.NextStatus.Description }}</div>
             </div>
@@ -268,7 +277,7 @@ export default {
     isTouchAcross(x, y) {
       x = Math.abs(x);
       y = Math.abs(y);
-      var angle = Math.atan2(x, y) * 180 / Math.PI;
+      var angle = Math.atan2(y, x) * 180 / Math.PI;
       var touchCritical = 30;
       if(angle <= touchCritical) {
         return true;
@@ -372,6 +381,41 @@ export default {
           };
         } else {
           this.alert(res.data.Meta.ErrorMsg);
+          // 环信，发送订单数据
+          let that = this;
+          window.easemobim = window.easemobim || {};
+          window.easemobim.config = {
+            configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
+            hideKeyboard: true,
+            visitor: {
+              trueName: '',
+              qq: '',
+              phone: this.$store.state.UserInfo.PhoneNumber,
+              companyName: '',
+              userNickname: this.$store.state.UserInfo.NickName,
+              description: '',
+              email: ''
+            },
+            onready: function() {
+              window.easemobim.sendExt({
+                ext: {
+                  "imageName": "",
+                  //custom代表自定义消息，无需修改
+                  "type": "custom",
+                  "msgtype": {
+                    "order": {
+                      "img_url": "",
+                      "title": "无法获取到用户订单信息，原因：" + res.data.Meta.ErrorMsg,
+                      "desc": "无法获取到用户订单信息，原因：" + res.data.Meta.ErrorMsg,
+                      "order_title": "",
+                      "price": "",
+                      "item_url": ""
+                    }
+                  }
+                }
+              });
+            },
+          };
         }
       }).catch(err => {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
@@ -667,18 +711,6 @@ $text-warn: #f56165;
     .status-group
     {
       position: relative;
-      & section:last-of-type::after
-      {
-        content: '';
-        position: absolute;
-        left: 2.5rem;
-        bottom: 0;
-        z-index: 1;
-        display: block;
-        width: 0.133333rem;
-        height: 50%;
-        background-color: #fff;
-      }
       .group-title
       {
         -webkit-justify-content: initial;
@@ -728,35 +760,60 @@ $text-warn: #f56165;
         {
           margin-top: 1.08rem;
         }
-        .step-time
+        .header
         {
-          flex-basis: 1.9rem;
-          font-size: 14px;
-          text-align: right;
-        }
-        .step-icon
-        {
-          position: relative;
-          z-index: 10;
-          display: block;
-          width: 0.266667rem;
-          height: 0.266667rem;
-          margin: 0 0.533333rem;
-          border: 1px solid #fff;
-          border-radius: 50%;
-          background-color: #ccc;
-        }
-        .step-desc
-        {
-          flex: 1;
-          width: 1px;
+          .step-time
+          {
+            flex-basis: 1.9rem;
+            font-size: 14px;
+            text-align: right;
+          }
+          .step-icon
+          {
+            position: relative;
+            z-index: 10;
+            display: block;
+            width: 0.266667rem;
+            height: 0.266667rem;
+            margin: 0 0.533333rem;
+            border: 1px solid #fff;
+            border-radius: 50%;
+            background-color: #ccc;
+          }
           .desc-status
           {
+            flex: 1;
+            width: 1px;
             line-height: 100%;
             font-size: 15px;
           }
+        }
+        .content
+        {
+          .step-time
+          {
+            flex-basis: 1.9rem;
+            font-size: 14px;
+            text-align: right;
+          }
+          .step-icon
+          {
+            // position: relative;
+            // z-index: 10;
+            // display: block;
+            // width: 0.266667rem;
+            // height: 0.266667rem;
+            // margin: 0 0.533333rem;
+            // border: 1px solid transparent;
+            display: block;
+            flex-basis: 1.346667rem;
+          }
           .desc-content
           {
+            flex: 1;
+            width: 1px;
+            margin-top: 0.106667rem;
+            font-size: 12px;
             .tel
             {
               color: #27b8f3;
@@ -774,52 +831,94 @@ $text-warn: #f56165;
         {
           margin-top: 1.08rem;
         }
-        .step-time
+        .header
         {
-          flex-basis: 1.9rem;
-          font-size: 14px;
-          text-align: right;
-          &.hide
+          .step-time
           {
-            visibility: hidden;
+            flex-basis: 1.9rem;
+            font-size: 15px;
+            text-align: right;
+            &.hide
+            {
+              visibility: hidden;
+            }
+            &::before
+            {
+              content: '';
+              display: inline-block;
+              width: 0.426667rem;
+              height: 0.426667rem;
+              margin-right: 0.16rem;
+              vertical-align: middle;
+              background-image: url(../../assets/images/order_detail_time.png);
+              background-repeat: no-repeat;
+              background-size: 100%;
+            }
           }
-        }
-        .step-icon
-        {
-          justify-content: center;
-          position: relative;
-          z-index: 10;
-          width: 0.3rem;
-          height: 0.3rem;
-          margin: 0 0.52rem;
-          border: 1px solid $text-normal;
-          border-radius: 50%;
-          background-color: #fff;
-          .step-inner-icon
+          .step-icon
           {
+            position: relative;
+            z-index: 10;
             display: block;
-            width: 0.25rem;
-            height: 0.25rem;
+            width: 0.266667rem;
+            height: 0.266667rem;
+            margin: 0 0.533333rem;
+            border: 1px solid #fff;
             border-radius: 50%;
-            background-color: $text-normal;
+            background-color: #333639;
+            &.countdown
+            {
+              width: 0.346667rem;
+              height: 0.346667rem;
+              margin: 0 0.48rem;
+              background-image: url(../../assets/images/order_detail_countdown.png);
+              background-repeat: no-repeat;
+              background-size: 100%;
+              background-color: #fff;
+            }
+            &::after
+            {
+              content: '';
+              position: absolute;
+              top: 100%;
+              left: 0;
+              z-index: 10;
+              width: 100%;
+              height: 100%;
+              background-color: #fff;
+            }
           }
-        }
-        .step-desc
-        {
-          flex: 1;
-          width: 1px;
           .desc-status
           {
+            flex: 1;
+            width: 1px;
             line-height: 100%;
             font-size: 15px;
           }
+        }
+        .content
+        {
+          .step-time
+          {
+            flex-basis: 1.9rem;
+            font-size: 14px;
+            text-align: right;
+          }
+          .step-icon
+          {
+            position: relative;
+            z-index: 10;
+            display: block;
+            flex-basis: 1.346667rem;
+            background-color: #fff;
+          }
           .desc-content
           {
-            color: $text-light;
-            .tel
-            {
-              color: #27b8f3;
-            }
+            flex: 1;
+            width: 1px;
+            margin-top: 0.106667rem;
+            color: #999;
+            font-size: 12px;
           }
         }
       }
@@ -831,6 +930,33 @@ $text-warn: #f56165;
         width: 0px;
         height: 100%;
         border-left: 2px dotted #ccc;
+      }
+      & section:last-of-type .content
+      {
+        -webkit-align-items: stretch;
+        align-items: stretch;
+      }
+      & section:last-of-type .header .step-icon
+      {
+        &::after
+        {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 0;
+          z-index: 10;
+          width: 100%;
+          height: 100%;
+          background-color: #fff;
+        }
+      }
+      & section:last-of-type .content .step-icon
+      {
+        position: relative;
+        z-index: 10;
+        display: block;
+        flex-basis: 1.346667rem;
+        background-color: #fff;
       }
     }
   }

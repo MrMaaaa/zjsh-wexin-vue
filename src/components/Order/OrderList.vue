@@ -16,7 +16,7 @@
         <ul class="order-list">
           <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog" @order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderNowList"></order-item>
         </ul>
-        <infinite-loading @infinite="getNowOrderList"  ref="infiniteLoading1">
+        <infinite-loading :on-infinite="getNowOrderList"  ref="infiniteLoading1">
           <span class="no-result" slot="no-more">没有更多订单了</span>
         </infinite-loading>
       </div>
@@ -32,7 +32,7 @@
         <ul class="order-list">
           <order-item :order-item="item" :key="item.OrderId" @order-cancel-dialog="orderCancelDialog" @order-delete-dialog="orderDeleteDialog" @order-confirm-dialog="orderConfirmDialog"@order-evaluate-dialog="orderEvaluateDialog" @order-add-pay="orderAddPay" @order-pay="orderPay" v-for="item in orderHistoryList"></order-item>
         </ul>
-        <infinite-loading @infinite="getHistoryOrderList"  ref="infiniteLoading2">
+        <infinite-loading :on-infinite="getHistoryOrderList"  ref="infiniteLoading2">
           <span class="no-result" slot="no-more">没有更多订单了</span>
         </infinite-loading>
       </div>
@@ -193,7 +193,7 @@ export default {
     isTouchAcross(x, y) {
       x = Math.abs(x);
       y = Math.abs(y);
-      var angle = Math.atan2(x, y) * 180 / Math.PI;
+      var angle = Math.atan2(y, x) * 180 / Math.PI;
       var touchCritical = 30;
       if(angle <= touchCritical) {
         return true;
@@ -481,10 +481,16 @@ export default {
     },
     isShowOperationBtns(OrderBtnInfo) {
       let o = OrderBtnInfo;
-      if (o.IsDisplayCancelOrderBtn === '0' && o.IsDisplayClientConfirmBtn === '0' && o.IsDisplayDeleteOrderBtn === '0' && o.IsDisplayGotoEvaluateBtn === '0' && o.IsDisplayGotoPayBtn === '0') {
-        return false;
+      // o.IsDisplayCancelOrderBtn === '0' 取消按钮不再在订单列表显示
+      if (o.IsKdEOrder !== '1') {
+        // 普通订单
+        if (o.IsDisplayClientConfirmBtn === '0' && o.IsDisplayDeleteOrderBtn === '0' && o.IsDisplayGotoEvaluateBtn === '0' && o.IsDisplayGotoPayBtn === '0') {
+          return false;
+        } else {
+          return true;
+        }
       } else {
-        return true;
+        return false;
       }
     },
     addZero(str, digit = 2) {

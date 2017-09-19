@@ -26,7 +26,7 @@
 
     <p class="login-tip">点击登录，即表示您同意<a class="link" href="https://copen.zhujiash.com/htm/yhfwxy.html">《助家生活用户协议》</a></p>
 
-  <m-loading v-show="isLoading"></m-loading>
+  <m-loading bg-style="0" v-show="isLoading"></m-loading>
 </div>
 </template>
 
@@ -180,6 +180,7 @@ $animate_duration: .5s;
 }
 .header
 {
+  line-height: 1.6;
   margin-top: 1.386667rem;
   padding-left: 0.586667rem;
   font-size: 24px;

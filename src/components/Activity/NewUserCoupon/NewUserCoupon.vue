@@ -73,7 +73,7 @@ import axios from 'axios';
 import qs from 'qs';
 
 export default {
-  name: 'main',
+  name: 'new_user_coupon',
   data() {
     return {
       phoneNumber: '',

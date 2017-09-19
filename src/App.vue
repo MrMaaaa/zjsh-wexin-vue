@@ -7,6 +7,8 @@
     <!-- </transition> -->
 
     <div class="new-user-coupon" v-if="isShowNewUserCoupon === '1'">
+      <div class="wrapper"></div>
+
       <div class="coupon">
         <img class="img-coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
 
@@ -70,7 +72,7 @@ export default {
 
     // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
-      if (this.interceptorsExceptList.indexOf(this.$route.name) == -1 && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
+      if (this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1 && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
         this.$store.commit('SetIsLogin', '0');
         this.openLogin();
       }
@@ -102,15 +104,11 @@ export default {
       axios.post(API.GetWxpayOpenId, qs.stringify({
         Token: this.Token,
         WxCode: code,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetOpenId', res.data.Body.OpenId);
         } else {
-          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
+          // res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
@@ -124,6 +122,9 @@ export default {
         titles['index'] += name;
         document.title = titles['index'];
         this.$store.commit('SetROUTER_TO_TITLE', titles);
+
+        // 根据不同分包设置不同OrderFrom
+        this.$store.commit('SetOrderFrom', name);
       } else {
         titles['index'] += '助家生活';
         document.title = titles['index'];
@@ -133,11 +134,7 @@ export default {
     verifyToken() {
       axios.post(API.VerifyToken, qs.stringify({
         Token: this.Token,
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetIsLogin', '1');
           this.saveUserInfo();
@@ -151,36 +148,32 @@ export default {
     saveUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
         Token: this.Token
-      }), {
-        header: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
+      })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           this.$store.commit('SetUserInfo', res.data.Body.Info);
         }
       });
     },
     wxConfig() {
-      wx.config({
-        debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-        appId: '', // 必填，公众号的唯一标识
-        timestamp: '', // 必填，生成签名的时间戳
-        nonceStr: '', // 必填，生成签名的随机串
-        signature: '', // 必填，签名，见附录1
-        jsApiList: [] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-      });
-      wx.onMenuShareTimeline({
-        title: '', // 分享标题
-        link: '', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-        imgUrl: '', // 分享图标
-        success: function() {
-          // 用户确认分享后执行的回调函数
-        },
-        cancel: function() {
-          // 用户取消分享后执行的回调函数
-        }
-      });
+      // wx.config({
+      //   debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+      //   appId: '', // 必填，公众号的唯一标识
+      //   timestamp: '', // 必填，生成签名的时间戳
+      //   nonceStr: '', // 必填，生成签名的随机串
+      //   signature: '', // 必填，签名，见附录1
+      //   jsApiList: [] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+      // });
+      // wx.onMenuShareTimeline({
+      //   title: '', // 分享标题
+      //   link: '', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+      //   imgUrl: '', // 分享图标
+      //   success: function() {
+      //     // 用户确认分享后执行的回调函数
+      //   },
+      //   cancel: function() {
+      //     // 用户取消分享后执行的回调函数
+      //   }
+      // });
     },
     routerToNewUser() {
       this.isShowNewUserCoupon = '0';
@@ -248,6 +241,12 @@ body,
   z-index: 99999;
   width: 100%;
   height: 100%;
+}
+.new-user-coupon .wrapper
+{
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,.6);
 }
 .new-user-coupon .coupon
 {

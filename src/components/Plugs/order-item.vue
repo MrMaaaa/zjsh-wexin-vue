@@ -91,7 +91,7 @@
     <div class="refund-status" :class="{ hide: !orderItem.RefundStatus || orderItem.RefundStatus =='' }">{{ orderItem.RefundStatus }}</div>
 
     <div class="operation-btns flex-row">
-      <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1' && orderItem.OrderBtnInfo.IsGotoCancelPage === '1'" @click="$emit('order-cancel-dialog', orderItem.OrderId)">取消订单</a>
+      <!-- <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1' && orderItem.OrderBtnInfo.IsGotoCancelPage === '1'" @click="$emit('order-cancel-dialog', orderItem.OrderId)">取消订单</a> -->
       <a class="btn oppo" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayClientConfirmBtn === '1'" @click="$emit('order-confirm-dialog', orderItem.OrderId)">确认订单</a>
       <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayDeleteOrderBtn === '1'" @click="$emit('order-delete-dialog', orderItem.OrderId)">删除订单</a>
       <a class="btn" v-if="orderItem.OrderBtnInfo.IsDisplayGotoEvaluateBtn === '1'" @click="$emit('order-evaluate-dialog', orderItem.OrderCode, orderItem.Service.ServiceId)">评价订单</a>

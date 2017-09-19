@@ -140,6 +140,14 @@ export default {
     this.getUserSettlement();
     this.getCouponAmount();
   },
+  activated() {
+    // 获取余额与红包
+    if(this.IsLogin === '1') {
+      this.getUserInfo();
+      this.getUserSettlement();
+      this.getCouponAmount();
+    }
+  },
   methods: {
     getUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
@@ -157,7 +165,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getWxUserInfo() {
@@ -171,7 +179,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getUserSettlement() {
@@ -184,7 +192,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     getCouponAmount() {
@@ -205,7 +213,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     logout() {
@@ -224,7 +232,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'AppName', 'OpenId', 'ThreeServiceIdFilterList', 'ALERT_MSG']),
+    ...mapState(['Token', 'AppName', 'OpenId', 'IsLogin', 'ThreeServiceIdFilterList', 'ALERT_MSG']),
   },
   watch: {
     Token(newValue, oldValue) {

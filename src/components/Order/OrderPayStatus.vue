@@ -29,7 +29,7 @@
     </section>
 
     <section class="operation flex-row">
-      <router-link class="operation-btn" :to="{ name: 'order_detail', params: { orderId: $route.query.orderId } }">查看订单</router-link>
+      <a class="operation-btn" @click="viewOrder">查看订单</a>
       <router-link class="operation-btn" :to="{ name: 'index' }">返回首页</router-link>
     </section>
   </div>
@@ -90,12 +90,29 @@ export default {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
+    },
+    viewOrder() {
+      if(this.orderInfo.IsKdEOrder == '0') {
+        this.$router.push({
+          name: 'order_detail',
+          params: {
+            orderId: this.orderId
+          }
+        });
+      } else if(this.orderInfo.IsKdEOrder == '2') {
+        this.$router.push({
+          name: 'errand_order_detail',
+          params: {
+            orderId: this.orderId
+          }
+        });
+      }
     }
   },
   computed: {
-    ...mapState(['Token']),
+    ...mapState(['Token', 'ALERT_MSG']),
   },
   components: {
     OrderItem,

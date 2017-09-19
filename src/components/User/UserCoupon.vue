@@ -132,9 +132,10 @@ export default {
           this.$router.push({
             name: 'service_detail',
             query: {
-              id: item.ServiceItem.ServiceId
+              id: item.ServiceItem.ServiceId,
             },
             params: {
+              id: item.ServiceItem.ServiceId,
               url: item.ServiceItem.DetailUrl,
               img: item.ServiceItem.LogoUrl ? item.ServiceItem.LogoUrl[0] : '',
             }

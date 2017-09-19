@@ -32,46 +32,16 @@ import UserCoupon from '@/components/User/UserCoupon';
 // 活动
 import BlackFriday from '@/components/Activity/BlackFriday/BlackFriday';
 import SFActivity from '@/components/Activity/SFActivity/SFActivity';
+import QianNeiZhu from '@/components/Activity/QianNeiZhu/QianNeiZhu';
+import OneRecharge from '@/components/Activity/OneRecharge/Introduction';
+import OneRechargeIndex from '@/components/Activity/OneRecharge/OneRecharge';
+import OneRechargeOrder from '@/components/Activity/OneRecharge/RechargeDetail';
 
 import store from '../store/index';
 
 Vue.use(Router);
 
 // console.log(store.state.AppName);
-
-// // 路由-标题映射表
-// const ROUTER_TO_TITLE = {
-//   index: '助家生活',
-//   activity: '活动列表',
-//   order: '订单列表',
-//   user: '我的信息',
-//   black_friday: '‘折’就是爱',
-//   sf_activity: '一字不写发快递',
-//   service_detail: '服务详情',
-//   recommend_more: '更多',
-//   order_place: '提交订单',
-//   order_detail: '订单详情',
-//   order_complaint_reason: '投诉理由',
-//   order_cancel_reason: '取消理由',
-//   order_pay_status: '订单状态',
-//   order_add_pay: '增加服务',
-//   order_pay: '订单支付',
-//   order_service_time: '选择服务时间',
-//   order_coupon_select: '使用红包',
-//   login: '登录',
-//   express: '快递上门',
-//   express_order_detail: '订单详情',
-//   errand: '同城跑腿',
-//   errand_order_detail: '订单详情',
-//   new_user_coupon: '新手红包',
-//   user_about: '关于我们',
-//   user_connect_us: '联系我们',
-//   user_coupon: '我的红包',
-//   address_list: '服务地址',
-//   address_add: '添加服务地址',
-//   address_edit: '修改服务地址',
-//   address_select: '选择你的位置',
-// }
 
 let router = new Router({
   routes: [{
@@ -87,7 +57,7 @@ let router = new Router({
     children: [{
       path: 'index',
       name: 'index',
-      component: Index
+      component: Index,
     }, {
       path: 'activity',
       name: 'activity',
@@ -95,7 +65,7 @@ let router = new Router({
     }, {
       path: 'order',
       name: 'order',
-      component: OrderList
+      component: OrderList,
     }, {
       path: 'user',
       name: 'user',
@@ -109,6 +79,22 @@ let router = new Router({
     path: '/activity/sf_activity',
     name: 'sf_activity',
     component: SFActivity,
+  }, {
+    path: '/activity/qianneizhu',
+    name: 'qianneizhu',
+    component: QianNeiZhu,
+  }, {
+    path: '/activity/one_recharge',
+    name: 'one_recharge',
+    component: OneRecharge,
+  }, {
+    path: '/activity/one_recharge/index',
+    name: 'one_recharge_index',
+    component: OneRechargeIndex,
+  }, {
+    path: '/activity/one_recharge/order',
+    name: 'one_recharge_order',
+    component: OneRechargeOrder,
   }, {
     path: '/menu/index/detail/:id',
     name: 'service_detail',
@@ -154,7 +140,7 @@ let router = new Router({
     name: 'order_coupon_select',
     component: OrderCouponSelect
   }, {
-    path: '/service/express',
+    path: '/express',
     name: 'express',
     component: ServiceExpress
   }, {
@@ -162,7 +148,7 @@ let router = new Router({
     name: 'express_order_detail',
     component: ServiceExpressDetail
   }, {
-    path: '/service/errand',
+    path: '/errand',
     name: 'errand',
     component: ServiceErrand
   }, {
@@ -269,7 +255,7 @@ router.beforeEach((to, from, next) => {
   var login = document.getElementById('module_login');
   if (login && login.classList.contains('active')) {
     login && login.classList.remove('active');
-    document.title = ROUTER_TO_TITLE[from.name] || ROUTER_TO_TITLE['/menu/index'];
+    document.title = ROUTER_TO_TITLE[from.name] || ROUTER_TO_TITLE['index'];
 
     // input失去焦点
     let inputs = document.getElementsByTagName('input');
@@ -285,7 +271,7 @@ router.beforeEach((to, from, next) => {
     document.querySelector('iframe.easemobim-chat-panel').classList.add('easemobim-minimized');
     next(false);
   } else {
-    document.title = ROUTER_TO_TITLE[to.name] || ROUTER_TO_TITLE['/menu/index'];
+    document.title = ROUTER_TO_TITLE[to.name] || ROUTER_TO_TITLE['index'];
     next();
   }
 });

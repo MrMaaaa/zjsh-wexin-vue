@@ -6,17 +6,14 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    zjsh_version: '3.5.0',
+    zjsh_version: '3.5.3',
 
     AppName: '助家生活', // 当前web app的名称
 
     IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
 
-    // 是否在微信浏览器环境下
-    IsWxBrowser: '0',
-
     // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: 'activity black_friday sf_activity user index service_detail new_user_coupon express errand user_about user_connect_us',
+    interceptorsExceptList: ' black_friday sf_activity qianneizhu one_recharge one_recharge_index one_recharge_order user index activity service_detail new_user_coupon express errand user_about user_connect_us ',
 
     Token: '',
     UserId: '',
@@ -24,6 +21,8 @@ export default new Vuex.Store({
 
     // 环信客服发送客户数据
     UserInfo: {
+      PhoneNumber: '',
+      NickName: '',
     },
 
     // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0，需要注意，由于该参数需要在verifyToken接口返回数据后才会修改，因此在某些页面中该参数将未必能及时修改状态，因此不要全部依赖该参数来进行登录状态的判断
@@ -35,7 +34,11 @@ export default new Vuex.Store({
     // 下单页选择的地址
     DefaultAddressId: '',
 
-    OrderInfo: { // 下单页提交订单信息
+    // 订单来源
+    OrderFrom: '210',
+
+    // 下单页提交订单信息
+    OrderInfo: {
       FourServiceId: '', // 四级服务id
       Amount: '', // 服务数量
       Price: '', // 服务单价
@@ -100,6 +103,7 @@ export default new Vuex.Store({
       user: '我的',
       black_friday: '超级星期五',
       sf_activity: '一字不写发快递',
+      qianneizhu: '钱内助',
       service_detail: '服务详情',
       recommend_more: '更多',
       order_place: '提交订单',
@@ -175,6 +179,21 @@ export default new Vuex.Store({
     },
     SetIsOpenLogin(state, data = '') {
       return state.IsOpenLogin = data;
+    },
+    SetOrderFrom(state, data = '助家生活') {
+      var orderFrom = '210';
+      if (data == '助家生活') {
+        orderFrom = '210';
+      } else if (data == '同城家政') {
+        orderFrom = '215';
+      } else if (data == '快递上门') {
+        orderFrom = '211';
+      } else if (data == '曹操家政') {
+        orderFrom = '212';
+      } else if (data == '同城到家') {
+        orderFrom = '213';
+      }
+      return state.OrderFrom = orderFrom;
     },
     SetOrderInfo(state, data) {
       // Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');

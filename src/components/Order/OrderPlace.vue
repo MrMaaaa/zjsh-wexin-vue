@@ -560,22 +560,11 @@ export default {
       } else {
         this.isLoading = true;
         this.txtLoading = '正在提交订单……';
-        if(this.AppName == '助家生活') {
-          this.OrderInfo.OrderFrom = '210';
-        } else if(this.AppName == '同城家政') {
-          this.OrderInfo.OrderFrom = '215';
-        } else if(this.AppName == '快递上门') {
-          this.OrderInfo.OrderFrom = '211';
-        } else if(this.AppName == '曹操家政') {
-          this.OrderInfo.OrderFrom = '212';
-        } else if(this.AppName == '同城到家') {
-          this.OrderInfo.OrderFrom = '213';
-        }
         axios.post(API.SubmitOrder, qs.stringify({
           Token: this.Token,
           ServiceId: this.OrderInfo.FourServiceId,
           SpecialType: this.OrderInfo.SpecialType,
-          OrderFrom: this.OrderInfo.OrderFrom,
+          OrderFrom: this.OrderFrom,
           ServiceAddressId: this.OrderInfo.Address.Id,
           Total: this.OrderInfo.Amount,
           ServiceStartAt: this.OrderInfo.DateTime,
@@ -614,7 +603,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'AppName', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
@@ -1019,6 +1008,7 @@ export default {
       {
         color: #f66165;
         font-size: 16px;
+        vertical-align: middle;
       }
     }
   }

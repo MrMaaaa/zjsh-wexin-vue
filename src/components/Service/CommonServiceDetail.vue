@@ -1,7 +1,7 @@
 <template>
 <div>
-  <a class="icon-customer-service" onclick='easemobim.bind({configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"})'></a>
-  <div class="service-detail" v-if="pageData">
+  <a class="icon-customer-service" @click="callCustomerService"></a>
+  <div class="service-detail" v-if="pageData.headImg">
     <header class="header-img">
         <img :src="pageData.headImg">
     </header>
@@ -34,7 +34,7 @@
         </p>
     </div>
 
-    <div class="section section-no-mt" v-if="pageData.introduce">
+    <div class="section" v-if="pageData.introduce.title || pageData.introduce.img">
         <div class="section-header">
           <span class="header-title">服务介绍</span>
         </div>
@@ -42,7 +42,7 @@
         <div class="section-intro">
           <span class="intro-txt">{{ pageData.introduce.title }}</span>
 
-          <img class="intro-img intro-img-br" :src="pageData.introduce.img">
+          <img class="intro-img" style="margin-top: 10px;" v-if="pageData.introduce.img" :src="pageData.introduce.img">
         </div>
     </div>
 
@@ -54,8 +54,8 @@
 
         <div class="content-row flex-row"v-for="val in pageData.range">
             <div class="row-item" v-for="v in val">
-              <img class="item-img" :src="v.img">
-              <span class="item-info">{{ v.title }}</span>
+              <img class="item-img" v-if="v.img" :src="v.img">
+              <span class="item-info" v-if="v.title">{{ v.title }}</span>
             </div>
         </div>
 
@@ -103,30 +103,30 @@
     </div>
 
     <div class="region">
-        <div class="region-title">服务保障</div>
+      <div class="region-title">服务保障</div>
 
-        <div class="region-content flex-row">
-          <div class="content-icon">
-              <img :src="imgUrl + 'heart.png'">
-          </div>
-
-
-            <div class="content-info">
-              <span class="info-title">{{ pageData.assurance[0].t }}</span>
-
-              <span class="info-intro">{{ pageData.assurance[0].c }}</span>
-            </div>
+      <div class="region-content flex-row">
+        <div class="content-icon">
+            <img :src="imgUrl + 'heart.png'">
         </div>
 
-        <div class="region-content flex-row">
-            <div class="content-icon">
-                <img :src="imgUrl + 'safe.png'">
-            </div>
+        <div class="content-info">
+          <span class="info-title">{{ pageData.assurance[0].t }}</span>
 
-            <div class="content-info">
-                <span class="info-title">隐私保障</span>
-              <span class="info-intro">服务过程中，未经客户允许，不擅自翻动衣柜、抽屉等个人隐私范围，不泄露客户个人隐私！</span>
-          </div>
+          <span class="info-intro">{{ pageData.assurance[0].c }}</span>
+        </div>
+      </div>
+
+      <div class="region-content flex-row">
+        <div class="content-icon">
+            <img :src="imgUrl + 'safe.png'">
+        </div>
+
+        <div class="content-info">
+          <span class="info-title">{{ pageData.assurance[1].t }}</span>
+
+          <span class="info-intro">{{ pageData.assurance[1].c }}</span>
+        </div>
       </div>
     </div>
   </div>
@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import data from "../../config/detail";
+import ServiceInfo from "../../config/detail";
 import { mapState } from 'vuex';
 import API from '../../config/backend';
 import axios from 'axios';
@@ -148,14 +148,28 @@ export default {
   name: "service_detail",
   data() {
     return {
-      imgUrl: data.imgUrl,
-      pageData: null,
+      imgUrl: ServiceInfo.imgUrl,
+      pageData: {},
       threeId: '',
       serviceList: [],
+      isActiveHuanXin: false, // 是否已经加载好客服窗口
     }
   },
   activated() {
-    let that = this;
+    var that = this;
+    // 当服务id不同时刷新数据
+    let oldId = this.threeId;
+    this.threeId = this.$route.query.id || this.$route.params.id;
+    this.pageData = ServiceInfo[this.threeId];
+    document.title = this.pageData.title;
+    if(oldId !== this.threeId) {
+      this.serviceList.splice(0);
+      this.getServicePrice();
+    }
+
+    var desc = this.pageData.title;
+    var img = this.$route.params.img || '';
+    var url = this.$route.params.url || '';
     window.easemobim = window.easemobim || {};
     window.easemobim.config = {
       configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
@@ -163,25 +177,25 @@ export default {
       visitor: {
         trueName: '',
         qq: '',
-        phone: this.$store.state.UserInfo.PhoneNumber,
+        phone: this.$store.state.UserInfo.PhoneNumber || '未登录',
         companyName: '',
-        userNickname: this.$store.state.UserInfo.NickName,
+        userNickname: this.$store.state.UserInfo.NickName || '未登录',
         description: '',
         email: ''
       },
       onready: function() {
-        var img = that.$route.params.img || '';
-        var url = that.$route.params.url || '';
+        that.isActiveHuanXin = true;
+        // 发送服务信息
         window.easemobim.sendExt({
           ext: {
-            "imageName": "abc.png",
+            "imageName": "detail.png",
             //custom代表自定义消息，无需修改
             "type": "custom",
             "msgtype": {
               "track": {
-                "title": '我正在看',
+                "title": '我正在看：' + desc,
                 "price": "",
-                "desc": that.pageData.title,
+                "desc": desc,
                 "img_url": img,
                 "item_url": url,
               }
@@ -190,17 +204,35 @@ export default {
         });
       },
     };
-    // 当服务id不同时刷新数据
-    let oldId = this.threeId;
-    this.threeId = this.$route.query.id || this.$route.params.id;
-    document.title = data[this.threeId].title;
-    this.pageData = data[this.threeId];
-    if(oldId !== this.threeId) {
-      this.serviceList.splice(0);
-      this.getServicePrice();
-    }
   },
   methods: {
+    callCustomerService() {
+      var desc = this.pageData.title;
+      var img = this.$route.params.img || '';
+      var url = this.$route.params.url || '';
+      window.easemobim.bind({
+        configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"
+      });
+      // 如果第一次加载好之后，每次点击联系客服都重新发送轨迹信息
+      if (this.isActiveHuanXin) {
+        window.easemobim.sendExt({
+          ext: {
+            "imageName": "detail.png",
+            //custom代表自定义消息，无需修改
+            "type": "custom",
+            "msgtype": {
+              "track": {
+                "title": '我正在看' + desc,
+                "price": "",
+                "desc": desc,
+                "img_url": img,
+                "item_url": url,
+              }
+            }
+          }
+        });
+      }
+    },
     getServicePrice() {
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.threeId
@@ -355,6 +387,7 @@ export default {
 .section-content
 {
   box-sizing: border-box;
+  margin-top: 14px;
   /* border: 1px solid #eef2f5; */
   border-top-width: 0;
   border-bottom-left-radius: 4px;

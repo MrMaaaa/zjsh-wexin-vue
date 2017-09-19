@@ -473,7 +473,7 @@ export default {
           }
         }).catch(err => {
           this.isLoading = false;
-          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
       }
     },
@@ -489,27 +489,26 @@ export default {
           SenderAddressId: this.addrData.sender.id,
           ReceiverAddressId: this.addrData.receiver.id,
           GoodsName: this.selData.name,
-          OrderFrom: '210',
+          OrderFrom: this.OrderFrom,
           ServiceTime: this.selData.date,
           GoodsWeight: this.selData.weight
         })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
-            this.alert('订单已提交', 1000);
-            setTimeout(() => {
+            this.alert('订单已提交', () => {
               this.$router.push({
-                name: 'errand_order_detail',
+                name: 'order_pay',
                 params: {
                   orderId: res.data.Body.OrderId
                 }
               });
-            }, 1000);
+            });
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
         }).catch(err => {
           this.isLoading = false;
-          this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+          this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
       } else {
         var msg = '';
@@ -524,7 +523,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'IsLogin', 'SelectedAddress', 'ALERT_MSG']),
+    ...mapState(['Token', 'IsLogin', 'OrderFrom', 'SelectedAddress', 'ALERT_MSG']),
   }
 }
 </script>
