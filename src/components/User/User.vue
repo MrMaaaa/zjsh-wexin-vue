@@ -200,6 +200,7 @@ export default {
         Token: this.Token
       })).then(res => {
         if(res.data.Meta.ErrorCode === '0') {
+          this.userInfo.couponCount = 0;
           let date = new Date();
           res.data.Body.CouponList.map(value => {
             // if((value.ServiceItem == null || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {

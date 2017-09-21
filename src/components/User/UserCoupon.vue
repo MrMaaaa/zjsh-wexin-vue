@@ -68,12 +68,7 @@ export default {
   },
   activated() {
     this.isLoading = false;
-    this.couponListNoUsed = [];
-    this.couponListUsed = [];
-    this.couponListOverdued = [];
-    this.couponListActived = [];
     this.getCouponList();
-    this.toggleCouponList(0);
   },
   methods: {
     getCouponList() {
@@ -82,6 +77,10 @@ export default {
       })).then(res => {
         this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
+          this.couponListNoUsed = [];
+          this.couponListUsed = [];
+          this.couponListOverdued = [];
+          this.couponListActived = [];
           // 红包分类
           let date = new Date();
           res.data.Body.CouponList.map((value, index) => {
@@ -104,6 +103,8 @@ export default {
           });
           // 默认显示未使用红包
           this.couponListActived = this.couponListNoUsed;
+
+          this.toggleCouponList(0);
         } else {
           if(res.data.Meta.ErrorCode === '2004') {
             this.alert(this.ALERT_MSG.USER_COUPON_NO_LOGIN);

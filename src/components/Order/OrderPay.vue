@@ -421,20 +421,20 @@ export default {
                 "signType": "MD5",
                 "paySign": res.data.Body.WxpaySign.sign
               },
-              function(res) {
-                if (res.err_msg == "get_brand_wcpay_request:ok") {
-                  this.routeTo({
+              function(wx_res) {
+                if (wx_res.err_msg == "get_brand_wcpay_request:ok") {
+                  that.routeTo({
                     name: 'order_pay_status',
                     query: {
-                      orderId: that.orderDetail.OrderId,
-                      type: that.payType,
-                      money: price + balance
+                      id: that.orderId,
+                      type: '1',
+                      money: Number(price) + Number(balance),
                     }
                   }, true);
-                } else if (res.err_msg == "get_brand_wcpay_request:cancel" || res.err_msg == "get_brand_wcpay_request:fail") {
+                } else if (wx_res.err_msg == "get_brand_wcpay_request:cancel" || wx_res.err_msg == "get_brand_wcpay_request:fail") {
                   that.alert(that.ALERT_MSG.PAY_ERROR);
                 } else {
-                  that.alert(res.err_msg);
+                  that.alert(wx_res.err_desc);
                 }
               }
             );

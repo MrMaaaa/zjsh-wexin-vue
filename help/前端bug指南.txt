@@ -1,0 +1,125 @@
+http://www.w3help.org/zh-cn/causes/index.html 一些兼容性问题
+
+1.与移动设备交互（browser是一个插件，用来判断设备类型）
+if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+  //ios
+  function setupWebViewJavascriptBridge(callback) {
+	if (window.WebViewJavascriptBridge) {
+	  return callback(WebViewJavascriptBridge);
+	}
+	if (window.WVJBCallbacks) {
+	  return window.WVJBCallbacks.push(callback);
+	}
+	window.WVJBCallbacks = [callback];
+	var WVJBIframe = document.createElement('iframe');
+	WVJBIframe.style.display = 'none';
+	WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';
+	document.documentElement.appendChild(WVJBIframe);
+	setTimeout(function() {
+	  document.documentElement.removeChild(WVJBIframe)
+	}, 0)
+  }
+  setupWebViewJavascriptBridge(function(bridge) {
+	bridge.callHandler('iosIsLogin', bridgeData, function(response) {
+	  log("跳转到对应服务类型");
+	});
+  });
+} else if (browser.versions.android) {
+  //android
+  var data = JSON.stringify(bridgeData);
+  android.androidIsLogin(data);
+}
+
+ios中bridge.callHandler函数中第一个参数为调用的函数，第二个参数为函数的参数，第三个参数为函数的返回值，ios返回值可以为map对象，可直接使用key.value调用，无需JSON.parse转化
+android中的用法与js函数类似
+
+2. 清除ios设备/移动safari浏览器点击阴影效果：  -webkit-tap-highlight-color: rgba(0,0,0,0);
+
+3. 移动端解决点击后300ms延迟：fastclick或使用jquery的touchend事件
+$('input').on('touchend', function() {
+	$(this).focus(); //模拟点击获取焦点
+})
+
+4. 文本描边：text-stroke（注意兼容性不如text-shadow）配合text-fill-color使用
+一个渐变文本描边的样式
+{
+	-webkit-text-stroke: 6px #f00;
+	-webkit-text-fill-color: #fff;
+	font-size: 30px;
+	background: linear-gradient(-86deg, #EEF85B 5%, #7AEC8D 53%, #09E5C3 91%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: #fff;
+	-webkit-text-stroke: 6px transparent;
+}
+
+5. js查询css属性是否可用CSS.supports('display', 'flex')
+   css中查询：@supports (可选：not) (display: flex) and/or (display: box) {}
+   兼容性：不支持IE、UC
+   
+6. background-repeat新属性：round和space（类似于repeat-x，round不会超出宽度，space自动控制图片间距以适应容器宽度）
+
+7. 防止fixed定位元素错位：加上transform: translateZ(0)或者给fixed元素子元素设置position: absolute;
+
+8. 给position: fixed作优化效果：transform: translateZ(0); 或者 transform: translate3d(0,0,0);
+9. 阻止ios设备弹簧效果：document.getElementByTagName('body')[0].addEventListener('touchstart', function(e) {e.preventDefault();}, false);
+   注意：该方法会阻止整个body页面滚动，因此滚动条无法正常滚动，适合作为移动设备内嵌活动页面（红包）等
+   
+10. 获取dom元素的兼容性写法
+function getStyle(elem, property) {
+	// ie通过currentStyle来获取元素的样式，其他浏览器通过getComputedStyle来获取
+	return document.defaultView.getComputedStyle ? document.defaultView.getComputedStyle(elem, false)[property] : elem.currentStyle[property];
+}
+
+11. event.stopImmediatePropagation()阻止该元素的其他事件监听与冒泡
+
+12. jquery中使用end()方法来返回到$(this),如$(this).parent().end()就回到了$(this)这个元素而不是其父元素
+
+13. pointer-events:none; 禁用点击事件 如果要取消a标签的键盘响应事件（如tab键可以切换到该元素）可以remove掉a标签的href属性
+
+14. div:first-of-type:last-of-type === div:only-child 设置了当子元素只有一个的时候的样式
+	div:not(:last-of-type):first-of-type 当有多个子元素时，选中第一个；只有一个子元素时该css不生效（但是最后一个子元素无法被应用样式）
+	div:not(:only-child) 效果同上，但是最后一个子元素可以被应用样式
+	div:not(:only-child):last-of-type 有多个子元素时给最后一个子元素应用样式
+	
+15. vue中通过router传递参数必须使用name代替path
+
+16. 移动端隐藏滚动条
+	::-webkit-scrollbar
+	{
+		height: 0;
+		width: 0;
+	}
+	否则整个元素会偏小（为了给滚动条留出空间，并且在不显示滚动条时该空间为透明）
+17. 如果需要在flex布局中实现文字超出隐藏的效果，并且不挤占其他元素。（如A、B两元素，A为占位元素，固定宽度，B为自适应宽度，文字需要超出隐藏，则可做如下设置
+A: flex-shrink: 0;
+B: width: 1px; flex-grow: 1;
+注：如果B的width超出了页面高度则会破坏布局，因此设为1px避免这种情况
+
+18. 如果需要对父页面中引入的子组件添加点击事件，使用@click.native
+
+19. 在浏览器中输入【data:text/html, <html contenteditable>】会打开一个可编辑的页面
+
+20. jQuery进行dom操作时，首先$elem.detach()，然后进行操作，最后$elem.appendTo($parentElem);
+detach会移除元素及其所有节点，但保留所有的事件、匹配的元素、附加的数据。因此可以恢复元素。
+
+21. 获取iframe内部元素（同源）
+iframe.onload = () => {
+// 这里如果使用iframe可能会导致无法获取到元素
+  document.getElementById("iframe").contentWindow.document.getElementById('now_submit').style.visibility = 'hidden';
+}
+
+22. iframe会在src为空或者任意值时加载一次，如果动态修改src地址，会加载两次，因此需要动态创建iframe然后append到body中
+
+23. table-layout: fixed 单元格等宽
+
+24. ios下需要给某些元素添加cursor: pointer;样式来相应点击事件
+
+25. 部分android设备animation无效的原因：linear等动画函数写在第一位而不是动画名字在第一位
+例子：animation: linear m-loading-rotating 1.1s infinite;
+
+26. 匹配中文字符的正则表达式： [\u4e00-\u9fa5]
+
+27. touch-action: manipulation; 这个样式会禁用双击缩放的功能，同时也取消了click事件的300ms延迟问题（PS：如果存在<meta name="viewport" content="width=device-width">标签会自动取消300ms的延迟）
+
+28. Object.prototype.toString.call(argument).slice(8, -1).toLowerCase()
+以小写形式返回参数的类型，能识别出null,undefined,array等object类型，但NaN返回number类型

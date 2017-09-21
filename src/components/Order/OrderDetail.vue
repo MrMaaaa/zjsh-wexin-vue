@@ -265,7 +265,7 @@ export default {
     });
   },
   activated() {
-    this.orderId = this.$route.params.orderId;
+    this.orderId = this.$route.params.orderId || this.orderId;
     this.tabIndex = '0';
     this.getOrderStatus();
     clearInterval(this.interval);
@@ -279,7 +279,7 @@ export default {
       y = Math.abs(y);
       var angle = Math.atan2(y, x) * 180 / Math.PI;
       var touchCritical = 30;
-      if(angle <= touchCritical) {
+      if(angle >= touchCritical) {
         return true;
       } else {
         return false;

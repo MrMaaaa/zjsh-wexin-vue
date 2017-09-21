@@ -8,7 +8,7 @@ export default new Vuex.Store({
   state: {
     zjsh_version: '3.5.3',
 
-    AppName: '助家生活', // 当前web app的名称
+    AppName: '助家生活', // 当前web app的名称 // 微信下名称为助家生活
 
     IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
 

@@ -92,7 +92,7 @@ let router = new Router({
     name: 'one_recharge_index',
     component: OneRechargeIndex,
   }, {
-    path: '/activity/one_recharge/order',
+    path: '/activity/one_recharge/order/:out_trade_no',
     name: 'one_recharge_order',
     component: OneRechargeOrder,
   }, {

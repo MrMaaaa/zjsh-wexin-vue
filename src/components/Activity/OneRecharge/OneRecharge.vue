@@ -43,7 +43,7 @@
       <img class="icon-select" v-else src="../../../assets/images/address_unselected.png">
     </div>
 
-    <div class="content flex-row" v-if="OpenId !== ''" @click="payType = '1'">
+    <div class="content flex-row" v-if="OpenId !== ''"  @click="payType = '1'">
       <div><img class="icon-pay" src="../../../assets/images/pay_wx.png"><span class="pay-span">微信支付</span></div>
 
       <img class="icon-select" v-if="payType === '1'" src="../../../assets/images/orders_pitch_on.png">
@@ -81,6 +81,9 @@ export default {
     }
   },
   mounted() {
+    if(this.OpenId != '') {
+      this.payType = '1';
+    }
     this.getRechargeList();
   },
   methods: {
@@ -149,7 +152,7 @@ export default {
         NeedPay: rechargeMoney,
         TotalMoney: totalMoney,
         ActivityId: activityId,
-        Activity: activity
+        Activity: activity,
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
@@ -163,7 +166,67 @@ export default {
       });
     },
     rechargeByWx(rechargeMoney, totalMoney, activityId, activity) {
-
+      axios.post(API.GetWxpaySignForWeb, qs.stringify({
+        Token: this.Token,
+        NeedPay: rechargeMoney,
+        TotalMoney: totalMoney,
+        ActivityId: activityId,
+        Activity: activity,
+        TradeType: this.OpenId === '' ? 'MWEB' : 'JSAPI',
+        OpenId: this.OpenId,
+      })).then(res => {
+        this.isLoading = false;
+        if (res.data.Meta.ErrorCode === '0') {
+          if(this.OpenId != '') {
+            // 公众号支付
+            const that = this;
+            function onBridgeReady() {
+              WeixinJSBridge.invoke(
+                'getBrandWCPayRequest', {
+                  "appId": res.data.Body.WxpaySign.appid,
+                  "timeStamp": res.data.Body.WxpaySign.timestamp,
+                  "nonceStr": res.data.Body.WxpaySign.noncestr,
+                  "package": res.data.Body.WxpaySign.package,
+                  "signType": "MD5",
+                  "paySign": res.data.Body.WxpaySign.sign
+                },
+                function(wx_res) {
+                  if (wx_res.err_msg == "get_brand_wcpay_request:ok") {
+                    that.$router.push({
+                      name: 'one_recharge_order',
+                      params: {
+                        out_trade_no: res.data.Body.out_trade_no
+                      }
+                    });
+                  } else if (wx_res.err_msg == "get_brand_wcpay_request:cancel" || wx_res.err_msg == "get_brand_wcpay_request:fail") {
+                    // that.alert(that.$store.state.IS_DEBUG === '0' ? that.ALERT_MSG.PAY_ERROR : wx_res.err_desc);
+                    that.alert(that.ALERT_MSG.PAY_ERROR);
+                  } else {
+                    that.alert(wx_res.err_desc);
+                  }
+                }
+              );
+            }
+            if (typeof WeixinJSBridge == "undefined") {
+              if (document.addEventListener) {
+                document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+              } else if (document.attachEvent) {
+                document.attachEvent('WeixinJSBridgeReady', onBridgeReady);
+                document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+              }
+            } else {
+              onBridgeReady();
+            }
+          } else {
+            // 微信h5支付
+          }
+        } else {
+          this.alert(res.data.Meta.ErrorMsg);
+        }
+      }).catch(err => {
+        this.isLoading = false;
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      });
     }
   },
   computed: {
@@ -171,7 +234,7 @@ export default {
   },
   filters: {
     moneyFilter(value) {
-      if(value === '' || value === undefined || value === null) {
+      if(!value || isNaN(value)) {
         return 0;
       }
       return Number(value);
@@ -189,6 +252,7 @@ export default {
   height: 2.133333rem;
   border-radius: 4px;
   border: 2px solid transparent;
+  overflow: auto;
 }
 .recharge-section.active
 {
@@ -215,7 +279,7 @@ export default {
 {
   width: auto;
   border: 2px solid transparent;
-  margin: 0.6rem 0.426667rem 0;
+  margin: 0.6rem 0.426667rem;
 }
 .recharge-section .title
 {

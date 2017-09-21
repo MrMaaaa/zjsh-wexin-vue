@@ -25,15 +25,34 @@ export default {
   },
   mounted() {
   },
+  activated() {
+    if(this.$route.params.selfLink) {
+      this.checkPhoneNumber();
+    } else if(window.history && window.history.length < 2) {
+      this.checkPhoneNumber();
+    }
+  },
   methods: {
     checkPhoneNumber() {
-      if(this.IsLogin == '0') {
-        this.openLogin();
-      } else if(this.UserInfo.PhoneNumber) {
-        this.linkToQNZ(this.UserInfo.PhoneNumber);
-      } else {
-        this.getUserInfo();
-      }
+      axios.post(API.VerifyToken, qs.stringify({
+        Token: this.Token,
+      })).then(res => {
+        if (res.data.Meta.ErrorCode === '0') {
+          this.getUserInfo();
+        } else {
+          this.openLogin();
+        }
+      }).catch(err => {
+        this.isLoading = false;
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
+      });
+      // if(this.IsLogin == '0') {
+      //   this.openLogin();
+      // } else if(this.UserInfo.PhoneNumber) {
+      //   this.linkToQNZ(this.UserInfo.PhoneNumber);
+      // } else {
+      //   this.getUserInfo();
+      // }
     },
     getUserInfo() {
       this.isLoading = true;
@@ -50,14 +69,14 @@ export default {
       }).catch(err => {
         this.isLoading = false;
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
-      });;
+      });
     },
     linkToQNZ(phone) {
-      window.location.href = 'http://www.qianneizhu.com/promotion/index.html?code=zhujia&phone=' + phone;
+      window.location.href = 'https://www.qianneizhu.com/promotion/index.html?code=zhujia&phone=' + phone;
     }
   },
   computed: {
-    ...mapState(['Token', 'IsLogin', 'UserInfo', 'ALERT_MSG'])
+    ...mapState(['Token', 'UserInfo', 'ALERT_MSG'])
   }
 }
 </script>

@@ -193,9 +193,9 @@ export default {
     isTouchAcross(x, y) {
       x = Math.abs(x);
       y = Math.abs(y);
-      var angle = Math.atan2(y, x) * 180 / Math.PI;
+      var angle = Math.atan2(y, x) * 180 / Math.PI; // 与y轴的夹角
       var touchCritical = 30;
-      if(angle <= touchCritical) {
+      if(angle >= touchCritical) {
         return true;
       } else {
         return false;

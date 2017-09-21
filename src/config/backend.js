@@ -102,6 +102,9 @@ export default {
   // 支付宝充值
   "GetAlipaySignForWeb": wap + "api/v3/Recharge/GetAlipaySignForWeb",
 
+  // 微信充值
+  "GetWxpaySignForWeb": wap + "api/v3/Recharge/GetWxpaySignForWeb",
+
   // 取消订单（仅用于支付页倒计时结束后自动取消订单）
   "CancelOrderEx": wap + "api/v3/OrderInfo/CancelOrderEx",
 

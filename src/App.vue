@@ -72,9 +72,14 @@ export default {
 
     // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
-      if (this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1 && JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
+      if (JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
         this.$store.commit('SetIsLogin', '0');
-        this.openLogin();
+        this.$store.commit('SetToken', '');
+
+        // 过滤掉不需要打开登录的页面
+        if(this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1) {
+          this.openLogin();
+        }
       }
       return response;
     }, error => Promise.reject(error));
@@ -203,8 +208,8 @@ body,
 .router-view
 {
   background-color: #eef2f5;
-  /*overflow: scroll;
-  -webkit-overflow-scrolling: touch;*/
+  overflow: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 /*.bounce-enter-active {
     animation: bounce-in .3s;
@@ -274,7 +279,7 @@ body,
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 9999;
+  z-index: 99999;
   transform: translateZ(0) translateY(100%);
   width: 100%;
   height: 100%;
