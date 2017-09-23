@@ -3,7 +3,7 @@
   <keep-alive>
     <router-view class="menu-router-view"></router-view>
   </keep-alive>
-  <footer class="menu flex-row">
+  <nav class="menu flex-row">
     <router-link :to="{ name: 'index' }" class="menu-item menu-item1" active-class="active">
       <i class="menu-icon"></i>
       <span class="menu-name">首页</span>
@@ -20,7 +20,7 @@
       <i class="menu-icon"></i>
       <span class="menu-name">我的</span>
     </router-link>
-  </footer>
+  </nav>
 </div>
 </template>
 

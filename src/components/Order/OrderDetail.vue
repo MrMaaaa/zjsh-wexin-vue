@@ -194,6 +194,8 @@ export default {
       orderCodeForEvaluate: '',
       serviceTypeIdForEvaluate: '',
       isEvaluate: '0',
+      touchStartX: 0,
+      touchStartY: 0,
     }
   },
   mounted() {
@@ -253,9 +255,9 @@ export default {
         this.$refs.tabIndex.classList.add('trans');
         this.$refs.orderStatus.classList.add('trans');
         this.$refs.orderInfo.classList.add('trans');
-        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX - 50) {
           this.tabIndex = '1';
-        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX + 50) {
           this.tabIndex = '0';
         }
       }

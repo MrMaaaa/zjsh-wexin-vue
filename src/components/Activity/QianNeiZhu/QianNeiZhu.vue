@@ -40,7 +40,10 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           this.getUserInfo();
         } else {
-          this.openLogin();
+          var that = this;
+          this.openLogin(() => {
+            that.getUserInfo();
+          });
         }
       }).catch(err => {
         this.isLoading = false;

@@ -554,9 +554,9 @@ export default {
     },
     orderSubmit() {
       if(!this.OrderInfo.Address.Id) {
-        this.alert('请选择服务地址');
+        this.alert(this.ALERT_MSG.PLACE_ERROR.ADDRESS_EMPTY);
       } else if(this.OrderInfo.DateTime === '') {
-        this.alert('请选择服务时间');
+        this.alert(this.ALERT_MSG.PLACE_ERROR.DATETIME_EMPTY);
       } else {
         this.isLoading = true;
         this.txtLoading = '正在提交订单……';
@@ -603,7 +603,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
@@ -681,6 +681,22 @@ export default {
         this.getActivityServiceDetail(this.valueFromUrl('ServiceId'));
       }
     },
+    IsLogin(newValue, oldValue) {
+      // 如果在下单页面由于token失效导致弹出登录窗口，此时需要在登录后重新获取服务数据
+      if(newValue == '1' && this.serviceList.length == 0) {
+        this.serviceId = this.$route.query.id;
+        this.isActivity = this.$route.query.isActivity || '0';
+        this.OrderInfo.DateTime = '';
+        this.OrderInfo.ServiceContent = '';
+
+        this.getUserAddress();
+        if (this.isActivity == '1') {
+          this.getActivityServiceDetail();
+        } else {
+          this.getServiceDetail();
+        }
+      }
+    }
   }
 }
 </script>

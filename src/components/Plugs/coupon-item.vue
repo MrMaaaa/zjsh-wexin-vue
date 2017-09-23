@@ -26,15 +26,17 @@ couponTypeByVue: 0:未使用 1:已使用 2:已过期
     </div>
   </div>
 
-  <div class="right" v-else>
-    <header class="item-title txt-over-hide">{{ couponItem.Title }}</header>
+  <div class="right flex-row" v-else>
+    <div class="item-info">
+      <header class="item-title txt-over-hide">{{ couponItem.Title }}</header>
 
-    <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes && couponItem.ServiceTypes.length >  0">
-      <span class="service-type" v-for="(type, t_index) in couponItem.ServiceTypes"><span v-if="t_index > 0">、</span>{{ type.ServiceName }}</span>
-    </p>
-    <p class="item-limit-service" v-else>全品类可用</p>
+      <p class="item-limit-service txt-over-hide" v-if="couponItem.ServiceTypes && couponItem.ServiceTypes.length >  0">
+        <span class="service-type" v-for="(type, t_index) in couponItem.ServiceTypes"><span v-if="t_index > 0">、</span>{{ type.ServiceName }}</span>
+      </p>
+      <p class="item-limit-service" v-else>全品类可用</p>
 
-    <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
+      <p class="item-limit-date txt-over-hide">{{ couponItem.CreateTime | formatDate }}至{{ couponItem.EndTime | formatDate }}</p>
+    </div>
   </div>
 
   <img v-if="couponItem.couponTypeByVue === '1'" class="item-status" src="../../assets/images/coupon_used.png">
@@ -129,6 +131,36 @@ export default {
   background-image: url(../../assets/images/coupon_bg.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
+  &.gray
+  {
+    background-image: url(../../assets/images/coupon_bg_gray.png);
+    .left
+    {
+      .item-discount
+      {
+        color: #ccc;
+      }
+      .item-limit-discount
+      {
+        color: #cdcdcd;
+      }
+    }
+    .right
+    {
+      .item-info
+      {
+        .item-title
+        {
+          color: #ccc;
+        }
+        .item-limit-service,
+        .item-limit-date
+        {
+          color: #cdcdcd;
+        }
+      }
+    }
+  }
   .left
   {
     flex-shrink: 0;
@@ -200,11 +232,9 @@ export default {
       .use-now
       {
         position: absolute;
-        bottom: 0.133333rem;
-        right: 0;
+        bottom: 0.15rem;
+        right: 0.5rem;
         line-height: 100%;
-        margin-top: 0.6rem;
-        margin-right: 0.2rem;
         padding: 0.1rem 0.133333rem;
         border: 1px solid #ab49ea;
         border-radius: 0.3rem;
@@ -216,33 +246,6 @@ export default {
   {
     width: 2.08rem;
     margin-right: 0.106667rem;
-  }
-}
-.list-item.gray
-{
-  background-image: url(../../assets/images/coupon_bg_gray.png);
-  .left
-  {
-    .item-discount
-    {
-      color: #ccc;
-    }
-    .item-limit-discount
-    {
-      color: #cdcdcd;
-    }
-  }
-  .right
-  {
-    .item-title
-    {
-      color: #ccc;
-    }
-    .item-limit-service,
-    .item-limit-date
-    {
-      color: #cdcdcd;
-    }
   }
 }
 </style>

@@ -152,7 +152,7 @@ export default {
       pageData: {},
       threeId: '',
       serviceList: [],
-      isActiveHuanXin: false, // 是否已经加载好客服窗口
+      isHXReady: false,
     }
   },
   activated() {
@@ -171,67 +171,64 @@ export default {
     var img = this.$route.params.img || '';
     var url = this.$route.params.url || '';
     window.easemobim = window.easemobim || {};
-    window.easemobim.config = {
-      configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
-      hideKeyboard: true,
-      visitor: {
-        trueName: '',
-        qq: '',
-        phone: this.$store.state.UserInfo.PhoneNumber || '未登录',
-        companyName: '',
-        userNickname: this.$store.state.UserInfo.NickName || '未登录',
-        description: '',
-        email: ''
-      },
-      onready: function() {
-        that.isActiveHuanXin = true;
-        // 发送服务信息
-        window.easemobim.sendExt({
-          ext: {
-            "imageName": "detail.png",
-            //custom代表自定义消息，无需修改
-            "type": "custom",
-            "msgtype": {
-              "track": {
-                "title": '我正在看：' + desc,
-                "price": "",
-                "desc": desc,
-                "img_url": img,
-                "item_url": url,
-              }
+    if(this.isHXReady) {
+      window.easemobim.sendExt({
+        ext: {
+          "imageName": "detail.png",
+          //custom代表自定义消息，无需修改
+          "type": "custom",
+          "msgtype": {
+            "track": {
+              "title": '我正在看：' + desc,
+              "price": "",
+              "desc": desc,
+              "img_url": img,
+              "item_url": url,
             }
           }
-        });
-      },
-    };
+        }
+      });
+    } else {
+      window.easemobim.config = {
+        configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
+        hideKeyboard: true,
+        visitor: {
+          trueName: '',
+          qq: '',
+          phone: this.$store.state.UserInfo.PhoneNumber || '未登录',
+          companyName: '',
+          userNickname: this.$store.state.UserInfo.NickName || '未登录',
+          description: '',
+          email: ''
+        },
+        onready: function() {
+          that.isHXReady = true;
+          // 发送服务信息
+          window.easemobim.sendExt({
+            ext: {
+              "imageName": "detail.png",
+              //custom代表自定义消息，无需修改
+              "type": "custom",
+              "msgtype": {
+                "track": {
+                  "title": '我正在看：' + desc,
+                  "price": "",
+                  "desc": desc,
+                  "img_url": img,
+                  "item_url": url,
+                }
+              }
+            }
+          });
+        },
+      };
+    }
   },
   methods: {
     callCustomerService() {
-      var desc = this.pageData.title;
-      var img = this.$route.params.img || '';
-      var url = this.$route.params.url || '';
       window.easemobim.bind({
         configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"
       });
-      // 如果第一次加载好之后，每次点击联系客服都重新发送轨迹信息
-      if (this.isActiveHuanXin) {
-        window.easemobim.sendExt({
-          ext: {
-            "imageName": "detail.png",
-            //custom代表自定义消息，无需修改
-            "type": "custom",
-            "msgtype": {
-              "track": {
-                "title": '我正在看' + desc,
-                "price": "",
-                "desc": desc,
-                "img_url": img,
-                "item_url": url,
-              }
-            }
-          }
-        });
-      }
     },
     getServicePrice() {
       axios.post(API.QueryServicePrice, qs.stringify({

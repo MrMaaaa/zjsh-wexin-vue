@@ -44,7 +44,7 @@ export default new Vuex.Store({
       Price: '', // 服务单价
       SellType: '', // 1:定价类型 2:面议类型
       SpecialType: '0',
-      OrderFrom: '210', // 订单来源 0:android 1:ios 210:微信 215:同城家政分包
+      OrderFrom: '210', // 210:微信
       ServiceContent: '', // 备注
       DateTime: '', // 订单预约时间
       IsClaims: '1', // 是否使用1元保险
@@ -85,6 +85,10 @@ export default new Vuex.Store({
       PAY_ERROR: '支付失败',
       AMOUNT_ERROR: '请输入正确的金额',
       POSITION_ERROR: '定位失败，请开启定位或检查网络',
+      PLACE_ERROR: {
+        ADDRESS_EMPTY: '请选择服务地址',
+        DATETIME_EMPTY: '请选择服务时间',
+      },
       ADDRESS_ERROR: {
         NAME_EMPTY: '请填写您的姓名',
         SEX_EMPTY: '请选择您的性别',
@@ -134,6 +138,9 @@ export default new Vuex.Store({
     AlertMsg: '', // 弹出信息
     AlertTimeout: '1000', // 弹框持续时间
     AlertStatus: '0', // 弹框状态：0:隐藏，1:显示
+
+    // 登录成功回调函数
+    LoginCallback: null,
   },
   mutations: {
     SetIsWxBrowser(state, data) {
@@ -171,13 +178,13 @@ export default new Vuex.Store({
       Common.setCookie('ZJSH_WX_DefaultAddressId', data, 30, '/');
       return state.DefaultAddressId = data;
     },
-    SetUserInfo(state, data = '') {
+    SetUserInfo(state, data) {
       return state.UserInfo = data;
     },
-    SetIsLogin(state, data = '') {
+    SetIsLogin(state, data = '0') {
       return state.IsLogin = data;
     },
-    SetIsOpenLogin(state, data = '') {
+    SetIsOpenLogin(state, data = '0') {
       return state.IsOpenLogin = data;
     },
     SetOrderFrom(state, data = '助家生活') {
@@ -210,6 +217,9 @@ export default new Vuex.Store({
     },
     SetROUTER_TO_TITLE(state, data) {
       return state.ROUTER_TO_TITLE = data;
+    },
+    SetLoginCallback(state, data) {
+      return state.LoginCallback = data;
     },
   },
   actions: {

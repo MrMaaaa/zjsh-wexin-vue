@@ -246,7 +246,7 @@ export default {
     },
     gotoOrderPlace(item) {
       // 目前只有小时工（还有从活动页中跳转到下单的服务）isActivity才是1，其他服务isActivity均为0
-      if (item.ServiceId == '1') {
+      if (item.ServiceName.indexOf('小时工') > -1) {
         this.$router.push({
           name: 'order_place',
           query: {

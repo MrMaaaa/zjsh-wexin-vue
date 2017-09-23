@@ -117,6 +117,8 @@ export default {
           var login = document.getElementById('module_login');
           document.title = login.getAttribute('title');
           login.classList.remove('active');
+          this.LoginCallback && this.LoginCallback();
+          this.$store.commit('SetLoginCallback', null);
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -136,7 +138,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['AppName', 'IsOpenLogin', 'ALERT_MSG']),
+    ...mapState(['AppName', 'IsOpenLogin', 'LoginCallback', 'ALERT_MSG']),
     isPhone() {
       return /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phoneNumber);
     },

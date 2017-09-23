@@ -344,8 +344,8 @@ export default {
       this.nameFlag = '-1';
       this.isSelNameCustom = true;
     },
+    //获取与今天相隔val天的日期
     getDate(val) {
-      //获取与今天相隔val天的日期
       val = parseInt(val);
       var date = new Date();
       date = new Date(parseInt(date.getTime()) + val * 86400000);
@@ -354,8 +354,8 @@ export default {
       var day = date.getDate();
       return year + '-' + month + '-' + day;
     },
+    //获取可供选择的时间列表，如果为今天则需要与当前时间作对比
     getDateList(start, end, isToday) {
-      //获取可供选择的时间列表，如果为今天则需要与当前时间作对比
       var arr = [];
       if (isToday) {
         var date = new Date();

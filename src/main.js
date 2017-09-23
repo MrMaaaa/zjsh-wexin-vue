@@ -24,15 +24,19 @@ Vue.mixin({
     alert(alertMsg, alertTimeout=1000, alertCallback) {
       this.$store.dispatch('SetAlert', {
         alertMsg,
-        alertTimeout: (typeof alertTimeout) == 'function' ? 1000 : alertTimeout,
-        alertCallback: (typeof alertTimeout) == 'function' ? alertTimeout : alertCallback,
+        alertTimeout: typeof alertTimeout == 'function' ? 1000 : alertTimeout,
+        alertCallback: typeof alertTimeout == 'function' ? alertTimeout : alertCallback,
       });
     },
-    openLogin() {
+    // 弹出登录
+    openLogin(callback) {
       this.$store.commit('SetIsOpenLogin', '1');
       var login = document.getElementById('module_login');
       login.setAttribute('title', document.title);
       login.classList.add('active');
+      if(callback && typeof callback == 'function') {
+        this.$store.commit('SetLoginCallback', callback);
+      }
       var WVJBIframe = document.createElement('iframe');
       document.title = '登录';
       WVJBIframe.style.display = 'none';

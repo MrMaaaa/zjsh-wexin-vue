@@ -64,7 +64,7 @@ export default {
       isWxPay: '0',
       isZfbPay: '0',
       isLoading: false,
-      bgLoading: '1',
+      bgLoading: '2',
       payAmount: '',
     }
   },
@@ -97,9 +97,11 @@ export default {
   },
   methods: {
     getUserSettlement() {
+      this.isLoading = true;
       axios.post(API.MySettlement, qs.stringify({
         Token: this.Token
       })).then(res => {
+        this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
           this.balance = Number(res.data.Body.SettlementBalance);
           if (this.payWayStatus.isBalancePay == '0') {
@@ -124,6 +126,7 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
+        this.isLoading = false;
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },

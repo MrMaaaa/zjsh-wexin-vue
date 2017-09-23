@@ -33,6 +33,7 @@ export default {
   name: 'order_complaint_reason',
   data () {
     return {
+      orderId: '',
       reasonList: [],
       selectedIndex: -1,
       cancelReason: '',
@@ -43,6 +44,7 @@ export default {
     }
   },
   activated() {
+    this.orderId = this.$route.params.orderId;
     this.isLoading = true;
     this.selectedIndex = -1;
     this.getReasonList();
@@ -77,7 +79,7 @@ export default {
       this.loadingBgStyle = '2';
       axios.post(API.OrderCancel, qs.stringify({
         Token: this.Token,
-        OrderId: this.$route.params.orderId,
+        OrderId: this.orderId,
         CancelReason: this.cancelReason == '其他' ? this.customReason : this.cancelReason,
       })).then(res => {
         this.isLoading = false;

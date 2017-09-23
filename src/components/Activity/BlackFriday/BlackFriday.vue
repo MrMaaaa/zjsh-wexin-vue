@@ -121,13 +121,26 @@ export default {
       }
     },
     goToOrder(item) {
-      this.$router.push({
-        name: 'order_place',
-        query: {
-          id: item.ProductId,
-          isActivity: '1',
-        }
-      });
+      if(this.IsLogin === '1') {
+        this.$router.push({
+          name: 'order_place',
+          query: {
+            id: item.ProductId,
+            isActivity: '1',
+          }
+        });
+      } else {
+        var that = this;
+        this.openLogin(() => {
+          this.$router.push({
+            name: 'order_place',
+            query: {
+              id: item.ProductId,
+              isActivity: '1',
+            }
+          });
+        });
+      }
     },
     showInfo(type) {
       if(type == '0') {
@@ -138,7 +151,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'ALERT_MSG']),
+    ...mapState(['IsLogin', 'ALERT_MSG']),
   },
 }
 </script>

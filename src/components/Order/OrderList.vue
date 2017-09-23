@@ -89,11 +89,8 @@ export default {
       isConfirm: '0',
       isLoading: false,
       loadingBgStyle: '1',
-      // 弹出支付页面时禁止滚动，待实现
-      noScroll: function(event) {
-        event.preventDefault();
-        return false;
-      }
+      touchStartX: 0,
+      touchStartY: 0,
     }
   },
   mounted() {
@@ -113,6 +110,9 @@ export default {
       if(!isCheck && (Math.abs(event.targetTouches[0].pageY - this.touchStartY) > 10 || Math.abs(event.targetTouches[0].pageX - this.touchStartX) > 10)) {
         isCheck = true;
         if(this.isTouchAcross(Math.abs(event.targetTouches[0].pageY - this.touchStartY), Math.abs(event.targetTouches[0].pageX - this.touchStartX))) {
+          // 如果是横向滑动，记录当前的touch位置
+          this.touchStartX = event.targetTouches[0].pageX;
+          this.touchStartY = event.targetTouches[0].pageY;
           isAcross = true;
         }
       }
@@ -153,9 +153,9 @@ export default {
         this.$refs.tabIndex.classList.add('trans');
         this.$refs.nowList.classList.add('trans');
         this.$refs.historyList.classList.add('trans');
-        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX) {
+        if (this.tabIndex == '0' && event.changedTouches[0].clientX < this.touchStartX - 50) {
           this.tabIndex = '1';
-        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX) {
+        } else if (this.tabIndex == '1' && event.changedTouches[0].clientX > this.touchStartX + 50) {
           this.tabIndex = '0';
         }
       }

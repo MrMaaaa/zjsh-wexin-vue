@@ -151,7 +151,7 @@ import axios from 'axios';
 import qs from 'qs';
 
 export default {
-  name: 'express_detail',
+  name: 'errand_detail',
   data() {
     return {
       slots_datetime: [{
@@ -322,8 +322,8 @@ export default {
       this.selData.name = event.target.innerText;
       this.isSelName = false;
     },
+    //获取与今天相隔val天的日期
     getDate(val) {
-      //获取与今天相隔val天的日期
       val = parseInt(val);
       var date = new Date();
       date = new Date(parseInt(date.getTime()) + val * 86400000);
@@ -366,8 +366,8 @@ export default {
         return arr;
       }
     },
+    // type说明 1:今天 2:明天的最后一个小时 3:当前小时的可选分钟
     getAvailMinute: function(type) {
-      // type说明 1:今天 2:明天的最后一个小时 3:当前小时的可选分钟
       var arr = [];
       var date = new Date();
       var nowHour = date.getHours();

@@ -361,7 +361,6 @@ export default {
     bottom: 2.3rem;
     left: 0;
     width: 100%;
-    margin-top: 2.666667rem;
     color: #333639;
     .row
     {

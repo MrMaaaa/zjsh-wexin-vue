@@ -51,7 +51,7 @@
       </div>
       <div class="row flex-row">
         <div class="left">发件人</div>
-        <div class="right txt-over-hide">{{ orderDetail.SenderAddress.Contact }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.SenderAddress.Contact }} {{ orderDetail.SenderAddress.PhoneNumber }}</div>
       </div>
       <div class="info-split"></div>
       <div class="row flex-row">
@@ -60,7 +60,7 @@
       </div>
       <div class="row flex-row">
         <div class="left">收件人</div>
-        <div class="right txt-over-hide">{{ orderDetail.RevicerAddress.Contact }}</div>
+        <div class="right txt-over-hide">{{ orderDetail.RevicerAddress.Contact }} {{ orderDetail.RevicerAddress.PhoneNumber }}</div>
       </div>
       <div class="info-split"></div>
       <div class="row flex-row">

@@ -105,7 +105,7 @@ export default {
       countdownTime: -1,
       interval: null,
       isLoading: false,
-      bgLoading: '1',
+      bgLoading: '2',
       DialogConfig: { //对话框配置信息
         IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
         DialogTitle: '温馨提示', // 对话框标题
@@ -149,6 +149,7 @@ export default {
   },
   methods: {
     getOrderDetail() {
+      this.isLoading = true;
       axios.post(API.GetOrderInfoEx, qs.stringify({
         Token: this.Token,
         OrderId: this.orderId,
