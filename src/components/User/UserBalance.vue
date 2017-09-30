@@ -1,53 +1,41 @@
 <template>
 <div class="app">
-  <header class="first-recharge recharge-section flex-row" :class="{ active: activeIndex == -1 }" @touchend="selectRecharge(firstRecharge, -1)">
-    <div class="title">
-      <span class="title-span">首充<br>特惠</span>
+  <div class="container">
+    <div class="recharges flex-row">
+      <section class="recharge-section" :class="{ active: activeIndex == index }" v-for="(item, index) in rechargeList" @touchend="selectRecharge(item, index)">
+        <div class="content">
+          <div class="money-recharge">充{{ item.RechargeMoney | moneyFilter }}元</div>
+          <div class="money-presented" v-if="!!item.ReturnMoney">赠送{{ item.ReturnMoney | moneyFilter }}元</div>
+        </div>
+      </section>
     </div>
 
-    <div class="content">
-      <div class="row">
-        <span class="money-recharge">充{{ firstRecharge.RechargeMoney | moneyFilter }}元</span>
-        <span class="money-presented">赠送{{ firstRecharge.ReturnMoney | moneyFilter }}元</span>
+    <div class="recharge-amount flex-row">
+      <div class="title">充值金额：</div>
+      <div class="content">￥<span class="amount">{{ selectRechargeItem.RechargeMoney | moneyFilter }}</span></div>
+    </div>
+
+    <div class="recharge-info flex-row">
+      <div class="title">额外赠送&nbsp;&nbsp;{{ selectRechargeItem.ReturnMoney | moneyFilter }}元</div>
+      <div class="content">实际可得<span class="amount">￥{{ selectRechargeItem.TotalMoney | moneyFilter }}</span></div>
+    </div>
+
+    <div class="pay-way">
+      <div class="title">支付方式</div>
+
+      <div class="content flex-row" v-if="OpenId === ''" @click="payType = '0'">
+        <div><img class="icon-pay" src="../../assets/images/pay_zfb.png"><span class="pay-span">支付宝支付</span></div>
+
+        <img class="icon-select" v-if="payType === '0'" src="../../assets/images/orders_pitch_on.png">
+        <img class="icon-select" v-else src="../../assets/images/address_unselected.png">
       </div>
-      <div class="row tip">每个账号限领一次</div>
-    </div>
-  </header>
 
-  <div class="recharges flex-row">
-    <section class="recharge-section" :class="{ active: activeIndex == index }" v-for="(item, index) in rechargeList" @touchend="selectRecharge(item, index)">
-      <div class="content">
-        <div class="money-recharge">充{{ item.RechargeMoney | moneyFilter }}元</div>
-        <div class="money-presented" v-if="!!item.ReturnMoney">赠送{{ item.ReturnMoney | moneyFilter }}元</div>
+      <div class="content flex-row" v-if="OpenId !== ''"  @click="payType = '1'">
+        <div><img class="icon-pay" src="../../assets/images/pay_wx.png"><span class="pay-span">微信支付</span></div>
+
+        <img class="icon-select" v-if="payType === '1'" src="../../assets/images/orders_pitch_on.png">
+        <img class="icon-select" v-else src="../../assets/images/address_unselected.png">
       </div>
-    </section>
-  </div>
-
-  <div class="recharge-amount flex-row">
-    <div class="title">充值金额：</div>
-    <div class="content">￥<span class="amount">{{ selectRechargeItem.RechargeMoney | moneyFilter }}</span></div>
-  </div>
-
-  <div class="recharge-info flex-row">
-    <div class="title">额外赠送&nbsp;&nbsp;{{ selectRechargeItem.ReturnMoney | moneyFilter }}元</div>
-    <div class="content">实际可得<span class="amount">￥{{ selectRechargeItem.TotalMoney | moneyFilter }}</span></div>
-  </div>
-
-  <div class="pay-way">
-    <div class="title">支付方式</div>
-
-    <div class="content flex-row" v-if="OpenId === ''" @click="payType = '0'">
-      <div><img class="icon-pay" src="../../../assets/images/pay_zfb.png"><span class="pay-span">支付宝支付</span></div>
-
-      <img class="icon-select" v-if="payType === '0'" src="../../../assets/images/orders_pitch_on.png">
-      <img class="icon-select" v-else src="../../../assets/images/address_unselected.png">
-    </div>
-
-    <div class="content flex-row" v-if="OpenId !== ''"  @click="payType = '1'">
-      <div><img class="icon-pay" src="../../../assets/images/pay_wx.png"><span class="pay-span">微信支付</span></div>
-
-      <img class="icon-select" v-if="payType === '1'" src="../../../assets/images/orders_pitch_on.png">
-      <img class="icon-select" v-else src="../../../assets/images/address_unselected.png">
     </div>
   </div>
 
@@ -61,17 +49,15 @@
 
 <script>
 import { mapState } from 'vuex';
-import API from '../../../config/backend';
+import API from '../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
 
 export default {
-  name: 'one_recharge_index',
+  name: 'user_balance',
   data() {
     return {
-      activeIndex: -1,
-      firstRecharge: {
-      },
+      activeIndex: 0,
       selectRechargeItem: {
       },
       activityDesc: '',
@@ -89,17 +75,11 @@ export default {
   methods: {
     getRechargeList() {
       this.isLoading = true;
-      axios.post(API.GetReChargeListResponse).then(res => {
+      axios.post(API.GetRechargeListEx).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          let count = 0;
-          let tempArr = [];
-          let list = res.data.Body.List;
-          this.rechargeList = list;
-          this.activityDesc = res.data.Body.RechargeDescription;
-          this.firstRecharge = list[0];
-          this.selectRecharge(this.firstRecharge, '-1');
-          this.rechargeList.splice(0, 1);
+          this.rechargeList = res.data.Body.List;
+          this.selectRechargeItem = this.rechargeList[0];
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -199,6 +179,7 @@ export default {
                       }
                     });
                   } else if (wx_res.err_msg == "get_brand_wcpay_request:cancel" || wx_res.err_msg == "get_brand_wcpay_request:fail") {
+                    // that.alert(that.$store.state.IS_DEBUG === '0' ? that.ALERT_MSG.PAY_ERROR : wx_res.err_desc);
                     that.alert(that.ALERT_MSG.PAY_ERROR);
                   } else {
                     that.alert(wx_res.err_desc);
@@ -243,6 +224,13 @@ export default {
 </script>
 
 <style scoped>
+.container
+{
+  box-sizing: border-box;
+  height: 100%;
+  padding-bottom: 1.946667rem;
+  overflow-y: scroll;
+}
 .recharge-section
 {
   position: relative;
@@ -257,10 +245,6 @@ export default {
 {
   border: 2px solid #f56165;
 }
-.recharge-section.first-recharge.active
-{
-  border: 2px solid #f56165;
-}
 .recharge-section.active::after
 {
   position: absolute;
@@ -270,15 +254,9 @@ export default {
   display: block;
   width: 0.88rem;
   height: 0.68rem;
-  background-image: url(../../../assets/images/selected-1.png);
+  background-image: url(../../assets/images/selected-1.png);
   background-repeat: no-repeat;
   background-size: 100% 100%;
-}
-.recharge-section.first-recharge
-{
-  width: auto;
-  border: 2px solid transparent;
-  margin: 0.6rem 0.426667rem;
 }
 .recharge-section .title
 {
@@ -313,11 +291,6 @@ export default {
   background-color: #fff;
   text-align: center;
 }
-.recharge-section.first-recharge .content
-{
-  padding-left: 0.8rem;
-  text-align: left;
-}
 .recharge-section .content .money-recharge
 {
   line-height: 100%;
@@ -330,11 +303,6 @@ export default {
   margin-top: 0.186667rem;
   font-size: 14px;
   color: #f56165;
-}
-.recharge-section.first-recharge .content .money-presented
-{
-  margin-top: 0;
-  margin-left: 0.32rem;
 }
 .recharge-section .content .tip
 {

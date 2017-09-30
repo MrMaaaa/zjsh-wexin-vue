@@ -18,8 +18,17 @@ export default {
   // 验证Token是否有效
   "VerifyToken": wap + "api/v3/helper/VerifyToken",
 
+  // 更新推送
+  "UpdatePushDeviceID": wap + "api/v3/ClientInfo/UpdatePushDeviceID",
+
   // 快捷登录
   "QuickLogin": wap + "api/v3/Wap/QuickLogin",
+
+  // 设置昵称
+  "SetNickName": wap + "api/v3/ClientInfo/SetNickName",
+
+  // 设置头像
+  "SetPhoto": wap + "api/v3/ClientInfo/SetPhoto",
 
   // 获取活动列表
   "GetAds": wap + "api/v3/Provider/GetAds",
@@ -90,7 +99,10 @@ export default {
   // 增项-微信支付
   "IodOfWxpay": wap + "api/v3/Order/IodOfWxpay",
 
-  // 充值列表
+  // 获取活动充值列表
+  "GetRechargeListEx": wap + "api/v3/Recharge/GetRechargeListEx",
+
+  // 获取活动充值列表
   "GetReChargeListResponse": wap + "api/v3/Recharge/GetReChargeListResponse",
 
   // 获取充值信息

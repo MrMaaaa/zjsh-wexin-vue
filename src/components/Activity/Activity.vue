@@ -79,6 +79,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.menu-router-view
+{
+  height: 100%;
+  overflow-y: scroll;
+}
 .activity-list
 {
   .list-item

@@ -88,7 +88,7 @@
   </div>
 
   <div class="item-operation flex-row" v-if="orderItem.OrderBtnInfo.IsShowBtnInfo">
-    <div class="refund-status" :class="{ hide: !orderItem.RefundStatus || orderItem.RefundStatus =='' }">{{ orderItem.RefundStatus }}</div>
+    <div class="refund-status" :class="{ hide: !orderItem.RefundStatus || orderItem.RefundStatus == '' }">{{ orderItem.RefundStatus }}</div>
 
     <div class="operation-btns flex-row">
       <!-- <a class="btn" v-if="orderItem.IsKdEOrder !== '1' && orderItem.OrderBtnInfo.IsDisplayCancelOrderBtn === '1' && orderItem.OrderBtnInfo.IsGotoCancelPage === '1'" @click="$emit('order-cancel-dialog', orderItem.OrderId)">取消订单</a> -->

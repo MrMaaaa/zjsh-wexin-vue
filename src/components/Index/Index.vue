@@ -1,63 +1,65 @@
 <template>
-<div class="wrapper index-wrapper" :class="appName">
-  <section class="shortcut">
-    <ul class="shortcut-list flex-row">
-      <li class="list-item" :class="'list-item' + index" @click="routerTo(item)" v-for="(item, index) in shortcuts">
-        <i class="item-img"><img class="item-icon" :src="item.icon"></i>
-        <span class="item-name txt-over-hide">{{ item.ServiceName }}</span>
-      </li>
-    </ul>
-  </section>
+<div class="outer-wrapper">
+  <div class="index-wrapper" :class="appName">
+    <section class="shortcut">
+      <ul class="shortcut-list flex-row">
+        <li class="list-item" :class="'list-item' + index" @click="routerTo(item)" v-for="(item, index) in shortcuts">
+          <i class="item-img"><img class="item-icon" :src="item.icon"></i>
+          <span class="item-name txt-over-hide">{{ item.ServiceName }}</span>
+        </li>
+      </ul>
+    </section>
 
-  <section class="super-discount" v-if="superDiscountList.Items.length > 0">
-    <header class="discount-title">{{ superDiscountList.Title }}</header>
-    <div>
-      <swiper :options="swiperOption" ref="mySwiper">
-        <swiper-slide class="slide-item" @click.native="gotoOrderPlace(item)" :key="item.ServiceId" v-for="item in superDiscountList.Items">
-          <img class="swiper-icon" :src="item.IconUrl">
+    <section class="super-discount" v-if="superDiscountList.Items.length > 0">
+      <header class="discount-title">{{ superDiscountList.Title }}</header>
+      <div>
+        <swiper :options="swiperOption" ref="mySwiper">
+          <swiper-slide class="slide-item" @click.native="gotoOrderPlace(item)" :key="item.ServiceId" v-for="item in superDiscountList.Items">
+            <img class="swiper-icon" :src="item.IconUrl">
 
-          <div class="slide-item-slot">
-            <span class="slot-title">{{ item.ServiceName }}</span>
-            <span class="slot-price"><span class="price-slogon">优惠后</span><span class="price-symbol"> ￥</span><span class="price-amount">{{ item.SuperDiscountItem.Amount }}</span></span>
-            <div class="slot-discount-info" v-if="item.SuperDiscountItem">
-              <span class="info-item txt-over-hide" v-for="info in item.SuperDiscountItem.DiscountContent"><img class="info-icon" src="../../assets/images/orders_pitch_on.png">{{ info }}</span>
+            <div class="slide-item-slot">
+              <span class="slot-title">{{ item.ServiceName }}</span>
+              <span class="slot-price"><span class="price-slogon">优惠后</span><span class="price-symbol"> ￥</span><span class="price-amount">{{ item.SuperDiscountItem.Amount }}</span></span>
+              <div class="slot-discount-info" v-if="item.SuperDiscountItem">
+                <span class="info-item txt-over-hide" v-for="info in item.SuperDiscountItem.DiscountContent"><img class="info-icon" src="../../assets/images/orders_pitch_on.png">{{ info }}</span>
+              </div>
             </div>
-          </div>
-        </swiper-slide>
-        <div class="swiper-pagination" slot="pagination"></div>
-      </swiper>
-    </div>
-  </section>
+          </swiper-slide>
+          <div class="swiper-pagination" slot="pagination"></div>
+        </swiper>
+      </div>
+    </section>
 
-  <section class="category clearning" :style="{ 'padding-bottom': recommend.ServiceId == '1' ? 0 : '1.173333rem'}" v-for="recommend in recommendList">
-    <header class="category-title">{{ recommend.Title }}</header>
+    <section class="category clearning" :style="{ 'padding-bottom': recommend.ServiceId == '1' ? 0 : '1.173333rem'}" v-for="recommend in recommendList">
+      <header class="category-title">{{ recommend.Title }}</header>
 
-    <router-link class="category-more" v-if="recommend.ServiceId != '1'" :to="{ name: 'recommend_more', query: { id:recommend.ServiceId } }">更多</router-link>
+      <router-link class="category-more" v-if="recommend.ServiceId != '1'" :to="{ name: 'recommend_more', query: { id:recommend.ServiceId } }">更多</router-link>
 
-    <ul class="category-list flex-row">
-      <li class="category-item" v-for="item in recommend.Items" @click="routerTo(item)">
-        <img class="item-img" :src="item.LogoUrl[0]">
+      <ul class="category-list flex-row">
+        <li class="category-item" v-for="item in recommend.Items" @click="routerTo(item)">
+          <img class="item-img" :src="item.LogoUrl[0]">
 
-        <p class="item-name">{{ item.ServiceName }}</p>
+          <p class="item-name">{{ item.ServiceName }}</p>
 
-        <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
-      </li>
-    </ul>
-  </section>
+          <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
+        </li>
+      </ul>
+    </section>
 
-  <section class="category convenience">
-    <header class="category-title">快递跑腿</header>
+    <section class="category convenience">
+      <header class="category-title">快递跑腿</header>
 
-    <ul class="category-list flex-row">
-      <li class="category-item" v-for="item in convenienceList" @click="routerTo(item)">
-        <img class="item-img" :src="item.icon">
+      <ul class="category-list flex-row">
+        <li class="category-item" v-for="item in convenienceList" @click="routerTo(item)">
+          <img class="item-img" :src="item.icon">
 
-        <p class="item-name">{{ item.ServiceName }}</p>
+          <p class="item-name">{{ item.ServiceName }}</p>
 
-        <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
-      </li>
-    </ul>
-  </section>
+          <p class="item-unit-price"><span class="price">{{ item.Price }}</span>元/{{ item.Unit }}</p>
+        </li>
+      </ul>
+    </section>
+  </div>
 </div>
 </template>
 
@@ -148,10 +150,6 @@ export default {
         ServiceId: '15',
         icon: require('../../assets/images/shortcut' + type + '_xiyijiqingxi.png'),
       }, {
-        ServiceName: '微波炉清洗',
-        ServiceId: '16',
-        icon: require('../../assets/images/shortcut' + type + '_chongfuliang.png'),
-      }, {
         ServiceName: '冰箱清洗',
         ServiceId: '14',
         icon: require('../../assets/images/shortcut' + type + '_bingxiangqingxi.png'),
@@ -163,15 +161,26 @@ export default {
         ServiceName: '同城跑腿',
         ServiceId: '59',
         icon: require('../../assets/images/shortcut' + type + '_paotui.png'),
+      }, {
+        ServiceName: '全部分类',
+        ServiceId: '0',
+        icon: require('../../assets/images/shortcut' + type + '_quanbu.png'),
       }]
   },
   mounted() {
     this.getRecommendList();
+    this.parsePushInfo();
   },
   activated() {
     this.getSuperDiscountList();
   },
   methods: {
+    valueFromUrl(key) {
+      var url = window.location.search;
+      var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
+      var result = url.substr(1).match(reg);
+      return result ? decodeURIComponent(result[2]) : null;
+    },
     getRecommendList() {
       axios.post(API.Recommend, qs.stringify({})).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
@@ -196,6 +205,8 @@ export default {
       axios.post(API.GetSuperDiscount, qs.stringify({
         Token: this.Token,
         IsNewVersion: '1',
+        Longitude: this.CurrentPosition.Longitude,
+        Latitude: this.CurrentPosition.Latitude,
       })).then(res => {
         this.superDiscountList.Items.splice(0);
         if (res.data.Meta.ErrorCode === '0') {
@@ -211,7 +222,7 @@ export default {
             if(value.ServiceName == '小时工') {
               value.ServiceName += '3小时';
             }
-            if(value.SuperDiscountItem.DiscountContent.length > 0) {
+            if(value.SuperDiscountItem.DiscountContent.length >= 0) {
               this.superDiscountList.Items.push(value);
             }
           });
@@ -221,7 +232,11 @@ export default {
       });
     },
     routerTo(item) {
-      if(item.ServiceId == '21') {
+      if(item.ServiceId == '0') {
+        this.$router.push({
+          name: 'all_service'
+        });
+      } else if(item.ServiceId == '21') {
         this.$router.push({
           name: 'express'
         });
@@ -245,13 +260,12 @@ export default {
       }
     },
     gotoOrderPlace(item) {
-      // 目前只有小时工（还有从活动页中跳转到下单的服务）isActivity才是1，其他服务isActivity均为0
-      if (item.ServiceName.indexOf('小时工') > -1) {
+      // OrderType: 0 普通id; 1 活动id
+      if (item.OrderType === '0') {
         this.$router.push({
           name: 'order_place',
           query: {
             id: item.ServiceId,
-            isActivity: '1',
           },
           params: {
             fromDetailPage: '1',
@@ -262,16 +276,62 @@ export default {
           name: 'order_place',
           query: {
             id: item.ServiceId,
+            isActivity: '1',
           },
           params: {
             fromDetailPage: '1',
           },
         });
       }
-    }
+    },
+    parsePushInfo() {
+      let j = this.valueFromUrl('json');
+      if(j) {
+        j = JSON.parse(j);
+        if(j.type == '0') {
+
+        } else if(j.type == '1') {
+          switch (j.AppViewId) {
+            case '1000':
+            case '1001':
+            case '1002':
+              this.openLogin();
+              break;
+            case '10013':
+              this.$router.push({
+                name: 'user_coupon'
+              });
+              break;
+            case '10017':
+              this.$router.push({
+                name: 'order_detail',
+                params: {
+                  orderId: j.Order.OrderId
+                }
+              });
+              break;
+            case '10024':
+              this.$router.push({
+                name: 'user_balance',
+              });
+              break;
+            case '10027':
+              this.$router.push({
+                name: 'order_pay',
+                params: {
+                  orderId: j.Order.OrderId
+                }
+              });
+              break;
+          }
+        } else if(j.type == '2') {
+
+        }
+      }
+    },
   },
   computed: {
-    ...mapState(['Token', 'AppName', 'ALERT_MSG']),
+    ...mapState(['Token', 'AppName', 'CurrentPosition', 'ALERT_MSG']),
     swiper() {
       return this.$refs.mySwiper.swiper;
     }
@@ -284,6 +344,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.outer-wrapper
+{
+  height: 100%;
+  overflow-y: scroll;
+}
 .index-wrapper
 {
   -webkit-display: flex;
@@ -296,9 +361,9 @@ export default {
   align-items: center;
   background-color: #eef2f5;
 }
-.router-view .menu-router-view.index-wrapper
+.menu-router-view .index-wrapper
 {
-  padding-bottom: 1.6rem;
+  padding-bottom: 0.266667rem;
 }
 
 .swiper-pagination-fraction, .swiper-pagination-custom, .swiper-container-horizontal > .swiper-pagination-bullets
@@ -330,7 +395,7 @@ export default {
     .list-item
     {
       width: 1.5rem;
-      padding: 0.25rem;
+      padding: 0 0.25rem 0.25rem;
       .item-img
       {
         box-sizing: border-box;
@@ -448,10 +513,7 @@ export default {
           display: inline-block;
           height: 0.44rem;
           padding: 0 0.15rem;
-          border-top-left-radius: 0.22rem;
-          border-top-right-radius: 0.22rem;
-          border-bottom-left-radius: 0.22rem;
-          border-bottom-right-radius: 0.22rem;
+          border-radius: 0.22rem;
           background-color: #F56165;
           color: #fff;
           font-size: 10px;
@@ -574,8 +636,8 @@ export default {
 }
 
 // 助家生活、同城家政样式
-.menu-router-view.index-wrapper.name-zjsh,
-.menu-router-view.index-wrapper.name-tcjz
+.menu-router-view .index-wrapper.name-zjsh,
+.menu-router-view .index-wrapper.name-tcjz
 {
   @for $item from 0 to 10 {
     .list-item#{$item}
@@ -686,7 +748,7 @@ export default {
 }
 
 // 同城到家样式
-.menu-router-view.index-wrapper.name-tcdj
+.menu-router-view .index-wrapper.name-tcdj
 {
   // @for $item from 0 to 10 {
   //   .list-item#{$item}
@@ -755,7 +817,7 @@ export default {
 }
 
 // 快递上门样式
-.menu-router-view.index-wrapper.name-kdsm
+.menu-router-view .index-wrapper.name-kdsm
 {
   // @for $item from 0 to 10 {
   //   .list-item#{$item}
@@ -769,12 +831,12 @@ export default {
     -webkit-order: 1;
     order: 1;
   }
-  .list-item8
+  .list-item7
   {
     -webkit-order: 0;
     order: 0;
   }
-  .list-item9
+  .list-item8
   {
     -webkit-order: 0;
     order: 0;
@@ -800,7 +862,7 @@ export default {
 }
 
 // 曹操家政样式
-.menu-router-view.index-wrapper.name-ccjz
+.menu-router-view .index-wrapper.name-ccjz
 {
   .super-discount
   {

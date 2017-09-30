@@ -10,6 +10,8 @@ export default new Vuex.Store({
 
     AppName: '助家生活', // 当前web app的名称 // 微信下名称为助家生活
 
+    PushDeviceId: '', // 推送id，在登录成功与验证token成功时调用接口
+
     IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
 
     // 这个字符串中的路由的name不会被拦截器拦截
@@ -23,6 +25,12 @@ export default new Vuex.Store({
     UserInfo: {
       PhoneNumber: '',
       NickName: '',
+    },
+
+    // 位置信息
+    CurrentPosition: {
+      Longitude: '',
+      Latitude: ''
     },
 
     // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0，需要注意，由于该参数需要在verifyToken接口返回数据后才会修改，因此在某些页面中该参数将未必能及时修改状态，因此不要全部依赖该参数来进行登录状态的判断
@@ -85,17 +93,14 @@ export default new Vuex.Store({
       PAY_ERROR: '支付失败',
       AMOUNT_ERROR: '请输入正确的金额',
       POSITION_ERROR: '定位失败，请开启定位或检查网络',
-      PLACE_ERROR: {
-        ADDRESS_EMPTY: '请选择服务地址',
-        DATETIME_EMPTY: '请选择服务时间',
-      },
-      ADDRESS_ERROR: {
-        NAME_EMPTY: '请填写您的姓名',
-        SEX_EMPTY: '请选择您的性别',
-        PHONE_EMPTY: '请填写你的手机号',
-        PHONE_ERROR: '请填写正确的手机号',
-        ADDRESS_EMPTY: '请填写您的详细地址',
-      },
+      CAPTCHA_EMPTY: '请输入验证码',
+      ADDRESS_EMPTY: '请选择服务地址',
+      DATETIME_EMPTY: '请选择服务时间',
+      NAME_EMPTY: '请填写您的姓名',
+      SEX_EMPTY: '请选择您的性别',
+      PHONE_EMPTY: '请填写你的手机号',
+      PHONE_ERROR: '请填写正确的手机号',
+      ADDRESS2_EMPTY: '请填写您的详细地址',
       USER_COUPON_NO_LOGIN: '登录后，才能看到红包情况',
     },
 
@@ -149,6 +154,9 @@ export default new Vuex.Store({
     SetAppName(state, data) {
       return state.AppName = data;
     },
+    SetPushDeviceId(state, data) {
+      return state.PushDeviceId = data;
+    },
     // SetAPI(state, data) {
     //   let api = '';
     //   if(data === '0') {
@@ -180,6 +188,10 @@ export default new Vuex.Store({
     },
     SetUserInfo(state, data) {
       return state.UserInfo = data;
+    },
+    SetCurrentPosition(state, data) {
+      Common.setCookie('ZJSH_WX_Position', encodeURIComponent(JSON.stringify(data)), 30, '/');
+      return state.CurrentPosition = data;
     },
     SetIsLogin(state, data = '0') {
       return state.IsLogin = data;

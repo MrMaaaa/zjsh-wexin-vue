@@ -3,7 +3,7 @@
   <keep-alive>
     <router-view class="menu-router-view"></router-view>
   </keep-alive>
-  <nav class="menu flex-row">
+  <nav ref="btnWraper" class="menu flex-row">
     <router-link :to="{ name: 'index' }" class="menu-item menu-item1" active-class="active">
       <i class="menu-icon"></i>
       <span class="menu-name">首页</span>
@@ -25,12 +25,19 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'menu',
   data() {
     return {
     }
   },
+  mounted() {
+  },
+  computed: {
+    ...mapState(['AppName']),
+  }
 }
 </script>
 
@@ -46,6 +53,7 @@ export default {
   position: fixed;
   bottom: 0;
   left: 0;
+  transform: translateZ(0);
   z-index: 10000;
   width: 100%;
   height: 1.333333rem;

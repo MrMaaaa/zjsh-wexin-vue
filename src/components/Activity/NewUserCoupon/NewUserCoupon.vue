@@ -68,6 +68,7 @@
 
 <script>
 import MLoading from '../../Plugs/m-loading';
+import { mapState } from 'vuex';
 import API from '../../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
@@ -88,12 +89,6 @@ export default {
       warnMsg: '',
       isLoading: false,
       couponList: [],
-      WARN_INFO: {
-        PHONE_NUMBER_EMPTY: '请输入手机号',
-        PHONE_NUMBER_ERROR: '手机号输入有误，请重新输入',
-        CAPTCHA_EMPTY: '请输入验证码',
-        NET_ERROR: '网络连接失败，请检查网络'
-      }
     }
   },
   methods: {
@@ -109,24 +104,21 @@ export default {
             if (res.data.Meta.ErrorCode == '0') {
               // 无论新老用户均弹出验证码
               if (res.data.Body.IsNewUser == '0') {
-                //老用户显示
+                //老用户
                 this.isNewUser = '0';
-                this.isChecked = true;
-                this.isAllowedSendCaptcha = true;
-                this.sendCaptcha('4');
               } else {
-                //新用户弹出注册页面
+                //新用户
                 this.isNewUser = '1';
-                this.isChecked = true;
-                this.isAllowedSendCaptcha = true;
-                this.sendCaptcha('1');
               }
+              this.isChecked = true;
+              this.isAllowedSendCaptcha = true;
+              this.sendCaptcha();
             } else {
               this.alert(res.data.Meta.ErrorMsg);
             }
           }).catch(err => {
             this.isLoading = false;
-            this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+            this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
           });
         }
       } else {
@@ -136,7 +128,7 @@ export default {
     drawCoupon() {
       if (this.checkPhoneNumber()) {
         if (this.captcha == '') {
-          this.alert(this.WARN_INFO.CAPTCHA_EMPTY);
+          this.alert(this.ALERT_MSG.CAPTCHA_EMPTY);
         } else {
           if(this.isNewUser == '0') {
             // 老用户直接登录
@@ -212,7 +204,7 @@ export default {
             }).catch((err) => {
               this.isLoading = false;
               this.isDrawCoupon = true;
-              this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+              this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
             });
           }
         }
@@ -220,14 +212,14 @@ export default {
         this.alert(this.warnMsg);
       }
     },
-    sendCaptcha(type) {
+    sendCaptcha() {
       if(this.checkPhoneNumber()) {
         //发送验证码
         if(this.isAllowedSendCaptcha) {
           this.isLoading = true;
           axios.post(API.SendCaptcha, qs.stringify({
             "Phone": this.phoneNumber,
-            "Type": type
+            "Type": this.isNewUser === '0' ? '4' : '1'
           })).then(res => {
             this.isLoading = false;
             //如果成功发送验证码
@@ -254,7 +246,7 @@ export default {
             }
           }).catch((err) => {
             this.isLoading = false;
-            this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+            this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
           });
         }
       } else {
@@ -299,15 +291,15 @@ export default {
           this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     checkPhoneNumber() {
       if(this.phoneNumber == '') {
-        this.warnMsg = this.WARN_INFO.PHONE_NUMBER_EMPTY;
+        this.warnMsg = this.ALERT_MSG.PHONE_EMPTY;
         return false;
       } else if(!this.isPhoneNumber) {
-        this.warnMsg = this.WARN_INFO.PHONE_NUMBER_ERROR;
+        this.warnMsg = this.ALERT_MSG.PHONE_ERROR;
         return false;
       } else {
         return true;
@@ -315,6 +307,7 @@ export default {
     },
   },
   computed: {
+    ...mapState(['ALERT_MSG']),
     isPhoneNumber() {
       //判断手机号是否正确
       return /^1[34578]\d{9}$/.test(this.phoneNumber);

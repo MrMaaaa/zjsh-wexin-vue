@@ -21,10 +21,10 @@ Vue.component(Picker.name, Picker);
 Vue.mixin({
   methods: {
     // 用于显示文本（一般用于接口的结果显示）
-    alert(alertMsg, alertTimeout=1000, alertCallback) {
+    alert(alertMsg, alertTimeout=1500, alertCallback) {
       this.$store.dispatch('SetAlert', {
         alertMsg,
-        alertTimeout: typeof alertTimeout == 'function' ? 1000 : alertTimeout,
+        alertTimeout: typeof alertTimeout == 'function' ? 1500 : alertTimeout,
         alertCallback: typeof alertTimeout == 'function' ? alertTimeout : alertCallback,
       });
     },

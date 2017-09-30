@@ -8,7 +8,7 @@
     <i class="tab-line" :class="{ 'move-1': tabIndex === 1,'move-2': tabIndex === 2 }"></i>
   </div>
 
-  <ul class="coupon-list" id="coupont_list" v-if="couponListActived.length > 0">
+  <ul class="coupon-list" v-if="couponListActived.length > 0">
     <coupon-item v-for="item in couponListActived" @click.native="useCoupon(item)" :coupon-item="item" :key="item.Id"></coupon-item>
   </ul>
 
@@ -48,11 +48,6 @@ export default {
     document.getElementById('user_coupon').addEventListener('touchstart', event => {
       this.touchStartX = event.changedTouches[0].clientX;
       this.touchStartY = event.changedTouches[0].clientY;
-    });
-    document.getElementById('user_coupon').addEventListener('touchmove', event => {
-      if(Math.abs(event.changedTouches[0].clientY - this.touchStartY) <= 20) {
-        event.preventDefault();
-      }
     });
     const slideThreshold = 50;
     document.getElementById('user_coupon').addEventListener('touchend', event => {
@@ -213,8 +208,11 @@ export default {
   }
   .coupon-list
   {
-    overflow: hidden;
-    padding: 1.0rem 0;
+    box-sizing: border-box;
+    height: 100%;
+    padding-top: 1.0rem;
+    padding-bottom: 0.32em;
+    overflow: scroll;
   }
   .coupon-empty
   {

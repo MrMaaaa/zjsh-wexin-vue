@@ -150,15 +150,15 @@ export default {
     },
     saveAddress() {
       if(this.AddressAddedInfo.Contact === '') {
-        this.alert(this.ALERT_MSG.ADDRESS_ERROR.NAME_EMPTY);
+        this.alert(this.ALERT_MSG.NAME_EMPTY);
       } else if (this.AddressAddedInfo.PhoneNumber === '') {
-        this.alert(this.ALERT_MSG.ADDRESS_ERROR.PHONE_EMPTY);
+        this.alert(this.ALERT_MSG.PHONE_EMPTY);
       } else if (!/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber)) {
-        this.alert(this.ALERT_MSG.ADDRESS_ERROR.PHONE_ERROR);
+        this.alert(this.ALERT_MSG.PHONE_ERROR);
       } else if (this.AddressAddedInfo.Address1 === '') {
-        this.alert(this.ALERT_MSG.ADDRESS_ERROR.ADDRESS_EMPTY);
+        this.alert(this.ALERT_MSG.ADDRESS_EMPTY);
       } else if (this.AddressAddedInfo.Address2 === '') {
-        this.alert(this.ALERT_MSG.ADDRESS_ERROR.ADDRESS_EMPTY);
+        this.alert(this.ALERT_MSG.ADDRESS2_EMPTY);
       } else if(this.isSaved) {
         this.isLoading = true;
         axios.post(API.EditAddress, qs.stringify({

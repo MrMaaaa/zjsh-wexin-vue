@@ -88,9 +88,9 @@ export default {
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
-      }).catch(error => {
+      }).catch(err => {
         this.isShowLoading = false;
-        this.alert('网络连接错误');
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     returnRecharge() {
@@ -103,6 +103,9 @@ export default {
     addZero(value) {
       return value < 10 ? '0' + value : value;
     }
+  },
+  computed: {
+    ...mapState(['Token', 'ALERT_MSG']),
   },
   filters: {
     formatDate(value) {

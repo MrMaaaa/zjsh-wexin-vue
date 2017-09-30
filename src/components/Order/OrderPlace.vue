@@ -1,152 +1,154 @@
 <template>
-<div>
-  <section class="section address flex-row" @click="routeTo({ name: 'address_list', params: { from: 'order_place' } })">
-    <div class="left flex-row">
-      <img class="icon-header" src="../../assets/images/nearby.png">
+<div :class="{ 'name-tcjz': AppName === '同城家政' }">
+  <div class="router-view-inner">
+    <section class="section address flex-row" @click="routeTo({ name: 'address_list', query: { from: 'order_place' } })">
+      <div class="left flex-row">
+        <img class="icon-header" src="../../assets/images/nearby.png">
 
-      <p v-if="!OrderInfo.Address || !OrderInfo.Address.Id" class="txt-light">请选择一个服务地址</p>
+        <p v-if="!OrderInfo.Address || !OrderInfo.Address.Id" class="txt-light">请选择一个服务地址</p>
 
-      <p v-else class="address-info txt-normal">
-        <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }} {{ OrderInfo.Address.Address2 }}</span>
-        <span>{{ OrderInfo.Address.PhoneNumber }}</span>
-      </p>
-    </div>
+        <p v-else class="address-info txt-normal">
+          <span class="txt-over-hide">{{ OrderInfo.Address.Contact }}，{{ OrderInfo.Address.Address1 }} {{ OrderInfo.Address.Address2 }}</span>
+          <span>{{ OrderInfo.Address.PhoneNumber }}</span>
+        </p>
+      </div>
 
-    <img class="icon-link" src="../../assets/images/link.png">
-  </section>
+      <img class="icon-link" src="../../assets/images/link.png">
+    </section>
 
-  <section class="section type flex-row">
-    <img class="icon-header" src="../../assets/images/orders_type.png">
+    <section class="section type flex-row">
+      <img class="icon-header" src="../../assets/images/orders_type.png">
 
-    <span class="txt-light">请选择{{ serviceName }}类型</span>
-  </section>
+      <span class="txt-light">请选择{{ serviceName }}类型</span>
+    </section>
 
-  <ul class="type-list">
-    <li class="list-item flex-row" v-for="(item,index) in serviceList" @click="selectType(item, index)">
-      <img class="type-img" :src="item.IconUrl">
+    <ul class="type-list">
+      <li class="list-item flex-row" v-for="(item,index) in serviceList" @click="selectType(item, index)">
+        <img class="type-img" :src="item.IconUrl">
 
-      <div class="flex-row list-right">
-        <div class="type-info">
-          <p class="info-name">{{ item.ServiceName }}</p>
-          <p class="info-price" v-if="!item.DepositAmount || item.DepositAmount == 0">{{ item.Price }}元/{{ item.Unit }}</p>
-          <p class="info-price" v-else>{{ item.DepositAmount }}元订金</p>
+        <div class="flex-row list-right">
+          <div class="type-info">
+            <p class="info-name">{{ item.ServiceName }}</p>
+            <p class="info-price" v-if="!item.DepositAmount || item.DepositAmount == 0">{{ item.Price }}元/{{ item.Unit }}</p>
+            <p class="info-price" v-else>{{ item.DepositAmount }}元订金</p>
+          </div>
+
+          <img class="icon-selector" v-show="typeIndex != index" src="../../assets/images/address_unselected.png">
+          <img class="icon-selector" v-show="typeIndex == index" src="../../assets/images/orders_pitch_on.png">
         </div>
-
-        <img class="icon-selector" v-show="typeIndex != index" src="../../assets/images/address_unselected.png">
-        <img class="icon-selector" v-show="typeIndex == index" src="../../assets/images/orders_pitch_on.png">
-      </div>
-    </li>
-  </ul>
-
-  <section class="section amount flex-row">
-    <div class="flex-row">
-      <img class="icon-header" src="../../assets/images/orders_amount.png">
-
-      <span class="txt-normal">服务数量</span>
-    </div>
-
-    <div class="flex-row">
-      <img class="icon-amount" v-show="isReduce" @click="amountReduce" src="../../assets/images/orders_reduce.png">
-      <img class="icon-amount" v-show="!isReduce" src="../../assets/images/orders_reduce_disable.png">
-      <span class="amount-value" v-show="!isMaunalInput">{{ OrderInfo.Amount }}</span>
-      <input class="amount-value" type="text" @input="inputFilter" @blur="inputBlurCheck" :value="OrderInfo.Amount" v-show="isMaunalInput">
-      <img class="icon-amount" v-show="isAdd" @click="amountAdd" src="../../assets/images/orders_add.png">
-      <img class="icon-amount" v-show="!isAdd" src="../../assets/images/orders_add_disable.png">
-    </div>
-  </section>
-
-  <section class="section time flex-row" @click="routeTo({ name: 'order_service_time' })">
-    <div class="flex-row">
-      <img class="icon-header" src="../../assets/images/orders_time.png">
-
-      <span class="txt-light" v-if="OrderInfo.DateTime === ''">请选择服务时间</span>
-      <span v-else>{{ OrderInfo.DateTime }}</span>
-    </div>
-    <img class="icon-link" src="../../assets/images/link.png">
-  </section>
-
-  <section class="section one-safe flex-row" v-show="oneSafe.isShow">
-    <div class="flex-row">
-      <img class="icon-header" src="../../assets/images/orders_safe.png">
-
-      <span class="txt-normal">1元保险：迟到、爽约赔付</span>
-      <img class="icon-one-safe" @click="oneSafeAlert" src="../../assets/images/orders_alert.png">
-    </div>
-
-    <div class="selector" :class="{ active: oneSafe.isUsed }" @click="toggleOneSafe">
-      <div class="toggle"></div>
-    </div>
-  </section>
-
-    <!-- 无订金 -->
-  <section class="section statistics" v-if="isShowDeposit == '0'">
-    <div class="statistics-row flex-row">
-      <span>订单总价</span>
-
-      <div class="flex-row">
-        <span class="txt-light">￥{{ totalPrice | formatAmount }}</span>
-      </div>
-    </div>
-
-    <div class="statistics-row flex-row" v-show="this.oneSafe.isUsed">
-      <span>一元保险</span>
-
-      <div class="flex-row">
-        <span class="txt-light">￥{{ '1' | formatAmount }}</span>
-      </div>
-    </div>
-
-    <div class="statistics-split2"></div>
-
-    <ul class="discount-list" v-if="activityList.length > 0">
-      <li class="list-item-discount">-￥{{ discountAmount | formatAmount }}</li>
-      <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
+      </li>
     </ul>
 
-    <div class="statistics-row flex-row" @click="routeTo({ name: 'order_coupon_select', query: { totalPrice: totalPrice, serviceId: OrderInfo.FourServiceId, isPay: '0' } })">
-      <span>红包</span>
+    <section class="section amount flex-row">
+      <div class="flex-row">
+        <img class="icon-header" src="../../assets/images/orders_amount.png">
+
+        <span class="txt-normal">服务数量</span>
+      </div>
 
       <div class="flex-row">
-        <span class="txt-price" v-if="CouponSelected.NoUse === '0'">-￥{{ couponAmount | formatAmount }}</span>
-        <span class="txt-price" v-else-if="CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
-        <span class="txt-price" v-else>暂无可用红包</span>
-        <img class="icon-link" src="../../assets/images/link.png">
+        <img class="icon-amount" v-show="isReduce" @click="amountReduce" src="../../assets/images/orders_reduce.png">
+        <img class="icon-amount" v-show="!isReduce" src="../../assets/images/orders_reduce_disable.png">
+        <span class="amount-value" v-show="!isMaunalInput">{{ OrderInfo.Amount }}</span>
+        <input class="amount-value" type="text" @input="inputFilter" @blur="inputBlurCheck" :value="OrderInfo.Amount" v-show="isMaunalInput">
+        <img class="icon-amount" v-show="isAdd" @click="amountAdd" src="../../assets/images/orders_add.png">
+        <img class="icon-amount" v-show="!isAdd" src="../../assets/images/orders_add_disable.png">
       </div>
-    </div>
+    </section>
 
-    <div class="statistics-split"></div>
-
-    <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
-    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
-  </section>
-
-  <!-- 有订金 -->
-  <section class="section statistics" v-else>
-    <div class="statistics-row flex-row">
-      <span>订金</span>
-
+    <section class="section time flex-row" @click="routeTo({ name: 'order_service_time' })">
       <div class="flex-row">
-        <span class="txt-price">￥{{ payAmount | formatAmount }}</span>
+        <img class="icon-header" src="../../assets/images/orders_time.png">
+
+        <span class="txt-light" v-if="OrderInfo.DateTime === ''">请选择服务时间</span>
+        <span v-else>{{ OrderInfo.DateTime }}</span>
       </div>
-    </div>
+      <img class="icon-link" src="../../assets/images/link.png">
+    </section>
 
-    <div class="statistics-split"></div>
-
-    <div class="statistics-row flex-row">
-      <span>红包</span>
-
+    <section class="section one-safe flex-row" v-show="oneSafe.isShow">
       <div class="flex-row">
-        <span class="txt-price">订金不可用红包</span>
-        <img class="icon-link" src="../../assets/images/link.png">
+        <img class="icon-header" src="../../assets/images/orders_safe.png">
+
+        <span class="txt-normal">1元保险：迟到、爽约赔付</span>
+        <img class="icon-one-safe" @click="oneSafeAlert" src="../../assets/images/orders_alert.png">
       </div>
-    </div>
-  </section>
 
-  <section class="section remark flex-row">
-    <img class="icon-header" src="../../assets/images/orders_remark.png">
+      <div class="selector" :class="{ active: oneSafe.isUsed }" @click="toggleOneSafe">
+        <div class="toggle"></div>
+      </div>
+    </section>
 
-    <input class="remark-input" type="text" v-model="OrderInfo.ServiceContent" placeholder="备注留言">
-  </section>
+      <!-- 无订金 -->
+    <section class="section statistics" v-if="isShowDeposit == '0'">
+      <div class="statistics-row flex-row">
+        <span>订单总价</span>
+
+        <div class="flex-row">
+          <span class="txt-light">￥{{ totalPrice | formatAmount }}</span>
+        </div>
+      </div>
+
+      <div class="statistics-row flex-row" v-show="this.oneSafe.isUsed">
+        <span>一元保险</span>
+
+        <div class="flex-row">
+          <span class="txt-light">￥{{ '1' | formatAmount }}</span>
+        </div>
+      </div>
+
+      <div class="statistics-split2"></div>
+
+      <ul class="discount-list" v-if="activityList.length > 0">
+        <li class="list-item-discount">-￥{{ discountAmount | formatAmount }}</li>
+        <li class="list-item" v-for="item in activityList">{{ item.Title }}满<span class="txt-price">{{ item.Upper }}</span>减<span class="txt-price">{{ item.Minus }}</span></li>
+      </ul>
+
+      <div class="statistics-row flex-row" @click="routeTo({ name: 'order_coupon_select', query: { totalPrice: totalPrice, serviceId: OrderInfo.FourServiceId, isPay: '0' } })">
+        <span>红包</span>
+
+        <div class="flex-row">
+          <span class="txt-price" v-if="CouponSelected.NoUse === '0'">-￥{{ couponAmount | formatAmount }}</span>
+          <span class="txt-price" v-else-if="CouponSelected.NoUse === '1' && couponList.length > 0">不使用红包</span>
+          <span class="txt-price" v-else>暂无可用红包</span>
+          <img class="icon-link" src="../../assets/images/link.png">
+        </div>
+      </div>
+
+      <div class="statistics-split"></div>
+
+      <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+      <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}<span class="total-pay">小计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    </section>
+
+    <!-- 有订金 -->
+    <section class="section statistics" v-else>
+      <div class="statistics-row flex-row">
+        <span>订金</span>
+
+        <div class="flex-row">
+          <span class="txt-price">￥{{ payAmount | formatAmount }}</span>
+        </div>
+      </div>
+
+      <div class="statistics-split"></div>
+
+      <div class="statistics-row flex-row">
+        <span>红包</span>
+
+        <div class="flex-row">
+          <span class="txt-price">订金不可用红包</span>
+          <img class="icon-link" src="../../assets/images/link.png">
+        </div>
+      </div>
+    </section>
+
+    <section class="section remark flex-row">
+      <img class="icon-header" src="../../assets/images/orders_remark.png">
+
+      <input class="remark-input" type="text" v-model="OrderInfo.ServiceContent" placeholder="备注留言">
+    </section>
+  </div>
 
   <section class="bottom-button flex-row">
     <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
@@ -263,7 +265,9 @@ export default {
       this.isLoading = true;
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
-        ServiceId: this.serviceId
+        ServiceId: this.serviceId,
+        Longitude: this.CurrentPosition.Longitude,
+        Latitude: this.CurrentPosition.Latitude,
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -303,7 +307,9 @@ export default {
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
         Token: this.Token,
-        ActivityProductId: this.serviceId
+        ActivityProductId: this.serviceId,
+        Longitude: this.CurrentPosition.Longitude,
+        Latitude: this.CurrentPosition.Latitude,
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -346,7 +352,9 @@ export default {
 
       axios.post(API.GetActivityEx, qs.stringify({
         Token: this.Token,
-        ServiceId: this.OrderInfo.FourServiceId
+        ServiceId: this.OrderInfo.FourServiceId,
+        Longitude: this.CurrentPosition.Longitude,
+        Latitude: this.CurrentPosition.Latitude,
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 活动信息清洗
@@ -554,9 +562,9 @@ export default {
     },
     orderSubmit() {
       if(!this.OrderInfo.Address.Id) {
-        this.alert(this.ALERT_MSG.PLACE_ERROR.ADDRESS_EMPTY);
+        this.alert(this.ALERT_MSG.ADDRESS_EMPTY);
       } else if(this.OrderInfo.DateTime === '') {
-        this.alert(this.ALERT_MSG.PLACE_ERROR.DATETIME_EMPTY);
+        this.alert(this.ALERT_MSG.DATETIME_EMPTY);
       } else {
         this.isLoading = true;
         this.txtLoading = '正在提交订单……';
@@ -603,7 +611,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'CurrentPosition', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
@@ -702,12 +710,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.router-view
+.router-view-inner
 {
-  height: auto;
+  box-sizing: border-box;
+  height: 100%;
   padding-top: 0.32rem;
   padding-bottom: 1.866667rem;
   background-color: #eef2f5;
+  overflow-y: scroll;
+}
+// 为同城到家分包的兼容处理
+.router-view.name-tcjz
+{
+  box-sizing: border-box;
+  height: 100%;
+  overflow: scroll;
 }
 .txt-light
 {

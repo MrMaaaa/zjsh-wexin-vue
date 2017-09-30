@@ -219,7 +219,7 @@ export default {
             // 只显示定价类订单
             res.data.Body.OrderList.map(value => {
               // 判断是否显示底部按钮组
-              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value);
               this.orderNowList.push(value);
             });
             this.$refs.infiniteLoading1.$emit('$InfiniteLoading:loaded');
@@ -252,7 +252,7 @@ export default {
             // 只显示定价类订单
             res.data.Body.OrderList.map(value => {
               // 判断是否显示底部按钮组
-              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value.OrderBtnInfo);
+              value.OrderBtnInfo.IsShowBtnInfo = this.isShowOperationBtns(value);
               this.orderHistoryList.push(value);
             });
             this.$refs.infiniteLoading2.$emit('$InfiniteLoading:loaded');
@@ -479,12 +479,12 @@ export default {
         this.getOrderList();
       }
     },
-    isShowOperationBtns(OrderBtnInfo) {
-      let o = OrderBtnInfo;
+    isShowOperationBtns(order) {
+      let o = order.OrderBtnInfo;
       // o.IsDisplayCancelOrderBtn === '0' 取消按钮不再在订单列表显示
-      if (o.IsKdEOrder !== '1') {
+      if (order.IsKdEOrder !== '1') {
         // 普通订单
-        if (o.IsDisplayClientConfirmBtn === '0' && o.IsDisplayDeleteOrderBtn === '0' && o.IsDisplayGotoEvaluateBtn === '0' && o.IsDisplayGotoPayBtn === '0') {
+        if ((!order.RefundStatus || order.RefundStatus === '') && o.IsDisplayClientConfirmBtn === '0' && o.IsDisplayDeleteOrderBtn === '0' && o.IsDisplayGotoEvaluateBtn === '0' && o.IsDisplayGotoPayBtn === '0') {
           return false;
         } else {
           return true;

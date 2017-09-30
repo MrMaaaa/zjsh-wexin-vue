@@ -276,7 +276,7 @@ a
   -webkit-overflow-scrolling: touch;
 
   width: 100%;
-  max-height: 135px;
+  max-height: 200px;
 
   background-color: #fff;
   overflow-y: scroll;

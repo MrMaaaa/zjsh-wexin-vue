@@ -40,12 +40,15 @@ export default {
   },
   created() {
     document.querySelector('body').addEventListener('touchmove', function(e) {
-      if (!document.querySelector('#app').contains(e.target)) {
+      if (!document.querySelector('#app .router-view').contains(e.target) || e.target.classList.contains('router-view')) {
         e.preventDefault();
       }
     });
 
+    this.getPosition();
+
     this.getAppName();
+    this.getPushDeviceId();
 
     // 如果是微信浏览器下跳转到微信页面
     if(!this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
@@ -57,7 +60,7 @@ export default {
       // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
       if (this.OpenId == '') {
         this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
-    }
+      }
     }
 
     // 从缓存中获取数据
@@ -68,7 +71,7 @@ export default {
     // 设置全局请求头
     axios.defaults.headers.common['zjsh_version'] = this.zjsh_version;
     axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
-    axios.defaults.timeout = '30000'; // 设置15秒超时时间
+    axios.defaults.timeout = '30000'; // 设置超时时间
 
     // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
@@ -95,6 +98,19 @@ export default {
         this.getOpenId();
       }
     }
+
+    // 为同城家政分包的兼容处理
+    if (this.$store.state.AppName === '同城家政') {
+      document.querySelector('#app').style.height = 'calc(100% - 64px)';
+      document.querySelector('#app').style.transform = 'translateY(0)';
+      document.querySelector('#app').style.overflow = 'hidden';
+      document.querySelector('#app').style.position = 'relative';
+      if(document.querySelector('.menu-router-view')) {
+        document.querySelector('.menu-router-view').style.display = 'block';
+        document.querySelector('.menu-router-view').style.height = '100%';
+        document.querySelector('.menu-router-view').style.overflow = 'scroll';
+      }
+    }
   },
   methods: {
     valueFromUrl(key) {
@@ -119,21 +135,47 @@ export default {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
+    getPosition() {
+      if(Common.getCookie('ZJSH_WX_Position')) {
+        this.$store.commit('SetCurrentPosition', JSON.parse(decodeURIComponent(Common.getCookie('ZJSH_WX_Position'))));
+      }
+      let that = this;
+      var geolocation = new BMap.Geolocation();
+      geolocation.getCurrentPosition(function(result) {
+        if (this.getStatus() == BMAP_STATUS_SUCCESS) {
+          that.$store.commit('SetCurrentPosition', {
+            Longitude: result.point.lng,
+            Latitude: result.point.lat,
+          });
+        } else {
+          that.alert(that.ALERT_MSG.POSITION_ERROR);
+        }
+      }, {
+        enableHighAccuracy: true
+      });
+    },
     getAppName() {
       let name = this.valueFromUrl('utm_term');
       var titles = this.$store.state.ROUTER_TO_TITLE;
       if(name) {
-        this.$store.commit('SetAppName', decodeURIComponent(name));
-        titles['index'] += name;
+        name = decodeURIComponent(name);
+        this.$store.commit('SetAppName', name);
+
+        titles['index'] = name;
         document.title = titles['index'];
         this.$store.commit('SetROUTER_TO_TITLE', titles);
 
-        // 根据不同分包设置不同OrderFrom
         this.$store.commit('SetOrderFrom', name);
       } else {
-        titles['index'] += '助家生活';
+        titles['index'] = '助家生活';
         document.title = titles['index'];
         this.$store.commit('SetROUTER_TO_TITLE', titles);
+      }
+    },
+    getPushDeviceId() {
+      let id = this.valueFromUrl('PushDeviceId');
+      if(id) {
+        this.$store.commit('SetPushDeviceId', id);
       }
     },
     verifyToken() {
@@ -149,6 +191,13 @@ export default {
           }
         }
       });
+    },
+    updatePushDeviceId() {
+      axios.post(API.UpdatePushDeviceID, qs.stringify({
+        PushDeviceId: this.$store.state.PushDeviceId,
+        DeviceType: this.$store.state.OrderFrom,
+        Token: this.Token,
+      })).then(res => {});
     },
     saveUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
@@ -196,19 +245,23 @@ export default {
 }
 </script>
 
-<style>
-html,
-body,
-#app,
+<style scoped>
+/* 兼容ios弹簧效果 */
+#app
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #eef2f5;
+}
+
 .router-view
 {
   height: 100%;
   background-color: #eef2f5;
-}
-.router-view
-{
-  background-color: #eef2f5;
-  overflow: scroll;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
 /*.bounce-enter-active {

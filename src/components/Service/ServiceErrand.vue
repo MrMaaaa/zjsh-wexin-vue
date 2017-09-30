@@ -70,7 +70,7 @@
     <span class="price">{{ estimatedPrice }}<span style="font-size: 14px;"> 元起</span></span>
   </div>
 
-  <div class="submit">
+  <div ref="btnWraper" class="submit">
     <button class="btn-submit" @click="submitOrder" type="button">提交订单</button>
   </div>
 

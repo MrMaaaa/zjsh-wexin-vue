@@ -4,6 +4,7 @@ import Router from 'vue-router';
 import Menu from '@/components/Menu';
 import Index from '@/components/Index/Index';
 import Activity from '@/components/Activity/Activity';
+import AllService from '@/components/Service/AllService';
 import ServiceDetail from '@/components/Service/CommonServiceDetail';
 import RecommendMoreServiceDetail from '@/components/Service/CommonRecommendMoreServiceDetail';
 import ServiceExpress from '@/components/Service/ServiceExpress';
@@ -29,6 +30,9 @@ import OrderServiceTime from '@/components/Order/OrderServiceTime';
 import OrderCouponSelect from '@/components/Order/OrderCouponSelect';
 import User from '@/components/User/User';
 import UserCoupon from '@/components/User/UserCoupon';
+import UserInfoEdit from '@/components/User/UserInfoEdit';
+import UserBalance from '@/components/User/UserBalance';
+import UserNickNameEdit from '@/components/User/UserNickNameEdit';
 // 活动
 import BlackFriday from '@/components/Activity/BlackFriday/BlackFriday';
 import SFActivity from '@/components/Activity/SFActivity/SFActivity';
@@ -95,6 +99,10 @@ let router = new Router({
     path: '/activity/one_recharge/order/:out_trade_no',
     name: 'one_recharge_order',
     component: OneRechargeOrder,
+  }, {
+    path: '/menu/index/all_service',
+    name: 'all_service',
+    component: AllService
   }, {
     path: '/menu/index/detail/:id',
     name: 'service_detail',
@@ -168,6 +176,18 @@ let router = new Router({
     name: 'user_connect_us',
     component: ConnectUs,
   }, {
+    path: '/user/user_info_edit',
+    name: 'user_info_edit',
+    component: UserInfoEdit,
+  }, {
+    path: '/user/user_balance',
+    name: 'user_balance',
+    component: UserBalance,
+  }, {
+    path: '/user/user_info_edit/user_nickname_edit',
+    name: 'user_nickname_edit',
+    component: UserNickNameEdit,
+  }, {
     path: '/user/user_coupon',
     name: 'user_coupon',
     component: UserCoupon,
@@ -204,8 +224,6 @@ let router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
   // 设置微信分享
   // wx.config({
   //   debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
@@ -267,6 +285,7 @@ router.beforeEach((to, from, next) => {
     // 阻止路由跳转
     next(false);
   } else if(document.querySelector('body').classList.contains('easemobim-mobile-body')) {
+    // 关闭客服窗口
     document.querySelector('html').classList.remove('easemobim-mobile-html');
     document.querySelector('body').classList.remove('easemobim-mobile-body');
     document.querySelector('iframe.easemobim-chat-panel').classList.add('easemobim-minimized');

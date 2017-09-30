@@ -122,36 +122,32 @@ export default {
 <style scoped lang="scss">
 .router-view
 {
+  box-sizing: border-box;
   position: relative;
-  padding-top: 1.6rem;
   padding-bottom: 2rem;
   background-color: #fff;
 }
 .date
 {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
   .date-list
   {
     -webkit-justify-content: initial;
     justify-content: initial;
+    padding-bottom: 0.226667rem;
     overflow-x: scroll;
     overflow-y: hidden;
-    padding-bottom: 0.226667rem;
     .list-item
     {
+      -webkit-flex-shrink: 0;
+      flex-shrink: 0;
       position: relative;
       box-sizing: border-box;
       width: 2.133333rem;
       padding: 0.266667rem 0;
       background-color: #eef2f5;
       color: #333639;
-      text-align: center;
       font-size: 14px;
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
+      text-align: center;
       &.active
       {
         background-color: #27b8f3;

@@ -3,72 +3,70 @@
   <a class="icon-customer-service" @click="callCustomerService"></a>
   <div class="service-detail" v-if="pageData.headImg">
     <header class="header-img">
-        <img :src="pageData.headImg">
+      <img :src="pageData.headImg">
     </header>
 
     <div class="container">
-        <table class="price-table" cellpadding="0" cellspacing="0">
-          <thead id="header_table">
-            <tr>
-              <td>类型</td>
-              <td>订金</td>
-              <td>价格</td>
-            </tr>
-          </thead>
+      <table class="price-table" cellpadding="0" cellspacing="0">
+        <thead id="header_table">
+          <tr>
+            <td>类型</td>
+            <td>订金</td>
+            <td>价格</td>
+          </tr>
+        </thead>
 
-          <tbody id="content_table">
-            <tr v-for="item in serviceList">
-              <td>{{ item.ServiceName }}</td>
-              <td>{{ item.DepositAmount | formatDeposit }}</td>
-              <td>{{ item.Price }}元/{{ item.Unit }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <tbody id="content_table">
+          <tr v-for="item in serviceList">
+            <td>{{ item.ServiceName }}</td>
+            <td>{{ item.DepositAmount | formatDeposit }}</td>
+            <td>{{ item.Price }}元/{{ item.Unit }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="region" v-if="pageData.standard && pageData.standard.length > 0">
-        <div class="region-title">服务标准</div>
-        <p v-if="typeof pageData.standard == 'string'">{{ pageData.standard }}</p>
-        <p v-else>
-          <span v-for="item in pageData.standard">{{ item }}</span>
-        </p>
+      <div class="region-title">服务标准</div>
+      <p v-if="typeof pageData.standard == 'string'">{{ pageData.standard }}</p>
+      <p v-else>
+        <span v-for="item in pageData.standard">{{ item }}</span>
+      </p>
     </div>
 
     <div class="section" v-if="pageData.introduce.title || pageData.introduce.img">
-        <div class="section-header">
-          <span class="header-title">服务介绍</span>
-        </div>
+      <div class="section-header">
+        <span class="header-title">服务介绍</span>
+      </div>
 
-        <div class="section-intro">
-          <span class="intro-txt">{{ pageData.introduce.title }}</span>
+      <div class="section-intro">
+        <span class="intro-txt">{{ pageData.introduce.title }}</span>
 
-          <img class="intro-img" style="margin-top: 10px;" v-if="pageData.introduce.img" :src="pageData.introduce.img">
-        </div>
+        <img class="intro-img" style="margin-top: 10px;" v-if="pageData.introduce.img" :src="pageData.introduce.img">
+      </div>
     </div>
 
     <div class="section-content" v-if="pageData.range && pageData.range.length > 0" style="padding: 0 20px;">
-
       <div class="section-header">
-          <span class="header-title">服务范围</span>
-        </div>
+        <span class="header-title">服务范围</span>
+      </div>
 
-        <div class="content-row flex-row"v-for="val in pageData.range">
-            <div class="row-item" v-for="v in val">
-              <img class="item-img" v-if="v.img" :src="v.img">
-              <span class="item-info" v-if="v.title">{{ v.title }}</span>
-            </div>
-        </div>
-
+      <div class="content-row flex-row"v-for="val in pageData.range">
+          <div class="row-item" v-for="v in val">
+            <img class="item-img" v-if="v.img" :src="v.img">
+            <span class="item-info" v-if="v.title">{{ v.title }}</span>
+          </div>
+      </div>
     </div>
 
     <div class="section" v-if="pageData.price">
-        <div class="section-header">
-          <span class="header-title">服务价格</span>
-        </div>
+      <div class="section-header">
+        <span class="header-title">服务价格</span>
+      </div>
 
-        <div class="section-intro">
-          <img class="intro-img" :src="pageData.price">
-        </div>
+      <div class="section-intro">
+        <img class="intro-img" :src="pageData.price">
+      </div>
     </div>
 
     <div class="section" v-if="pageData.process">
@@ -95,11 +93,11 @@
     </div>
 
     <div class="region" v-if="pageData.warn && pageData.warn.length > 0">
-        <div class="region-title">注意事项</div>
+      <div class="region-title">注意事项</div>
 
-        <p>
-          <span class="region-warn-txt" v-for="item in pageData.warn">{{ item }}</span>
-        </p>
+      <p>
+        <span class="region-warn-txt" v-for="item in pageData.warn">{{ item }}</span>
+      </p>
     </div>
 
     <div class="region">
@@ -131,7 +129,7 @@
     </div>
   </div>
 
-  <div class="btn-wrapper">
+  <div ref="btnWraper" class="btn-wrapper">
      <button type="button" class="order-button btn btn-warn" @click="subumitForWx">立即预约</button>
   </div>
 </div>
@@ -153,6 +151,7 @@ export default {
       threeId: '',
       serviceList: [],
       isHXReady: false,
+      isSet: false,
     }
   },
   activated() {
@@ -171,24 +170,7 @@ export default {
     var img = this.$route.params.img || '';
     var url = this.$route.params.url || '';
     window.easemobim = window.easemobim || {};
-    if(this.isHXReady) {
-      window.easemobim.sendExt({
-        ext: {
-          "imageName": "detail.png",
-          //custom代表自定义消息，无需修改
-          "type": "custom",
-          "msgtype": {
-            "track": {
-              "title": '我正在看：' + desc,
-              "price": "",
-              "desc": desc,
-              "img_url": img,
-              "item_url": url,
-            }
-          }
-        }
-      });
-    } else {
+    if (!this.isHXReady) {
       window.easemobim.config = {
         configId: 'e88edf52-a792-46ce-9af4-a737d4e9bd43',
         hideKeyboard: true,
@@ -226,13 +208,36 @@ export default {
   },
   methods: {
     callCustomerService() {
+      var desc = this.pageData.title;
+      var img = this.$route.params.img || '';
+      var url = this.$route.params.url || '';
+      if (this.isHXReady) {
+        window.easemobim.sendExt({
+          ext: {
+            "imageName": "detail.png",
+            //custom代表自定义消息，无需修改
+            "type": "custom",
+            "msgtype": {
+              "track": {
+                "title": '我正在看：' + desc,
+                "price": "",
+                "desc": desc,
+                "img_url": img,
+                "item_url": url,
+              }
+            }
+          }
+        });
+      }
       window.easemobim.bind({
         configId: "e88edf52-a792-46ce-9af4-a737d4e9bd43"
       });
     },
     getServicePrice() {
       axios.post(API.QueryServicePrice, qs.stringify({
-        ServiceId: this.threeId
+        ServiceId: this.threeId,
+        Longitude: this.CurrentPosition.Longitude,
+        Latitude: this.CurrentPosition.Latitude,
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -280,7 +285,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['IsLogin', 'ALERT_MSG']),
+    ...mapState(['IsLogin', 'AppName', 'CurrentPosition', 'CurrentPosition', 'ALERT_MSG']),
   },
   filters: {
     formatDeposit(str) {

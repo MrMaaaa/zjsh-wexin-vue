@@ -1,14 +1,18 @@
 <template>
 <div class="wrapper">
   <section class="user-group">
-    <div class="user-section user-info flex-row" v-if="this.userInfo.phoneNumber">
-      <img class="user-avatar" :src="userInfo.avatar">
+    <router-link class="user-section user-info flex-row" :to="{ name: 'user_info_edit' }" v-if="this.userInfo.phoneNumber">
+      <div class="flex-row user-wrapper">
+        <img class="user-avatar" :src="userInfo.avatar">
 
-      <div class="section-info user-info">
-        <span class="user-name">{{ userInfo.nickName }}</span>
-        <span class="user-phone">{{ userInfo.phoneNumber }}</span>
+        <div class="section-info user-info">
+          <span class="user-name">{{ userInfo.nickName }}</span>
+          <span class="user-phone">{{ userInfo.phoneNumber }}</span>
+        </div>
       </div>
-    </div>
+
+      <img class="section-icon-link" src="../../assets/images/link.png">
+    </router-link>
 
     <a @click="openLogin" class="user-section user-info login flex-row" v-else>
       <img class="user-avatar" src="../../assets/images/user_default.png">
@@ -20,15 +24,19 @@
   </section>
 
   <section class="user-group">
-    <div class="user-section flex-row">
+    <router-link class="user-section flex-row" :to="{ name: 'user_balance' }">
       <div class="flex-row">
         <img class="section-icon" src="../../assets/images/user_balance.png">
 
         <span class="section-name">余额</span>
       </div>
 
-      <span class="user-balance">￥{{ userInfo.balance }}</span>
-    </div>
+      <div class="flex-row">
+        <span class="user-balance">￥{{ userInfo.balance }}</span>
+
+        <img class="section-icon-link" src="../../assets/images/link.png">
+      </div>
+    </router-link>
 
     <div class="section-split"></div>
 
@@ -42,6 +50,20 @@
       <div class="flex-row">
         <span class="user-coupon-amount">{{ userInfo.couponCount }}个</span>
 
+        <img class="section-icon-link" src="../../assets/images/link.png">
+      </div>
+    </router-link>
+
+    <div class="section-split"></div>
+
+    <router-link :to="{ name: 'address_list', query: { type: '0' } }" class="user-section flex-row">
+      <div class="flex-row">
+        <img class="section-icon" src="../../assets/images/user_address.png">
+
+        <span class="section-name">地址</span>
+      </div>
+
+      <div class="flex-row">
         <img class="section-icon-link" src="../../assets/images/link.png">
       </div>
     </router-link>
@@ -153,10 +175,10 @@ export default {
       axios.post(API.GetUserInfo, qs.stringify({
         Token: this.Token
       })).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
+        if (res.data.Meta.ErrorCode === '0') {
           this.userInfo.nickName = res.data.Body.Info.NickName;
           this.userInfo.phoneNumber = res.data.Body.Info.PhoneNumber;
-          if(res.data.Body.Info.HqPic) {
+          if (res.data.Body.Info.HqPic) {
             this.userInfo.avatar = res.data.Body.Info.HqPic;
           } else {
             this.userInfo.avatar = DefaultLoginAvatar;
@@ -186,7 +208,7 @@ export default {
       axios.post(API.MySettlement, qs.stringify({
         Token: this.Token
       })).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
+        if (res.data.Meta.ErrorCode === '0') {
           this.userInfo.balance = res.data.Body.SettlementBalance;
         } else {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
@@ -199,14 +221,14 @@ export default {
       axios.post(API.GetCoupons, qs.stringify({
         Token: this.Token
       })).then(res => {
-        if(res.data.Meta.ErrorCode === '0') {
+        if (res.data.Meta.ErrorCode === '0') {
           this.userInfo.couponCount = 0;
           let date = new Date();
           res.data.Body.CouponList.map(value => {
             // if((value.ServiceItem == null || this.ThreeServiceIdFilterList.indexOf(' ' + value.ServiceItem.ServiceId + ' ') > -1) && date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
             //   this.userInfo.couponCount++;
             // }
-            if(date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
+            if (date.getTime() <= value.EndTime + '000' && value.IsUsed === '0') {
               this.userInfo.couponCount++;
             }
           });
@@ -255,6 +277,7 @@ export default {
   .user-group
   {
     margin-top: 0.373333rem;
+    background-color: #fff;
     &.logout
     {
       margin-top: 0.746667rem;
@@ -262,16 +285,18 @@ export default {
     .user-section
     {
       padding: 0.226667rem 0.4rem 0.226667rem 0.426667rem;
-
-      background-color: #fff;
       color: #333639;
       font-size: 17px;
       &.user-info
       {
-        -webkit-justify-content: initial;
-        justify-content: initial;
+        position: relative;
         padding-top: 0.426667rem;
         padding-bottom: 0.426667rem;
+        .user-wrapper
+        {
+          -webkit-justify-content: initial;
+          justify-content: initial;
+        }
         .user-avatar
         {
           width: 1.6rem;
@@ -302,6 +327,8 @@ export default {
       }
       &.user-info.login
       {
+        -webkit-justify-content: initial;
+        justify-content: initial;
         .section-info
         {
           margin-left: 0.32rem;
@@ -350,7 +377,7 @@ export default {
     {
       transform-origin: 0 0;
       transform: scaleY(0.5);
-      margin-left: 0.4rem;
+      margin-left: 0.426667rem;
       height: 1px;
       background-color: #e5e5e5;
     }
@@ -358,7 +385,7 @@ export default {
   .customer-service
   {
     position: absolute;
-    bottom: 2.3rem;
+    bottom: 1.5rem;
     left: 0;
     width: 100%;
     color: #333639;

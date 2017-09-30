@@ -83,12 +83,22 @@ export default {
         // 如果作为其他页面的内嵌页面，调用父页面方法传值
         window.parent.getDataFromIFrame(item);
       } else {
-        // 设置下单页的默认地址id
-        if(this.$route.params.from == 'order_place') {
-          this.$store.commit('SetDefaultAddressId', item.Id);
+        // type：点击地址的操作  空表示返回并保存当前地址 0表示进入编辑，
+        if(this.$route.query.type === '0') {
+          this.$router.push({
+            name: 'address_edit',
+            params: {
+              addr_info: item
+            }
+          });
+        } else {
+          // 设置下单页的默认地址id
+          if (this.$route.query.from == 'order_place') {
+            this.$store.commit('SetDefaultAddressId', item.Id);
+          }
+          this.$store.commit('SetSelectedAddress', item);
+          this.$router.go(-1);
         }
-        this.$store.commit('SetSelectedAddress', item);
-        this.$router.go(-1);
       }
     }
   },

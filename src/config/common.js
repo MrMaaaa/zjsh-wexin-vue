@@ -18,15 +18,7 @@ function setCookie(c_name, value, expiredays, path) {
   document.cookie = c_name + "=" + encodeURIComponent(value) + ((expiredays == null) ? "" : ";expires=" + exdate.toUTCString()) + ((path == null) ? "" : ";path=" + path);
 };
 
-//获取url参数
-function getvl(name) {
-  var reg = new RegExp("(^|\\?|&)" + name + "=([^&]*)(\\s|&|$)", "i");
-  if (reg.test(location.href)) return decodeURIComponent(RegExp.$2.replace(/\+/g, " "));
-  return "";
-};
-
 export default {
-  getCookie: getCookie,
-  setCookie: setCookie,
-  getvl: getvl
+  getCookie,
+  setCookie
 };
