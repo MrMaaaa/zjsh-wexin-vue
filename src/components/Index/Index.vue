@@ -134,25 +134,17 @@ export default {
         ServiceId: '3',
         icon: require('../../assets/images/shortcut' + type + '_xinfangkaihuang.png'),
       }, {
+        ServiceName: '保姆',
+        ServiceId: '7',
+        icon: require('../../assets/images/shortcut' + type + '_baomu.png'),
+      }, {
         ServiceName: '油烟机清洗',
         ServiceId: '12',
         icon: require('../../assets/images/shortcut' + type + '_youyanjiqingxi.png'),
       }, {
-        ServiceName: '空调清洗',
-        ServiceId: '13',
-        icon: require('../../assets/images/shortcut' + type + '_kongtiaoqingxi.png'),
-      }, {
-        ServiceName: '沙发清洗',
-        ServiceId: '4',
-        icon: require('../../assets/images/shortcut' + type + '_shafaqingxi.png'),
-      }, {
         ServiceName: '洗衣机清洗',
         ServiceId: '15',
         icon: require('../../assets/images/shortcut' + type + '_xiyijiqingxi.png'),
-      }, {
-        ServiceName: '冰箱清洗',
-        ServiceId: '14',
-        icon: require('../../assets/images/shortcut' + type + '_bingxiangqingxi.png'),
       }, {
         ServiceName: '快递上门',
         ServiceId: '21',
@@ -162,6 +154,14 @@ export default {
         ServiceId: '59',
         icon: require('../../assets/images/shortcut' + type + '_paotui.png'),
       }, {
+        ServiceName: '空调清洗',
+        ServiceId: '13',
+        icon: require('../../assets/images/shortcut' + type + '_kongtiaoqingxi.png'),
+      }, {
+        ServiceName: '冰箱清洗',
+        ServiceId: '14',
+        icon: require('../../assets/images/shortcut' + type + '_bingxiangqingxi.png'),
+      }, {
         ServiceName: '全部分类',
         ServiceId: '0',
         icon: require('../../assets/images/shortcut' + type + '_quanbu.png'),
@@ -169,7 +169,6 @@ export default {
   },
   mounted() {
     this.getRecommendList();
-    this.parsePushInfo();
   },
   activated() {
     this.getSuperDiscountList();
@@ -282,51 +281,6 @@ export default {
             fromDetailPage: '1',
           },
         });
-      }
-    },
-    parsePushInfo() {
-      let j = this.valueFromUrl('json');
-      if(j) {
-        j = JSON.parse(j);
-        if(j.type == '0') {
-
-        } else if(j.type == '1') {
-          switch (j.AppViewId) {
-            case '1000':
-            case '1001':
-            case '1002':
-              this.openLogin();
-              break;
-            case '10013':
-              this.$router.push({
-                name: 'user_coupon'
-              });
-              break;
-            case '10017':
-              this.$router.push({
-                name: 'order_detail',
-                params: {
-                  orderId: j.Order.OrderId
-                }
-              });
-              break;
-            case '10024':
-              this.$router.push({
-                name: 'user_balance',
-              });
-              break;
-            case '10027':
-              this.$router.push({
-                name: 'order_pay',
-                params: {
-                  orderId: j.Order.OrderId
-                }
-              });
-              break;
-          }
-        } else if(j.type == '2') {
-
-        }
       }
     },
   },
@@ -831,12 +785,12 @@ export default {
     -webkit-order: 1;
     order: 1;
   }
-  .list-item7
+  .list-item5
   {
     -webkit-order: 0;
     order: 0;
   }
-  .list-item8
+  .list-item6
   {
     -webkit-order: 0;
     order: 0;
@@ -847,6 +801,33 @@ export default {
     {
       -webkit-order: 3;
       order: 3;
+      .category-more
+      {
+        right: 0;
+        top: 100%;
+        width: 100%;
+        transform: translateY(-1.173333rem);
+        height: 1.173333rem;
+        line-height: 1.173333rem;
+        color: #666;
+        &::before
+        {
+          content: '查看';
+        }
+        &::after
+        {
+          content: '';
+          display: inline-block;
+          width: 0.106667rem;
+          height: 0.16rem;
+          margin-left: 5px;
+          background-image: url(../../assets/images/right.png);
+          background-size: 100%;
+          background-repeat: no-repeat;
+          font-size: 0;
+          vertical-align: middle;
+        }
+      }
     }
     &.appliance
     {
@@ -866,10 +847,7 @@ export default {
 {
   .super-discount
   {
-    -webkit-order: 0;
-    order: 0;
     width: 100%;
-    margin-top: 0;
     background-color: #fff;
     text-align: center;
     .discount-title
@@ -904,6 +882,39 @@ export default {
   {
     -webkit-order: 2;
     order: 2;
+    &.clearning
+    {
+      -webkit-order: 2;
+      order: 2;
+      padding-bottom: 1.173333rem;
+      .category-more
+      {
+        right: 0;
+        top: 100%;
+        width: 100%;
+        transform: translateY(-1.173333rem);
+        height: 1.173333rem;
+        line-height: 1.173333rem;
+        color: #666;
+        &::before
+        {
+          content: '查看';
+        }
+        &::after
+        {
+          content: '';
+          display: inline-block;
+          width: 0.106667rem;
+          height: 0.16rem;
+          margin-left: 5px;
+          background-image: url(../../assets/images/right.png);
+          background-size: 100%;
+          background-repeat: no-repeat;
+          font-size: 0;
+          vertical-align: middle;
+        }
+      }
+    }
   }
 }
 </style>

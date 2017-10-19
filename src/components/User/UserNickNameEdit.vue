@@ -1,6 +1,6 @@
 <template>
 <div>
-  <section class="name-input">
+  <section class="name-input flex-row">
     <span class="name">昵称</span><input class="input" ref="input" type="text" v-model="newNickName" placeholder="10个字符以内，支持中英文、数字"><img class="input-clr" @click="inputClear" src="../../assets/images/input_delete.png">
   </section>
   <a class="btn" @click="updateNickName">保存修改</a>
@@ -23,6 +23,7 @@ export default {
   mounted() {
   },
   activated() {
+    this.newNickName = this.$route.query.name;
   },
   methods: {
     updateNickName() {
@@ -59,24 +60,27 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.router-view
-{
-  background-color: #fff;
-}
 .name-input
 {
   position: relative;
-  padding: 0.266667rem 0.426667rem;
+  margin-top: 0.253333rem;
+  padding: 0 0.426667rem;
+  background-color: #fff;
   .name
   {
+    line-height: 100%;
     color: #333639;
     font-size: 17px;
   }
   .input
   {
-    width: 6.0rem;
+    display: block;
+    width: 1px;
+    -webkit-flex: 1;
+    flex: 1;
     margin-left: 0.106667rem;
-    font-size: 15px;
+    padding: 0.266667rem 0;
+    font-size: 17px;
   }
   .input-clr
   {

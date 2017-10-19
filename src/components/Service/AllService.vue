@@ -178,7 +178,7 @@ export default {
           margin-top: 0.213333rem;
           background-color: #fff;
           color: #666;
-          font-size: 10px;
+          font-size: 11px;
           text-align: center;
           .item-icon
           {

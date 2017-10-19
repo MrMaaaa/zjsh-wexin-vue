@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :is-warn="AlertStatus"></warn-info>
+    <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :callback="AlertCallback" :is-warn="AlertStatus"></warn-info>
 
     <m-login id="module_login"></m-login>
   </div>
@@ -39,16 +39,20 @@ export default {
     }
   },
   created() {
+    document.addEventListener("deviceready", onDeviceReady, false);
+    function onDeviceReady() {
+      navigator.geolocation.getCurrentPosition(onSuccess, onError);
+    }
+
+
     document.querySelector('body').addEventListener('touchmove', function(e) {
-      if (!document.querySelector('#app .router-view').contains(e.target) || e.target.classList.contains('router-view')) {
+      if (!document.querySelector('#app').contains(e.target)) {
         e.preventDefault();
       }
     });
 
     this.getPosition();
-
     this.getAppName();
-    this.getPushDeviceId();
 
     // 如果是微信浏览器下跳转到微信页面
     if(!this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
@@ -99,6 +103,50 @@ export default {
       }
     }
 
+    window.handleAppPushEvent = (data) => {
+      let j = data;
+      if(j) {
+        j = JSON.parse(j);
+        if(j.Type == '0') {
+        } else if(j.Type == '1') {
+          switch (j.AppViewId) {
+            case '1000':
+            case '1001':
+            case '1002':
+              this.openLogin();
+              break;
+            case '10013':
+              this.$router.push({
+                name: 'user_coupon'
+              });
+              break;
+            case '10017':
+              this.$router.push({
+                name: 'order_detail',
+                params: {
+                  orderId: j.Order.OrderId
+                }
+              });
+              break;
+            case '10024':
+              this.$router.push({
+                name: 'user_balance',
+              });
+              break;
+            case '10027':
+              this.$router.push({
+                name: 'order_pay',
+                params: {
+                  orderId: j.Order.OrderId
+                }
+              });
+              break;
+          }
+        } else if(j.Type == '2') {
+        }
+      }
+    };
+
     // 为同城家政分包的兼容处理
     if (this.$store.state.AppName === '同城家政') {
       document.querySelector('#app').style.height = 'calc(100% - 64px)';
@@ -111,6 +159,8 @@ export default {
         document.querySelector('.menu-router-view').style.overflow = 'scroll';
       }
     }
+
+    this.getAppDeviceId();
   },
   methods: {
     valueFromUrl(key) {
@@ -172,17 +222,12 @@ export default {
         this.$store.commit('SetROUTER_TO_TITLE', titles);
       }
     },
-    getPushDeviceId() {
-      let id = this.valueFromUrl('PushDeviceId');
-      if(id) {
-        this.$store.commit('SetPushDeviceId', id);
-      }
-    },
     verifyToken() {
       axios.post(API.VerifyToken, qs.stringify({
         Token: this.Token,
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
+          this.getAppDeviceId();
           this.$store.commit('SetIsLogin', '1');
           this.saveUserInfo();
         } else {
@@ -192,12 +237,37 @@ export default {
         }
       });
     },
-    updatePushDeviceId() {
-      axios.post(API.UpdatePushDeviceID, qs.stringify({
-        PushDeviceId: this.$store.state.PushDeviceId,
-        DeviceType: this.$store.state.OrderFrom,
-        Token: this.Token,
-      })).then(res => {});
+    getAppDeviceId() {
+      var that = this;
+      if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+        function setupWebViewJavascriptBridge(callback) {
+          if (window.WebViewJavascriptBridge) {
+            return callback(WebViewJavascriptBridge);
+          }
+          if (window.WVJBCallbacks) {
+            return window.WVJBCallbacks.push(callback);
+          }
+          window.WVJBCallbacks = [callback];
+          var WVJBIframe = document.createElement('iframe');
+          WVJBIframe.style.display = 'none';
+          WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';
+          document.documentElement.appendChild(WVJBIframe);
+          setTimeout(function() {
+            document.documentElement.removeChild(WVJBIframe)
+          }, 0)
+        }
+        setupWebViewJavascriptBridge(function(bridge) {
+          bridge.callHandler('iosGetAppDeviceId',
+            function(response) {
+              axios.post(API.UpdatePushDeviceID, qs.stringify({
+                PushDeviceId: response,
+                DeviceType: that.$store.state.OrderFrom,
+                Token: that.Token,
+              })).then(res => {}).catch(err => {});
+            }
+          );
+        });
+      }
     },
     saveUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
@@ -237,7 +307,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus']),
+    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus', 'AlertCallback']),
   },
   components: {
     MLogin
@@ -255,6 +325,7 @@ export default {
   width: 100%;
   height: 100%;
   background-color: #eef2f5;
+  -webkit-overflow-scrolling: touch;
 }
 
 .router-view

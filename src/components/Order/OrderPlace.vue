@@ -151,8 +151,8 @@
   </div>
 
   <section class="bottom-button flex-row">
-    <p class="discount-total" v-if="CouponSelected.NoUse === '0'">已优惠￥{{ discountAmount + couponAmount | formatAmount }}<span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
-    <p class="discount-total" v-else>已优惠￥{{ discountAmount | formatAmount }}<span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total flex-row" v-if="CouponSelected.NoUse === '0'"><span>已优惠￥{{ discountAmount + couponAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total flex-row" v-else><span>已优惠￥{{ discountAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
 
     <a class="btn-submit" @click="orderSubmit">提交订单</a>
   </section>
@@ -191,6 +191,7 @@ export default {
       serviceName: '',
       isActivity: '',
       serviceList: [],
+      lastAddressId: '',
       ServiceTypeRules: [], // 原始活动数据
       activityList: [], // 清洗后的活动数据
       couponList: [],
@@ -223,33 +224,36 @@ export default {
       this.OrderInfo.ServiceContent = '';
     }
 
-    this.getUserAddress();
+    this.lastAddressId = this.OrderInfo.Address ? this.OrderInfo.Address.Id : '';
+    this.getUserAddress(() => {
+      // 从app活动页分享到微信等会带有ServiceId的参数
+      let threeIdFromUrl = this.valueFromUrl('ServiceId');
+      if (threeIdFromUrl) {
+        this.serviceId = threeIdFromUrl;
+        this.serviceName = this.valueFromUrl('ServiceName');
 
-    // 从app活动页分享到微信等会带有ServiceId的参数
-    let threeIdFromUrl = this.valueFromUrl('ServiceId');
-    if (threeIdFromUrl) {
-      this.serviceId = threeIdFromUrl;
-      this.serviceName = this.valueFromUrl('ServiceName');
+        this.CouponSelected.NoUse = '1';
+        this.$store.commit('SetCouponSelected', this.CouponSelected);
+        this.serviceList.splice(0);
+        this.couponList.splice(0);
+        this.getActivityServiceDetail();
+      } else {
+        let oldId = this.serviceId;
+        let oldIsActivity = this.isActivity;
+        this.serviceId = this.$route.query.id;
+        this.isActivity = this.$route.query.isActivity || '0';
 
-      this.CouponSelected.NoUse = '1';
-      this.$store.commit('SetCouponSelected', this.CouponSelected);
-      this.serviceList.splice(0);
-      this.couponList.splice(0);
-      this.getActivityServiceDetail();
-    } else {
-      let oldId = this.serviceId;
-      let oldIsActivity = this.isActivity;
-      this.serviceId = this.$route.query.id;
-      this.isActivity = this.$route.query.isActivity || '0';
-      if(oldId !== this.serviceId || oldIsActivity !== this.isActivity) {
-        // 判断是否为活动id
-        if(this.isActivity == '1') {
-          this.getActivityServiceDetail();
-        } else {
-          this.getServiceDetail();
+        // serviceId或isActivity或address id不同则重新获取价格信息
+        if (oldId !== this.serviceId || oldIsActivity !== this.isActivity || (this.lastAddressId !== '' && this.lastAddressId != this.DefaultAddressId)) {
+          // 判断是否为活动id
+          if (this.isActivity == '1') {
+            this.getActivityServiceDetail();
+          } else {
+            this.getServiceDetail();
+          }
         }
       }
-    }
+    });
   },
   methods: {
     oneSafeAlert() {
@@ -266,8 +270,8 @@ export default {
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.serviceId,
-        Longitude: this.CurrentPosition.Longitude,
-        Latitude: this.CurrentPosition.Latitude,
+        Longitude: this.OrderInfo.Address.Address1Lng,
+        Latitude: this.OrderInfo.Address.Address1Lat,
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -308,8 +312,8 @@ export default {
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
         Token: this.Token,
         ActivityProductId: this.serviceId,
-        Longitude: this.CurrentPosition.Longitude,
-        Latitude: this.CurrentPosition.Latitude,
+        Longitude: this.OrderInfo.Address.Address1Lng,
+        Latitude: this.OrderInfo.Address.Address1Lat,
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -353,8 +357,8 @@ export default {
       axios.post(API.GetActivityEx, qs.stringify({
         Token: this.Token,
         ServiceId: this.OrderInfo.FourServiceId,
-        Longitude: this.CurrentPosition.Longitude,
-        Latitude: this.CurrentPosition.Latitude,
+        Longitude: this.OrderInfo.Address.Address1Lng,
+        Latitude: this.OrderInfo.Address.Address1Lat,
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 活动信息清洗
@@ -419,13 +423,13 @@ export default {
         });
       }
     },
-    getUserAddress() {
+    getUserAddress(callback) {
       axios.post(API.GetAddress, qs.stringify({
         Token: this.Token,
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          if(res.data.Body.length >= 1) {
+          if (res.data.Body.length >= 1) {
             var avail = false;
             var addr = null;
             res.data.Body.forEach(value => {
@@ -444,6 +448,7 @@ export default {
           } else {
             this.OrderInfo.Address = null;
           }
+          callback && callback();
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -611,7 +616,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'CurrentPosition', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
@@ -1030,10 +1035,12 @@ export default {
   background-color: #fff;
   .discount-total
   {
+    width: 1px;
+    -webkit-flex: 1;
+    flex: 1;
     flex-shrink: 0;
     padding-left: 0.413333rem;
     padding-right: 0.44rem;
-    text-align: right;
     .total-pay
     {
       margin-left: 0.266667rem;
@@ -1041,14 +1048,14 @@ export default {
       {
         color: #f66165;
         font-size: 16px;
-        vertical-align: middle;
+        vertical-align: bottom;
       }
     }
   }
   .btn-submit
   {
     display: block;
-    width: 100%;
+    width: 3.36rem;
     height: 100%;
     line-height: 1.6rem;
     background-color: #f66165;

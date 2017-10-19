@@ -6,14 +6,14 @@
     <div class="login-row flex-row">
       <div class="flex-row">
         <img class="icon-header" src="../../assets/images/register_phone.png">
-        <span class="input-prev">+86</span><input class="input" v-model="phoneNumber" ref="input_phone" type="tel" placeholder="请输入手机号" maxlength="11">
+        <span class="input-prev">+86</span><input class="input" v-model="phoneNumber" @click="initStatus" ref="input_phone" type="tel" placeholder="请输入手机号" maxlength="11">
       </div>
       <a class="btn-get-captcha"><img class="icon-delete" v-show="phoneNumber != ''" @click="clearPhone" src="../../assets/images/input_delete.png"></a>
     </div>
 
-    <div class="split-line"></div>
+    <div v-show="isCaptcha" class="split-line"></div>
 
-    <div class="login-row flex-row">
+    <div v-show="isCaptcha" class="login-row flex-row">
       <div class="flex-row">
         <img class="icon-header" src="../../assets/images/register_captcha.png">
         <input class="input" v-model="captcha" ref="input_captcha" type="tel" placeholder="请输入验证码" maxlength="4">
@@ -22,9 +22,10 @@
     </div>
   </section>
 
-  <a class="btn-login" :class="{ disable: !isSubmit }" @click="submit">登录</a>
+  <a class="btn-login" v-show="!isCaptcha" @click="verifyPhoneNumber">下一步</a>
+  <a class="btn-login" v-show="isCaptcha" :class="{ disable: !isSubmit }" @click="submit">登录</a>
 
-    <p class="login-tip">点击登录，即表示您同意<a class="link" href="https://copen.zhujiash.com/htm/yhfwxy.html">《{{ AppName }}用户协议》</a></p>
+  <p class="login-tip" v-show="!isCaptcha">点击下一步，即表示您同意<a class="link" href="https://copen.zhujiash.com/htm/yhfwxy.html">《{{ AppName }}用户协议》</a></p>
 
   <m-loading bg-style="0" v-show="isLoading"></m-loading>
 </div>
@@ -41,10 +42,12 @@ export default {
   data() {
     return {
       phoneNumber: '',
+      lastPhoneNumber: '',
       captcha: '',
       isCountdown: false,
       sendCaptchaInterval: null,
       isClickSendCaptcha: true,
+      isCaptcha: false,
       textCaptcha: '获取验证码',
       isLoading: false,
     }
@@ -57,26 +60,40 @@ export default {
       this.phoneNumber = '';
       this.$refs.input_phone.focus();
     },
+    verifyPhoneNumber() {
+      if(this.isPhone && this.phoneNumber !== this.lastPhoneNumber) {
+        this.sendCaptcha();
+      } else if(this.isPhone && this.phoneNumber === this.lastPhoneNumber) {
+        this.isCaptcha = true;
+      } else if(!this.isPhone) {
+        this.alert(this.ALERT_MSG.PHONE_ERROR);
+      }
+    },
     sendCaptcha() {
-      const that = this;
       this.isClickSendCaptcha = false;
+      this.isLoading = true;
       axios.post(API.SendCaptcha, qs.stringify({
         Phone: this.phoneNumber,
         "Type": "4"
       })).then(res => {
+        this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
-          this.$refs.input_captcha.focus();
-          this.alert(this.ALERT_MSG.SEND_CAPTCHA);
+          this.lastPhoneNumber = this.phoneNumber;
+          this.isCaptcha = true;
+          this.alert(this.ALERT_MSG.SEND_CAPTCHA, () => {
+            this.$refs.input_captcha.focus();
+          });
           let count = 60;
-          that.isCountdown = true;
-          this.sendCaptchaInterval = setInterval(function() {
+          this.isCountdown = true;
+          clearInterval(this.sendCaptchaInterval);
+          this.sendCaptchaInterval = setInterval(() => {
             count--;
-            that.textCaptcha = '(' + count + ')重新发送';
+            this.textCaptcha = '(' + count + ')重新发送';
             if(count <= 0) {
-              clearInterval(that.sendCaptchaInterval);
-              that.isCountdown = false;
-              that.textCaptcha = '重新发送';
-              that.isClickSendCaptcha = true;
+              clearInterval(this.sendCaptchaInterval);
+              this.isCountdown = false;
+              this.textCaptcha = '重新发送';
+              this.isClickSendCaptcha = true;
             }
           }, 1000);
         } else {
@@ -85,8 +102,19 @@ export default {
         }
       }).catch(err => {
         this.isClickSendCaptcha = true;
+        this.isLoading = false;
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
+    },
+    initStatus() {
+      this.isCaptcha = false;
+      if (this.lastPhoneNumber !== this.phoneNumber) {
+        clearInterval(this.sendCaptchaInterval);
+        this.isCountdown = false;
+        this.captcha = '';
+        this.textCaptcha = '获取验证码';
+        this.isClickSendCaptcha = true;
+      }
     },
     submit() {
       this.isLoading = true;
@@ -111,7 +139,7 @@ export default {
         if (res.data.Meta.ErrorCode === '0') {
           window._vds.push(['setCS1', 'user_id', res.data.Body.UserId]);
           this.saveUserInfo(res.data.Body.Token);
-          this.updatePushDeviceId(res.data.Body.Token);
+          this.getAppDeviceId(res.data.Body.Token);
           this.$store.commit('SetToken', res.data.Body.Token);
           this.$store.commit('SetUserId', res.data.Body.UserId);
           this.$store.commit('SetIsLogin', '1');
@@ -137,12 +165,38 @@ export default {
         }
       });
     },
-    updatePushDeviceId(token) {
-      axios.post(API.UpdatePushDeviceID, qs.stringify({
-        PushDeviceId: this.$store.state.PushDeviceId,
-        DeviceType: this.$store.state.OrderFrom,
-        Token: token,
-      })).then(res => {});
+    getAppDeviceId(token) {
+      var that = this;
+      if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+        function setupWebViewJavascriptBridge(callback) {
+          if (window.WebViewJavascriptBridge) {
+            return callback(WebViewJavascriptBridge);
+          }
+          if (window.WVJBCallbacks) {
+            return window.WVJBCallbacks.push(callback);
+          }
+          window.WVJBCallbacks = [callback];
+          var WVJBIframe = document.createElement('iframe');
+          WVJBIframe.style.display = 'none';
+          WVJBIframe.src = 'wvjbscheme://__BRIDGE_LOADED__';
+          document.documentElement.appendChild(WVJBIframe);
+          setTimeout(function() {
+            document.documentElement.removeChild(WVJBIframe)
+          }, 0)
+        }
+        setupWebViewJavascriptBridge(function(bridge) {
+          //IOS指定下单按钮跳到对应服务类型
+          bridge.callHandler('iosGetAppDeviceId',
+            function(response) {
+              axios.post(API.UpdatePushDeviceID, qs.stringify({
+                PushDeviceId: response,
+                DeviceType: that.$store.state.OrderFrom,
+                Token: token,
+              })).then(res => {});
+            }
+          );
+        });
+      }
     },
   },
   computed: {
@@ -190,7 +244,7 @@ $animate_duration: .5s;
 }
 .login
 {
-  margin: 0.533333rem 0 0;
+  margin: 1.2rem 0 0;
   border-radius: 4px;
   background: #fff;
   .icon-header
@@ -203,7 +257,7 @@ $animate_duration: .5s;
   .login-row
   {
     position: relative;
-    height: 1.533333rem;
+    height: 0.64rem;
     padding-left: 0.32rem;
     -webkit-justify-content: flex-start;
     justify-content: flex-start;
@@ -258,7 +312,8 @@ $animate_duration: .5s;
   .split-line
   {
     height: 1px;
-    margin-left: 1.173333rem;
+    margin: 0.28rem 0 0.28rem 1.173333rem;
+    // margin-left: 1.173333rem;
     background-color: #ededed;
   }
 }
@@ -278,7 +333,7 @@ $animate_duration: .5s;
   display: block;
   height: 1.146667rem;
   line-height: 1.146667rem;
-  margin: 1.6rem 0.373333rem 0;
+  margin: 0.653333rem 0.373333rem 0;
   border-radius: 4px;
   background-color: #f56165;
   color: #fff;

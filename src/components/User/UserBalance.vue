@@ -354,7 +354,7 @@ export default {
 .recharge-info
 {
   line-height: 100%;
-  margin: 0.373333rem 0.426667rem 0;
+  margin: 0.373333rem 0.533333rem 0;
 }
 .recharge-info .title
 {
@@ -374,7 +374,7 @@ export default {
 }
 .pay-way
 {
-  margin: 0.786667rem 0.426667rem 0;
+  margin: 0.786667rem 0.533333rem 0;
 }
 .pay-way .title
 {

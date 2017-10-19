@@ -1,5 +1,5 @@
 <template>
-  <div class="warn-info-wrapper" v-show="isShow && warnMsg != ''" @click="isShow = false">
+  <div class="warn-info-wrapper" v-show="isShow && warnMsg != ''" @click="wrapperClick">
     <div class="warn-info">
       <span class="txt">{{ warnMsg }}</span>
     </div>
@@ -14,15 +14,23 @@ export default {
       isShow: false
     }
   },
-  props: ['warnMsg', 'isWarn', 'timeout'],
+  props: ['warnMsg', 'isWarn', 'timeout', 'callback'],
+  methods: {
+    wrapperClick() {
+      // 如果点击了弹框遮罩，立即关闭弹框，并执行回调
+      this.isShow = false;
+      this.callback && this.callback();
+      this.$store.commit('InitAlertCallback');
+    },
+  },
   watch: {
     isWarn() {
       this.isShow = this.isWarn === '1' ? true : false;
       const that = this;
       if (this.timeout > 0) {
-        setTimeout(function() {
-          that.isShow = false;
-        }, this.timeout);
+        // setTimeout(function() {
+        //   that.isShow = false;
+        // }, this.timeout);
       }
     }
   }

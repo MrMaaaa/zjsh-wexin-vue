@@ -128,7 +128,7 @@ export default {
       local.searchNearby('小区', point, 1000);
     },
     // 补全地址的省市信息
-    fixAddress(address, city, province) {
+    fixAddress(address = '', city = '', province = '') {
       let isCity = false;
       let isProvince = false;
       if(address.indexOf(city) > -1) {

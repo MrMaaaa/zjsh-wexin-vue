@@ -1,7 +1,7 @@
 <template>
 <div class="wrapper">
   <section class="user-group">
-    <router-link class="user-section user-info flex-row" :to="{ name: 'user_info_edit' }" v-if="this.userInfo.phoneNumber">
+    <router-link class="user-section user-info flex-row" :to="{ name: 'user_info_edit' }" v-if="this.IsLogin == '1' && this.userInfo.phoneNumber">
       <div class="flex-row user-wrapper">
         <img class="user-avatar" :src="userInfo.avatar">
 
@@ -93,16 +93,16 @@
     </a>
   </section>
 
-  <section class="user-group logout" v-if="this.userInfo.phoneNumber">
+  <!-- <section class="user-group logout" v-if="this.userInfo.phoneNumber">
     <a class="user-section logout" @click="DialogConfig.IsDialog = '1'">退出登录</a>
-  </section>
+  </section> -->
 
   <section class="customer-service">
-    <p class="row">服务热线：<a class="tel" href="tel:400822262056">4008-262-056</a></p>
+    <p class="row">服务热线：<a class="tel" href="tel:4008262056">4008-262-056</a></p>
     <p class="row">工作时间：8:00 - 21:00</p>
   </section>
 
-  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="DialogConfig.IsDialog = '0'" @dialog-confirm="logout"></m-dialog>
+  <!-- <m-dialog :dialog-config="DialogConfig" @dialog-cancel="DialogConfig.IsDialog = '0'" @dialog-confirm="logout"></m-dialog> -->
 </div>
 </template>
 
@@ -125,12 +125,12 @@ export default {
         balance: '0',
         couponCount: 0,
       },
-      DialogConfig: { //对话框配置信息
-        IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
-        DialogTitle: '温馨提示', // 对话框标题
-        DialogContent: '确定要退出登录吗？', // 对话框内容
-        DialogBtns: ['取消', '确定'], // 对话框按钮文本
-      },
+      // DialogConfig: { //对话框配置信息
+      //   IsDialog: '0', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
+      //   DialogTitle: '温馨提示', // 对话框标题
+      //   DialogContent: '确定要退出登录吗？', // 对话框内容
+      //   DialogBtns: ['取消', '确定'], // 对话框按钮文本
+      // },
     }
   },
   mounted() {
@@ -198,7 +198,17 @@ export default {
           this.userInfo.nickName = res.data.Body.NickName;
           this.userInfo.avatar = res.data.Body.HeadImgUrl;
         } else {
-          res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
+          if(res.data.Meta.ErrorCode == '2004') {
+            this.userInfo = {
+              nickName: this.userInfo.nickName,
+              phoneNumber: '',
+              avatar: this.userInfo.avatar,
+              balance: '0',
+              couponCount: 0,
+            };
+          } else {
+            this.alert(res.data.Meta.ErrorMsg);
+          }
         }
       }).catch(err => {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
@@ -239,20 +249,20 @@ export default {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
-    logout() {
-      this.DialogConfig.IsDialog = '0';
-      window._vds.push(['setCS1', 'user_id', '']);
-      this.$store.commit('SetToken', '');
-      this.$store.commit('SetIsLogin', '0');
-      this.$store.commit('SetUserId', '0');
-      this.userInfo = {
-        nickName: this.userInfo.nickName,
-        phoneNumber: '',
-        avatar: this.userInfo.avatar,
-        balance: '0',
-        couponCount: 0,
-      };
-    },
+    // logout() {
+    //   this.DialogConfig.IsDialog = '0';
+    //   window._vds.push(['setCS1', 'user_id', '']);
+    //   this.$store.commit('SetToken', '');
+    //   this.$store.commit('SetIsLogin', '0');
+    //   this.$store.commit('SetUserId', '0');
+    //   this.userInfo = {
+    //     nickName: this.userInfo.nickName,
+    //     phoneNumber: '',
+    //     avatar: this.userInfo.avatar,
+    //     balance: '0',
+    //     couponCount: 0,
+    //   };
+    // },
   },
   computed: {
     ...mapState(['Token', 'AppName', 'OpenId', 'IsLogin', 'ThreeServiceIdFilterList', 'ALERT_MSG']),

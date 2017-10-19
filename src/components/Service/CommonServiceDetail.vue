@@ -2,13 +2,13 @@
 <div>
   <a class="icon-customer-service" @click="callCustomerService"></a>
   <div class="service-detail" v-if="pageData.headImg">
-    <header class="header-img">
+    <header class="header-img" @click="subumitForWx">
       <img :src="pageData.headImg">
     </header>
 
     <div class="container">
       <table class="price-table" cellpadding="0" cellspacing="0">
-        <thead id="header_table">
+        <thead>
           <tr>
             <td>类型</td>
             <td>订金</td>
@@ -16,7 +16,7 @@
           </tr>
         </thead>
 
-        <tbody id="content_table">
+        <tbody>
           <tr v-for="item in serviceList">
             <td>{{ item.ServiceName }}</td>
             <td>{{ item.DepositAmount | formatDeposit }}</td>

@@ -139,67 +139,76 @@ export default {
 }
 .address
 {
-  padding-left: 0.4rem;
-  background-color: #fff;
-  .address-item
+  box-sizing: border-box;
+  height: 100%;
+  padding-bottom: 1.333333rem;
+  background-color: #eef2f5;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  .address-list
   {
-    width: 100%;
-    height: 1.6rem;
-    &:not(:first-child)
+    padding-left: 0.4rem;
+    background-color: #fff;
+    .address-item
     {
-      border-top: 1px solid #e4eaee;
-    }
-    .address-content
-    {
-      flex-grow: 1;
-      -webkit-flex-grow: 1;
-      box-sizing: border-box;
-      width: 1px;
-      .address-user
+      width: 100%;
+      height: 1.6rem;
+      &:not(:first-child)
       {
-        line-height: 0.8rem;
-        font-size: 14px;
-        span:not(:first-child)
+        border-top: 1px solid #e4eaee;
+      }
+      .address-content
+      {
+        flex-grow: 1;
+        -webkit-flex-grow: 1;
+        box-sizing: border-box;
+        width: 1px;
+        .address-user
         {
-          margin-left: 0.24rem;
+          line-height: 0.8rem;
+          font-size: 14px;
+          span:not(:first-child)
+          {
+            margin-left: 0.24rem;
+          }
+        }
+        .address-info
+        {
+          justify-content: flex-start;
+          -webkit-justify-content: flex-start;
+          .address-tag
+          {
+            flex-shrink: 0;
+            -webkit-flex-shrink: 0;
+            margin-right: 0.106667rem;
+            padding: 1px 4px;
+            border-radius: 2px;
+            background-color: #27b8f3;
+            color: #fff;
+            flex-shrink: 0;
+            -webkit-flex-shrink: 0;
+          }
+          .address-detail
+          {
+            flex-grow: 1;
+            -webkit-flex-grow: 1;
+            width: 1px;
+          }
         }
       }
-      .address-info
+      .btn-edit
       {
-        justify-content: flex-start;
-        -webkit-justify-content: flex-start;
-        .address-tag
-        {
-          flex-shrink: 0;
-          -webkit-flex-shrink: 0;
-          margin-right: 0.106667rem;
-          padding: 1px 4px;
-          border-radius: 2px;
-          background-color: #27b8f3;
-          color: #fff;
-          flex-shrink: 0;
-          -webkit-flex-shrink: 0;
-        }
-        .address-detail
-        {
-          flex-grow: 1;
-          -webkit-flex-grow: 1;
-          width: 1px;
-        }
+        flex-shrink: 0;
+        -webkit-flex-shrink: 0;
+        display: block;
+        width: 0.533333rem;
+        height: 0.533333rem;
+        margin-left: 0.4rem;
+        margin-right: 0.4rem;
+        background-image: url(../../assets/images/address_edit.png);
+        background-repeat: no-repeat;
+        background-size: 0.533333rem 0.533333rem;
       }
-    }
-    .btn-edit
-    {
-      flex-shrink: 0;
-      -webkit-flex-shrink: 0;
-      display: block;
-      width: 0.533333rem;
-      height: 0.533333rem;
-      margin-left: 0.4rem;
-      margin-right: 0.4rem;
-      background-image: url(../../assets/images/address_edit.png);
-      background-repeat: no-repeat;
-      background-size: 0.533333rem 0.533333rem;
     }
   }
 }
@@ -229,6 +238,7 @@ export default {
   width: 100%;
   height: 1.333333rem;
   line-height: 1.333333rem;
+  border-top: 1px solid #eef2f5;
   background-color: #fff;
   text-align: center;
   .btn-add

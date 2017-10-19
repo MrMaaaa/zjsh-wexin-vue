@@ -10,11 +10,11 @@
     <script src="./assets/static/js/browser.js"></script>
     <script src="./assets/static/js/flexible.js"></script>
     <style>
-      .order-wrapper{padding-bottom:0.4rem;background-color:#fff}.order-wrapper .title{-webkit-justify-content:center;justify-content:center;padding-top:0.68rem;padding-bottom:0.706667rem}.order-wrapper .title .title-img{width:1.306667rem}.order-wrapper .title .title-info{margin-left:0.32rem}.order-wrapper .title .title-info .info-status{font-size:18px;font-weight:bolder}.order-wrapper .title .title-info .info-price{color:#333639;font-size:14px}.order-wrapper .order{padding:0.426667rem 0.533333rem}.order-wrapper .order .order-item{line-height:100%;color:#999;font-size:14px}.order-wrapper .order .order-item:not(:first-child){margin-top:0.266667rem}.order-wrapper .order .order-item .left{-webkit-flex-basis:2.0rem;flex-basis:2.0rem}.order-wrapper .order .order-item .right{-webkit-flex:1;flex:1;width:1px;text-align:right}.order-wrapper .operation{-webkit-justify-content:center;justify-content:center;margin-top:0.413333rem}.order-wrapper .operation .operation-btn{display:block;width:4.346667rem;padding:0.333333rem 0;border:1px solid #f56165;border-radius:4px;color:#f56165;font-size:16px;text-align:center}.order-wrapper .operation .operation-btn:not(:first-child){margin-left:0.453333rem}
+      .order-wrapper{padding-bottom:0.4rem;background-color:#fff}.order-wrapper .title{box-pack:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;padding-top:0.68rem;padding-bottom:0.706667rem}.order-wrapper .title .title-img{width:1.306667rem}.order-wrapper .title .title-info{margin-left:0.32rem}.order-wrapper .title .title-info .info-status{font-size:18px;font-weight:bolder}.order-wrapper .title .title-info .info-price{color:#333639;font-size:14px}.order-wrapper .order{padding:0.426667rem 0.533333rem}.order-wrapper .order .order-item{line-height:100%;color:#999;font-size:14px}.order-wrapper .order .order-item:not(:first-child){margin-top:0.266667rem}.order-wrapper .order .order-item .left{-webkit-flex-basis:2.0rem;flex-basis:2.0rem}.order-wrapper .order .order-item .right{-webkit-flex:1;flex:1;width:1px;text-align:right}.order-wrapper .operation{box-pack:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;margin-top:0.413333rem}.order-wrapper .operation .operation-btn{display:block;width:4.346667rem;padding:0.333333rem 0;border:1px solid #f56165;border-radius:4px;color:#f56165;font-size:16px;text-align:center}.order-wrapper .operation .operation-btn:not(:first-child){margin-left:0.453333rem}
     </style>
   </head>
   <body>
-    <div class="loading" id="loading" v-show="isShowLoading">
+    <div class="loading" id="loading">
       <div class="loading-content">
         <div class="loading-animate flex-row">
           <div class="object object1"></div>
@@ -30,7 +30,7 @@
           <img class="title-img" src="./assets/static/images/order_pay_success.png">
 
           <div class="title-info">
-            <p class="info-status">支付成功</p>
+            <p class="info-status">{{ orderStatus }}</p>
             <p class="info-price">已支付￥{{ payAmount }}</p>
           </div>
         </header>
@@ -100,11 +100,13 @@
         }
       },
       methods: {
-        alert(alertMsg, alertTimeout = 1000) {
+        alert(alertMsg, alertTimeout) {
+          alertTimeout = parseInt(alertTimeout) || 1000;
+          var that = this;
           this.warnMsg = alertMsg;
           this.isShow = true;
-          setTimeout(() => {
-            this.isShow = false;
+          setTimeout(function() {
+            that.isShow = false;
           }, alertTimeout);
         },
         valueFromUrl: function(name) {
@@ -113,6 +115,7 @@
           return "";
         },
         getOrderDetail: function() {
+          var that = this;
           this.isShowLoading = true;
           axios.post('https://copen.zhujiash.com/api/v3/OrderInfo/GetOrderInfoEx', Qs.stringify({
           // axios.post('http://192.168.1.191:3001/api/v3/OrderInfo/GetOrderInfoEx', Qs.stringify({
@@ -122,27 +125,30 @@
             header: {
               'Content-Type': 'application/x-www-form-urlencoded'
             }
-          }).then(res => {
-            this.isShowLoading = false;
+          }).then(function(res) {
+            that.isShowLoading = false;
             if (res.data.Meta.ErrorCode === '0') {
-              this.orderInfo = res.data.Body.Order;
+              that.orderInfo = res.data.Body.Order;
             } else {
-              this.alert(res.data.Meta.ErrorMsg);
+              that.alert(res.data.Meta.ErrorMsg);
             }
-          }).catch(error => {
-            this.isShowLoading = false;
-            this.alert('网络连接失败，请检查您的网络');
+          }).catch(function(error) {
+            that.isShowLoading = false;
+            that.alert('网络连接失败，请检查您的网络');
           });
         },
         viewOrder: function() {
-          if(this.orderInfo.IsKdEOrder == '0') {
-            window.location.href = window.location.origin + window.location.search + '/#/order/order_detail/' + this.orderId;
+          console.log(this.orderInfo);
+          if(!this.orderInfo) {
+            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index');
+          } else if(this.orderInfo.IsKdEOrder == '0') {
+            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index') + '/#/order/order_detail/' + this.orderId;
           } else if(this.orderInfo.IsKdEOrder == '2') {
-            window.location.href = window.location.origin + window.location.search + '/#/order/errand_order_detail/' + this.orderId;
+            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index') + '/#/order/errand_order_detail/' + this.orderId;
           }
         },
         returnIndex: function() {
-          window.location.href = window.location.origin + window.location.search;
+          window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index');
         }
       },
       filters: {
@@ -150,7 +156,7 @@
           if (!value) {
             return '';
           } else {
-            return Number(value);
+            return parseInt(value);
           }
         },
         dateFormat: function(value) {
@@ -160,7 +166,7 @@
           function addZero(value) {
             return value < 10 ? '0' + value : value;
           }
-          var date = new Date(Number(value + '000'));
+          var date = new Date(parseInt(value + '000'));
           var year = addZero(date.getFullYear()),
             month = addZero(date.getMonth() + 1),
             day = addZero(date.getDate()),

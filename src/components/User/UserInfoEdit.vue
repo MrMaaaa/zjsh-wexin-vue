@@ -2,8 +2,8 @@
 <div>
   <section class="user-group">
     <div class="user-section flex-row">
-      <!-- <input class="input-file" type="file" @change="onFileChange" accept="image/jpg,image/jpeg,image/png"> -->
-      <input class="input-file" type="file" @change="onFileChange" accept="image/*">
+      <input class="input-file" type="file" @change="onFileChange" accept="image/jpg,image/jpeg,image/png">
+      <!-- <input class="input-file" type="file" @change="onFileChange" accept="image/*"> -->
       <span class="section-name">头像</span>
 
       <div class="flex-row">
@@ -15,13 +15,14 @@
 
     <div class="section-split"></div>
 
-    <router-link class="user-section flex-row" :to="{ name: 'user_nickname_edit' }">
+    <router-link class="user-section flex-row" :to="{ name: 'user_nickname_edit', query: { name: userInfo.NickName } }">
       <div class="flex-row">
         <span class="section-name">昵称</span>
       </div>
 
       <div class="flex-row">
-        <span class="section-tips">{{ userInfo.NickName }}</span>
+        <span class="section-name" v-if="userInfo.NickName">{{ userInfo.NickName }}</span>
+        <span class="section-tips" v-else>10个字符以内，支持中英文、数字</span>
 
         <img class="section-icon-link" src="../../assets/images/link.png">
       </div>
@@ -41,7 +42,11 @@
     </div>
   </section>
 
-  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="closeAlert"></m-dialog>
+  <a class="logout" @click="logoutConfirm">退出当前账号</a>
+
+  <m-dialog :dialog-config="DialogConfig" @dialog-cancel="closeDialog" @dialog-confirm="logout"></m-dialog>
+
+  <m-loading bg-style="0" v-show="isLoading"></m-loading>
 </div>
 </template>
 
@@ -67,9 +72,11 @@ export default {
         DialogContent: '', // 对话框内容
         DialogBtns: ['取消'], // 对话框按钮文本
       },
+      isLoading: false,
     }
   },
   mounted() {
+    this.isLoading = true;
   },
   activated() {
     this.getUserInfo();
@@ -83,13 +90,14 @@ export default {
         DialogBtns: ['我知道了'],
       };
     },
-    closeAlert() {
+    closeDialog() {
       this.DialogConfig.IsDialog = '0';
     },
     getUserInfo() {
       axios.post(API.GetUserInfo, qs.stringify({
         Token: this.Token
       })).then(res => {
+        this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
           this.userInfo = res.data.Body.Info;
           this.userInfo.HqPic = this.userInfo.HqPic || defaultAvatar;
@@ -97,6 +105,7 @@ export default {
           res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
         }
       }).catch(err => {
+        this.isLoading = false;
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
@@ -235,6 +244,22 @@ export default {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
+    logoutConfirm() {
+      this.DialogConfig = { //对话框配置信息
+        IsDialog: '1', // 是否开启对话框，需在父组件中改变状态才能显示/关闭
+        DialogTitle: '温馨提示', // 对话框标题
+        DialogContent: '确定要退出登录吗？', // 对话框内容
+        DialogBtns: ['取消', '确定'], // 对话框按钮文本
+      };
+    },
+    logout() {
+      this.DialogConfig.IsDialog = '0';
+      window._vds.push(['setCS1', 'user_id', '']);
+      this.$store.commit('SetToken', '');
+      this.$store.commit('SetIsLogin', '0');
+      this.$store.commit('SetUserId', '0');
+      this.$router.go(-1);
+    },
   },
   computed: {
     ...mapState(['Token', 'ALERT_MSG']),
@@ -314,5 +339,18 @@ export default {
     height: 1px;
     background-color: #e5e5e5;
   }
+}
+.logout
+{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1.146667rem;
+  line-height: 1.146667rem;
+  background-color: #fff;
+  color: #f56165;
+  text-align: center;
+  font-size: 17px;
 }
 </style>

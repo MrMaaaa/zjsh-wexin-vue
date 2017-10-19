@@ -8,10 +8,10 @@
     <div class="coupon" v-if="isShowUserStatus === '0'">
       <header class="title-coupon">188</header>
 
-      <input class="phone" v-model="phoneNumber" type="number" maxlength="11" placeholder="请输入手机号">
+      <input class="phone" v-model="phoneNumber" type="tel" maxlength="11" placeholder="请输入手机号">
 
       <div class="user-captcha flex-row" v-show="isChecked">
-        <input class="captcha" v-model="captcha" type="number" ref="inputCaptcha" maxlength="4" placeholder="请输入验证码">
+        <input class="captcha" v-model="captcha" type="tel" ref="inputCaptcha" maxlength="4" placeholder="请输入验证码">
 
         <button class="btn-captcha" type="button" ref="btnSendCaptcha" @click="sendCaptcha">{{ captchaBtnText }}</button>
       </div>

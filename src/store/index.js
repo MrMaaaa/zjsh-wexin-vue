@@ -10,8 +10,6 @@ export default new Vuex.Store({
 
     AppName: '助家生活', // 当前web app的名称 // 微信下名称为助家生活
 
-    PushDeviceId: '', // 推送id，在登录成功与验证token成功时调用接口
-
     IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
 
     // 这个字符串中的路由的name不会被拦截器拦截
@@ -125,7 +123,7 @@ export default new Vuex.Store({
       order_service_time: '选择服务时间',
       order_coupon_select: '使用红包',
       login: '登录',
-      express: '快递上门',
+      express: '顺丰速运',
       express_order_detail: '订单详情',
       errand: '同城跑腿',
       errand_order_detail: '订单详情',
@@ -143,6 +141,7 @@ export default new Vuex.Store({
     AlertMsg: '', // 弹出信息
     AlertTimeout: '1000', // 弹框持续时间
     AlertStatus: '0', // 弹框状态：0:隐藏，1:显示
+    AlertCallback: null, // 弹框关闭回调
 
     // 登录成功回调函数
     LoginCallback: null,
@@ -153,9 +152,6 @@ export default new Vuex.Store({
     },
     SetAppName(state, data) {
       return state.AppName = data;
-    },
-    SetPushDeviceId(state, data) {
-      return state.PushDeviceId = data;
     },
     // SetAPI(state, data) {
     //   let api = '';
@@ -233,6 +229,9 @@ export default new Vuex.Store({
     SetLoginCallback(state, data) {
       return state.LoginCallback = data;
     },
+    InitAlertCallback(state) {
+      return state.AlertTimeout = null;
+    },
   },
   actions: {
     SetAlert(context, data) {
@@ -243,9 +242,13 @@ export default new Vuex.Store({
         context.state.AlertStatus = '1';
       }
       setTimeout(() => {
+
         context.state.AlertMsg = '';
         context.state.AlertStatus = '0';
-        data.alertCallback && data.alertCallback();
+
+        // 如果弹框因为点击遮罩而关闭，则不执行回调
+        context.state.AlertCallback && context.state.AlertCallback();
+        context.state.AlertCallback = null;
       }, context.state.AlertTimeout);
     }
   }
