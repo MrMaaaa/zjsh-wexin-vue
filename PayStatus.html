@@ -31,7 +31,8 @@
 
           <div class="title-info">
             <p class="info-status">{{ orderStatus }}</p>
-            <p class="info-price">已支付￥{{ payAmount }}</p>
+            <p class="info-price" v-if="orderStatus == '支付成功'">已支付￥{{ payAmount }}</p>
+            <p class="info-price" v-else>待支付￥{{ payAmount }}</p>
           </div>
         </header>
 
@@ -68,6 +69,7 @@
       el: '#app',
       data: {
         Token: '',
+        queryName: '',
         orderStatus: '支付成功',
         payAmount: '',
         orderInfo: null,
@@ -85,6 +87,12 @@
         this.orderId = this.valueFromUrl("orderId");
         this.Token = this.valueFromUrl("token");
         this.payAmount = this.valueFromUrl("payAmount");
+
+        var cookieAppName = this.getCookie('ZJSH_WX_AppName');
+        // %E5%8A%A9%E5%AE%B6%E7%94%9F%E6%B4%BB: 助家生活
+        if(cookieAppName && cookieAppName != '%E5%8A%A9%E5%AE%B6%E7%94%9F%E6%B4%BB') {
+          this.queryName = '?utm_term=' + cookieAppName;
+        }
 
         // 安卓给父页面传值，ios显示订单详情
         if (browser.versions.android) {
@@ -114,6 +122,19 @@
           if (reg.test(location.href)) return decodeURIComponent(RegExp.$2.replace(/\+/g, " "));
           return "";
         },
+        getCookie: function(c_name) {
+          if (document.cookie.length > 0) {
+            let c_start = document.cookie.indexOf(c_name + "=");
+            let c_end = null;
+            if (c_start != -1) {
+              c_start = c_start + c_name.length + 1;
+              c_end = document.cookie.indexOf(";", c_start);
+              if (c_end == -1) c_end = document.cookie.length;
+              return unescape(document.cookie.substring(c_start, c_end));
+            }
+          }
+          return "";
+        },
         getOrderDetail: function() {
           var that = this;
           this.isShowLoading = true;
@@ -138,17 +159,16 @@
           });
         },
         viewOrder: function() {
-          console.log(this.orderInfo);
           if(!this.orderInfo) {
-            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index');
+            window.location.href = window.location.origin + window.location.pathname.replace('PayStatus', 'index') + this.queryName;
           } else if(this.orderInfo.IsKdEOrder == '0') {
-            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index') + '/#/order/order_detail/' + this.orderId;
+            window.location.href = window.location.origin + window.location.pathname.replace('PayStatus', 'index')  + this.queryName + '#/order/order_detail/' + this.orderId;
           } else if(this.orderInfo.IsKdEOrder == '2') {
-            window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index') + '/#/order/errand_order_detail/' + this.orderId;
+            window.location.href = window.location.origin + window.location.pathname.replace('PayStatus', 'index')  + this.queryName + '#/order/errand_order_detail/' + this.orderId;
           }
         },
         returnIndex: function() {
-          window.location.href = window.location.origin + window.location.search + window.location.pathname.replace('PayStatus', 'index');
+          window.location.href = window.location.origin + window.location.pathname.replace('PayStatus', 'index') + this.queryName;
         }
       },
       filters: {

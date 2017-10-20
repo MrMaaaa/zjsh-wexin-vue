@@ -138,19 +138,25 @@ export default new Vuex.Store({
     },
 
     // 全局弹框配置
-    AlertMsg: '', // 弹出信息
-    AlertTimeout: '1000', // 弹框持续时间
-    AlertStatus: '0', // 弹框状态：0:隐藏，1:显示
-    AlertCallback: null, // 弹框关闭回调
+    AlertCfg: {
+      Msg: '', // 弹出信息
+      Timeout: '1000', // 弹框持续时间
+      Status: '0', // 弹框状态：0:隐藏，1:显示
+      Callback: null, // 弹框关闭回调
+    },
 
     // 登录成功回调函数
-    LoginCallback: null,
+    LoginCallbackCfg: {
+      RouterName: '',
+      Callback: null,
+    },
   },
   mutations: {
     SetIsWxBrowser(state, data) {
       return state.IsWxBrowser = data;
     },
-    SetAppName(state, data) {
+    SetAppName(state, data = '助家生活') {
+      Common.setCookie('ZJSH_WX_AppName', encodeURIComponent(data), 30, '/');
       return state.AppName = data;
     },
     // SetAPI(state, data) {
@@ -185,7 +191,7 @@ export default new Vuex.Store({
     SetUserInfo(state, data) {
       return state.UserInfo = data;
     },
-    SetCurrentPosition(state, data) {
+    SetCurrentPosition(state, data = '') {
       Common.setCookie('ZJSH_WX_Position', encodeURIComponent(JSON.stringify(data)), 30, '/');
       return state.CurrentPosition = data;
     },
@@ -211,7 +217,6 @@ export default new Vuex.Store({
       return state.OrderFrom = orderFrom;
     },
     SetOrderInfo(state, data) {
-      // Common.setCookie('ZJSH_WX_OrderInfo', encodeURIComponent(JSON.stringify(data)), 30, '/');
       return state.OrderInfo = data;
     },
     SetCouponSelected(state, data) {
@@ -226,30 +231,33 @@ export default new Vuex.Store({
     SetROUTER_TO_TITLE(state, data) {
       return state.ROUTER_TO_TITLE = data;
     },
-    SetLoginCallback(state, data) {
-      return state.LoginCallback = data;
+    SetLoginCallbackCfg(state, data) {
+      return state.LoginCallbackCfg = {
+        Callback: data.callback || null,
+        RouterName: data.routerName || '',
+      }
     },
     InitAlertCallback(state) {
-      return state.AlertTimeout = null;
+      return state.AlertCfg.Callback = null;
     },
   },
   actions: {
-    SetAlert(context, data) {
-      context.state.AlertMsg = data.alertMsg;
-      context.state.AlertTimeout = Number(data.alertTimeout);
-      context.state.AlertCallback = data.alertCallback;
-      if(context.state.AlertMsg != '') {
-        context.state.AlertStatus = '1';
+    SetAlertCfg(context, data) {
+      context.state.AlertCfg.Msg = data.alertMsg;
+      context.state.AlertCfg.Timeout = parseInt(data.alertTimeout);
+      context.state.AlertCfg.Callback = data.alertCallback;
+
+      if(context.state.AlertCfg.Msg) {
+        context.state.AlertCfg.Status = '1';
       }
       setTimeout(() => {
-
-        context.state.AlertMsg = '';
-        context.state.AlertStatus = '0';
+        context.state.AlertCfg.Msg = '';
+        context.state.AlertCfg.Status = '0';
 
         // 如果弹框因为点击遮罩而关闭，则不执行回调
-        context.state.AlertCallback && context.state.AlertCallback();
-        context.state.AlertCallback = null;
-      }, context.state.AlertTimeout);
+        context.state.AlertCfg.Callback && context.state.AlertCfg.Callback();
+        context.state.AlertCfg.Callback = null;
+      }, context.state.AlertCfg.Timeout);
     }
   }
 });

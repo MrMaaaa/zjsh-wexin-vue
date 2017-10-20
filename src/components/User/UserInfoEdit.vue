@@ -257,7 +257,9 @@ export default {
       window._vds.push(['setCS1', 'user_id', '']);
       this.$store.commit('SetToken', '');
       this.$store.commit('SetIsLogin', '0');
-      this.$store.commit('SetUserId', '0');
+      this.$store.commit('SetUserId', '');
+      this.$store.commit('SetDefaultAddressId', '');
+      this.$store.commit('SetCurrentPosition', '');
       this.$router.go(-1);
     },
   },

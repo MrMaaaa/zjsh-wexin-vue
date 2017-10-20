@@ -168,6 +168,14 @@ export default {
       this.getUserInfo();
       this.getUserSettlement();
       this.getCouponAmount();
+    } else {
+      this.userInfo =  {
+        nickName: '',
+        phoneNumber: '',
+        avatar: DefaultAvatar,
+        balance: '0',
+        couponCount: 0,
+      };
     }
   },
   methods: {

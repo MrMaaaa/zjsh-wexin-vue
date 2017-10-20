@@ -118,22 +118,10 @@ export default {
     },
     submit() {
       this.isLoading = true;
-      var orderFrom = '210';
-      if (this.AppName == '助家生活') {
-        orderFrom = '210';
-      } else if (this.AppName == '同城家政') {
-        orderFrom = '215';
-      } else if (this.AppName == '快递上门') {
-        orderFrom = '211';
-      } else if (this.AppName == '曹操家政') {
-        orderFrom = '212';
-      } else if (this.AppName == '同城到家') {
-        orderFrom = '213';
-      }
       axios.post(API.QuickLogin, qs.stringify({
         LoginName: this.phoneNumber,
         Captcha: this.captcha,
-        RegisterSource: orderFrom,
+        RegisterSource: this.OrderFrom,
       })).then(res => {
         this.isLoading = false;
         if (res.data.Meta.ErrorCode === '0') {
@@ -146,8 +134,16 @@ export default {
           var login = document.getElementById('module_login');
           document.title = login.getAttribute('title');
           login.classList.remove('active');
-          this.LoginCallback && this.LoginCallback();
-          this.$store.commit('SetLoginCallback', null);
+          // 如果设置了登录回调，就执行回调，否则重新进入该页面
+          if (this.LoginCallbackCfg.Callback && this.$route.name == this.LoginCallbackCfg.RouterName) {
+            this.LoginCallbackCfg.Callback();
+            this.$store.commit('SetLoginCallbackCfg', {
+              callback: null,
+              routerName: ''
+            });
+          } else {
+            this.$router.go(0);
+          }
         } else {
           this.alert(res.data.Meta.ErrorMsg);
         }
@@ -185,14 +181,13 @@ export default {
           }, 0)
         }
         setupWebViewJavascriptBridge(function(bridge) {
-          //IOS指定下单按钮跳到对应服务类型
           bridge.callHandler('iosGetAppDeviceId',
             function(response) {
               axios.post(API.UpdatePushDeviceID, qs.stringify({
                 PushDeviceId: response,
-                DeviceType: that.$store.state.OrderFrom,
+                DeviceType: that.OrderFrom,
                 Token: token,
-              })).then(res => {});
+              })).then(res => {}).catch(err => {});
             }
           );
         });
@@ -200,7 +195,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['AppName', 'IsOpenLogin', 'LoginCallback', 'ALERT_MSG']),
+    ...mapState(['AppName', 'IsOpenLogin', 'OrderFrom', 'LoginCallbackCfg', 'ALERT_MSG']),
     isPhone() {
       return /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phoneNumber);
     },

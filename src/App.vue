@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <warn-info :warn-msg="AlertMsg" :timeout="AlertTimout" :callback="AlertCallback" :is-warn="AlertStatus"></warn-info>
+    <warn-info :warn-msg="AlertCfg.Msg" :timeout="AlertCfg.Timout" :callback="AlertCfg.Callback" :is-warn="AlertCfg.Status"></warn-info>
 
     <m-login id="module_login"></m-login>
   </div>
@@ -39,12 +39,6 @@ export default {
     }
   },
   created() {
-    document.addEventListener("deviceready", onDeviceReady, false);
-    function onDeviceReady() {
-      navigator.geolocation.getCurrentPosition(onSuccess, onError);
-    }
-
-
     document.querySelector('body').addEventListener('touchmove', function(e) {
       if (!document.querySelector('#app').contains(e.target)) {
         e.preventDefault();
@@ -82,9 +76,12 @@ export default {
       if (JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
         this.$store.commit('SetIsLogin', '0');
         this.$store.commit('SetToken', '');
+        this.$store.commit('SetUserId', '');
+        this.$store.commit('SetDefaultAddressId', '');
+        this.$store.commit('SetCurrentPosition', '');
 
         // 过滤掉不需要打开登录的页面
-        if(this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1) {
+        if (this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1) {
           this.openLogin();
         }
       }
@@ -105,10 +102,11 @@ export default {
 
     window.handleAppPushEvent = (data) => {
       let j = data;
-      if(j) {
+      if (j) {
+        this.isShowNewUserCoupon = '0';
+        alert(j);
         j = JSON.parse(j);
-        if(j.Type == '0') {
-        } else if(j.Type == '1') {
+        if (j.Type == '0') {} else if (j.Type == '1') {
           switch (j.AppViewId) {
             case '1000':
             case '1001':
@@ -142,8 +140,7 @@ export default {
               });
               break;
           }
-        } else if(j.Type == '2') {
-        }
+        } else if (j.Type == '2') {}
       }
     };
 
@@ -153,14 +150,12 @@ export default {
       document.querySelector('#app').style.transform = 'translateY(0)';
       document.querySelector('#app').style.overflow = 'hidden';
       document.querySelector('#app').style.position = 'relative';
-      if(document.querySelector('.menu-router-view')) {
+      if (document.querySelector('.menu-router-view')) {
         document.querySelector('.menu-router-view').style.display = 'block';
         document.querySelector('.menu-router-view').style.height = '100%';
         document.querySelector('.menu-router-view').style.overflow = 'scroll';
       }
     }
-
-    this.getAppDeviceId();
   },
   methods: {
     valueFromUrl(key) {
@@ -205,22 +200,14 @@ export default {
       });
     },
     getAppName() {
-      let name = this.valueFromUrl('utm_term');
+      let name = this.valueFromUrl('utm_term') || '助家生活';
+      name = decodeURIComponent(name);
       var titles = this.$store.state.ROUTER_TO_TITLE;
-      if(name) {
-        name = decodeURIComponent(name);
-        this.$store.commit('SetAppName', name);
-
-        titles['index'] = name;
-        document.title = titles['index'];
-        this.$store.commit('SetROUTER_TO_TITLE', titles);
-
-        this.$store.commit('SetOrderFrom', name);
-      } else {
-        titles['index'] = '助家生活';
-        document.title = titles['index'];
-        this.$store.commit('SetROUTER_TO_TITLE', titles);
-      }
+      titles['index'] = name;
+      document.title = titles['index'];
+      this.$store.commit('SetROUTER_TO_TITLE', titles);
+      this.$store.commit('SetAppName', name);
+      this.$store.commit('SetOrderFrom', name);
     },
     verifyToken() {
       axios.post(API.VerifyToken, qs.stringify({
@@ -261,7 +248,7 @@ export default {
             function(response) {
               axios.post(API.UpdatePushDeviceID, qs.stringify({
                 PushDeviceId: response,
-                DeviceType: that.$store.state.OrderFrom,
+                DeviceType: that.OrderFrom,
                 Token: that.Token,
               })).then(res => {}).catch(err => {});
             }
@@ -307,7 +294,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'ALERT_MSG', 'AlertMsg', 'AlertTimout', 'AlertStatus', 'AlertCallback']),
+    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'OrderFrom', 'ALERT_MSG', 'AlertCfg', 'AlertCallback']),
   },
   components: {
     MLogin

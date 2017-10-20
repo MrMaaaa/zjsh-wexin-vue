@@ -165,25 +165,21 @@ export default {
     });
   },
   activated() {
-    if (this.Token === '') {
+    if (!this.Token) {
       this.orderNowList.splice(0);
       this.orderHistoryList.splice(0);
       this.openLogin();
-    } else {
-      if (this.orderNowList.length > 0) {
-        this.orderNowPageIndex = 1;
-        this.getNowOrderList(); // 会自动获取订单列表，无需二次调用
-      }
-      if (this.orderHistoryList.length > 0) {
-        this.orderHistoryPageIndex = 1;
-        this.getHistoryOrderList(); // 会自动获取订单列表，无需二次调用
-      }
-      if (this.orderNowList.length == 0 && this.tabIndex == '0') {
-        this.$refs.infiniteLoading1.$emit('$InfiniteLoading:loaded');
-      }
-      if (this.orderHistoryList.length == 0 && this.tabIndex == '1') {
-        this.$refs.infiniteLoading2.$emit('$InfiniteLoading:loaded');
-      }
+    } else if (this.orderNowList.length > 0) {
+      this.orderNowPageIndex = 1;
+      this.getNowOrderList(); // 会自动获取订单列表，无需二次调用
+    } else if (this.orderHistoryList.length > 0) {
+      this.orderHistoryPageIndex = 1;
+      this.getHistoryOrderList(); // 会自动获取订单列表，无需二次调用
+    }
+    if (this.orderNowList.length == 0 && this.tabIndex == '0') {
+      this.$refs.infiniteLoading1.$emit('$InfiniteLoading:loaded');
+    } else if (this.orderHistoryList.length == 0 && this.tabIndex == '1') {
+      this.$refs.infiniteLoading2.$emit('$InfiniteLoading:loaded');
     }
   },
   methods: {

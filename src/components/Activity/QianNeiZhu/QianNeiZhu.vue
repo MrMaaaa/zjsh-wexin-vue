@@ -42,20 +42,14 @@ export default {
         } else {
           var that = this;
           this.openLogin(() => {
+            console.log('钱内助')
             that.getUserInfo();
-          });
+          }, this.$route.name);
         }
       }).catch(err => {
         this.isLoading = false;
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
-      // if(this.IsLogin == '0') {
-      //   this.openLogin();
-      // } else if(this.UserInfo.PhoneNumber) {
-      //   this.linkToQNZ(this.UserInfo.PhoneNumber);
-      // } else {
-      //   this.getUserInfo();
-      // }
     },
     getUserInfo() {
       this.isLoading = true;

@@ -22,20 +22,23 @@ Vue.mixin({
   methods: {
     // 用于显示文本（一般用于接口的结果显示）
     alert(alertMsg, alertTimeout=1500, alertCallback) {
-      this.$store.dispatch('SetAlert', {
+      this.$store.dispatch('SetAlertCfg', {
         alertMsg,
         alertTimeout: typeof alertTimeout == 'function' ? 1500 : alertTimeout,
         alertCallback: typeof alertTimeout == 'function' ? alertTimeout : alertCallback,
       });
     },
     // 弹出登录
-    openLogin(callback) {
+    openLogin(callback = null, routerName = '') {
       this.$store.commit('SetIsOpenLogin', '1');
       var login = document.getElementById('module_login');
       login.setAttribute('title', document.title);
       login.classList.add('active');
-      if(callback && typeof callback == 'function') {
-        this.$store.commit('SetLoginCallback', callback);
+      if (callback && typeof callback == 'function') {
+        this.$store.commit('SetLoginCallbackCfg', {
+          callback,
+          routerName
+        });
       }
       var WVJBIframe = document.createElement('iframe');
       document.title = '登录';

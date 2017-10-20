@@ -139,7 +139,7 @@ export default {
               isActivity: '1',
             }
           });
-        });
+        }, 'black_friday');
       }
     },
     showInfo(type) {
