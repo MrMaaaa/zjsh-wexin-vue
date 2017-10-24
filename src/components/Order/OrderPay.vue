@@ -10,7 +10,7 @@
 
     <div class="status-info">
       <div class="info-amount" v-if="orderDetail && orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">￥{{ orderDetail.DepositInfo.DepositAmount | formatAmount }}</div>
-      <div class="info-amount" v-else-if="orderDetail">￥{{ orderDetail.TotalPrice | formatAmount }}</div>
+      <div class="info-amount" v-else>￥{{ payAmount | formatAmount }}</div>
       <div class="info-name" v-if="orderDetail && orderDetail.DepositInfo && orderDetail.DepositInfo.DepositIsPayOff == '0'">订金</div>
       <div class="info-name" v-else-if="orderDetail && orderDetail.Service">{{ orderDetail.Service.ServiceName }}</div>
     </div>
@@ -115,37 +115,34 @@ export default {
     }
   },
   mounted() {
-    let that = this;
-    window.getPayStatusFromFrame = function(status) {
-      let payIFrame = document.getElementById('alipay');
-      document.documentElement.removeChild(payIFrame);
-      if(status == '1') {
-        that.routeTo({
-          name: 'order_pay_status',
-          params: {
-            orderId: that.orderId
-          }
-        }, true);
-      } else {
-        that.alert(that.ALERT_MSG.PAY_ERROR);
-      }
-    }
+    // let that = this;
+    // window.getPayStatusFromFrame = function(status) {
+    //   let payIFrame = document.getElementById('alipay');
+    //   document.documentElement.removeChild(payIFrame);
+    //   if(status == '1') {
+    //     that.routeTo({
+    //       name: 'order_pay_status',
+    //       params: {
+    //         orderId: that.orderId
+    //       }
+    //     }, true);
+    //   } else {
+    //     that.alert(that.ALERT_MSG.PAY_ERROR);
+    //   }
+    // }
   },
   activated() {
-    let oldId = this.orderId;
     this.orderId = this.$route.params.orderId;
-    if(oldId !== this.orderId) {
-      // 需要先设置红包为不可用，避免上一次的红包带来的错误
-      this.$store.commit('SetCouponSelected', {
-        NoUse: '1',
-      });
+    // 需要先设置红包为不可用，避免上一次的红包带来的错误
+    this.$store.commit('SetCouponSelected', {
+      NoUse: '1',
+    });
 
-      this.getOrderDetail();
-      this.getUserSettlement();
-      this.isBalancePay = '0';
-      this.isWxPay = '0';
-      this.isZfbPay = '0';
-    }
+    this.getOrderDetail();
+    this.getUserSettlement();
+    this.isBalancePay = '0';
+    this.isWxPay = '0';
+    this.isZfbPay = '0';
   },
   methods: {
     getOrderDetail() {
@@ -546,13 +543,17 @@ export default {
         if (this.orderDetail.DepositInfo && this.orderDetail.DepositInfo.DepositIsPayOff == '0') {
           return this.orderDetail.DepositInfo.DepositAmount;
         } else {
+          // 如果是面议类的支付，需要减去之前的订金金额
+          var depositAmount = this.orderDetail.DepositInfo ? Number(this.orderDetail.DepositInfo.DepositAmount) : 0;
           if (this.CouponSelected.NoUse == '1') {
-            return Number(Number(this.orderDetail.TotalPrice) * 100 - this.discountAmount * 100) / 100;
+            return Number(Number(this.orderDetail.TotalPrice) * 100 - this.discountAmount * 100 - depositAmount * 100) / 100;
           } else {
             var coupon = this.CouponSelected.CouponDetails ? this.CouponSelected.CouponDetails[0].DiscountAmount : 0;
-            return (Number(this.orderDetail.TotalPrice) * 100 - Number(coupon) * 100 - this.discountAmount * 100) / 100;
+            return (Number(this.orderDetail.TotalPrice) * 100 - Number(coupon) * 100 - this.discountAmount * 100 - depositAmount * 100) / 100;
           }
         }
+      } else {
+        return '';
       }
     },
     // 需要支付的总价（不包含折扣，但是包含红包，用来只使用微信或支付宝支付时传的参数，不能用来展示）

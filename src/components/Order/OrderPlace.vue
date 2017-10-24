@@ -181,7 +181,7 @@ import OrderServiceTime from './OrderServiceTime';
 import API from '../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
-import Common from '../../config/Common';
+import Common from '../../config/common';
 
 export default {
   name: 'order_place',
@@ -270,8 +270,8 @@ export default {
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.serviceId,
-        Longitude: this.OrderInfo.Address.Address1Lng,
-        Latitude: this.OrderInfo.Address.Address1Lat,
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -312,8 +312,8 @@ export default {
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
         Token: this.Token,
         ActivityProductId: this.serviceId,
-        Longitude: this.OrderInfo.Address.Address1Lng,
-        Latitude: this.OrderInfo.Address.Address1Lat,
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -357,8 +357,8 @@ export default {
       axios.post(API.GetActivityEx, qs.stringify({
         Token: this.Token,
         ServiceId: this.OrderInfo.FourServiceId,
-        Longitude: this.OrderInfo.Address.Address1Lng,
-        Latitude: this.OrderInfo.Address.Address1Lat,
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 活动信息清洗
@@ -507,7 +507,7 @@ export default {
         this.minCount = Number(item.MinCount);
 
         // 初始化数量
-        this.OrderInfo.Amount = this.minCount;
+        this.OrderInfo.Amount = Number(item.DefaultCount);
 
         this.getCouponMaxAmount(this.totalPrice);
 
@@ -566,7 +566,7 @@ export default {
       }
     },
     orderSubmit() {
-      if(!this.OrderInfo.Address.Id) {
+      if(!this.OrderInfo.Address || !this.OrderInfo.Address.Id) {
         this.alert(this.ALERT_MSG.ADDRESS_EMPTY);
       } else if(this.OrderInfo.DateTime === '') {
         this.alert(this.ALERT_MSG.DATETIME_EMPTY);

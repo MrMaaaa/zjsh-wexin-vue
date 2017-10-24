@@ -28,7 +28,7 @@ import MLogin from './components/Plugs/m-login.vue';
 import API from './config/backend';
 import axios from 'axios';
 import qs from 'qs';
-import Common from './config/Common';
+import Common from './config/common';
 
 export default {
   name: 'app',

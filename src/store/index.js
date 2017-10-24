@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import Common from '../config/Common';
+import Common from '../config/common';
 
 Vue.use(Vuex);
 

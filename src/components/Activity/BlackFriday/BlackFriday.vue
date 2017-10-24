@@ -159,7 +159,9 @@ export default {
 <style scoped lang="scss">
 .router-view
 {
-  height: auto;
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
 }
 .contain
 {

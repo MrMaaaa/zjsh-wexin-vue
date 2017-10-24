@@ -922,6 +922,10 @@ $text-warn: #f56165;
             color: #999;
             font-size: 12px;
           }
+          .tel
+          {
+            color: #27b8f3;
+          }
         }
       }
       .group-line

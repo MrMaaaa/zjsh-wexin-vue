@@ -272,7 +272,10 @@ router.beforeEach((to, from, next) => {
   // 对不同的路由设置不同的title
   var login = document.getElementById('module_login');
   if (login && login.classList.contains('active')) {
-    store.commit('SetLoginCallback', null);
+    store.commit('SetLoginCallbackCfg', {
+      callback: null,
+      routerName: ''
+    });
     login && login.classList.remove('active');
     document.title = ROUTER_TO_TITLE[from.name] || ROUTER_TO_TITLE['index'];
 

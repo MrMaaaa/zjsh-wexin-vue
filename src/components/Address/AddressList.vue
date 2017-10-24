@@ -140,7 +140,7 @@ export default {
 .address
 {
   box-sizing: border-box;
-  height: 100%;
+  // height: 100%;
   padding-bottom: 1.333333rem;
   background-color: #eef2f5;
   overflow-y: scroll;
