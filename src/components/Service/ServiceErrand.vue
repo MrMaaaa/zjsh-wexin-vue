@@ -196,13 +196,11 @@ export default {
         date: '请选择', // 选择的日期
         name: '请选择', // 选择的物品名称
         weight: '请选择', // 选择的重量
-        way: '请选择' // 选择的付款方式
       },
       selData: { // 后台接口用数据
         date: '', // 选择的日期
         name: '', // 选择的物品名称
         weight: '', // 选择的重量
-        way: '' // 选择的付款方式
       },
       errandNote: '', // 备注
       priceOrderId: '',
@@ -291,7 +289,7 @@ export default {
         this.selData.date = this.getDate(0) + ' ' + (new Date().getHours() < 10 ? '0' + new Date().getHours() : new Date().getHours()) + ':' + (new Date().getMinutes() < 10 ? '0' + new Date().getMinutes() : new Date().getMinutes());
       } else {
         this.showData.date = this.dateTimePicker_now[0] + ' ' + this.dateTimePicker_now[1] + ':' + this.dateTimePicker_now[2];
-        this.selData.date = this.getDate(0) + ' ' + this.dateTimePicker_now[1] + ':' + this.dateTimePicker_now[2];
+        this.selData.date = (this.dateTimePicker_now[0] == '明天' ? this.getDate(1) : this.getDate(0)) + ' ' + this.dateTimePicker_now[1] + ':' + this.dateTimePicker_now[2];
       }
       this.isDateTimePicker = false;
       this.getErrandPrice();
@@ -478,7 +476,7 @@ export default {
       }
     },
     submitOrder() {
-      if (this.selData.date != '' && this.selData.name != '' && this.selData.weight != '' && this.addrData.sender.show && this.addrData.receiver.show && this.estimatedPrice) {
+      if (this.selData.date && this.selData.name && this.selData.weight && this.addrData.sender.show && this.addrData.receiver.show && this.estimatedPrice) {
         this.isLoading = true;
         axios.post(API.CreatePaoTuiOrder, qs.stringify({
           Token: this.Token,
@@ -514,10 +512,10 @@ export default {
         var msg = '';
         if (!this.addrData.sender.show) msg = '请选择寄件地址';
         else if (!this.addrData.receiver.show) msg = '请选择收件地址';
-        else if (this.selData.date == '') msg = '请选择寄件时间';
-        else if (this.selData.name == '') msg = '请选择物品名称';
-        else if (this.selData.weight == '') msg = '请选择物品重量';
-        else if (this.selData.way == '') msg = '请选择付款方式';
+        else if (!this.selData.date) msg = '请选择寄件时间';
+        else if (!this.selData.name) msg = '请选择物品名称';
+        else if (!this.selData.weight) msg = '请选择物品重量';
+        else if (!this.estimatedPrice) msg = '不提供跨城服务，请重新选择地址';
         this.alert(msg);
       }
     },

@@ -151,11 +151,12 @@ export default {
       threeId: '',
       serviceList: [],
       isHXReady: false,
-      isSet: false,
+      ischanged: 0,
     }
   },
   activated() {
     var that = this;
+    this.ischanged++;
     // 当服务id不同时刷新数据
     let oldId = this.threeId;
     this.threeId = this.$route.query.id || this.$route.params.id;
@@ -184,7 +185,6 @@ export default {
           email: ''
         },
         onready: function() {
-          that.isHXReady = true;
           // 发送服务信息
           window.easemobim.sendExt({
             ext: {
@@ -204,6 +204,7 @@ export default {
           });
         },
       };
+      that.isHXReady = true;
     }
   },
   methods: {

@@ -151,8 +151,8 @@
   </div>
 
   <section class="bottom-button flex-row">
-    <p class="discount-total flex-row" v-if="CouponSelected.NoUse === '0'"><span>已优惠￥{{ discountAmount + couponAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
-    <p class="discount-total flex-row" v-else><span>已优惠￥{{ discountAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total txt-over-hide" v-if="CouponSelected.NoUse === '0'"><span>已优惠￥{{ discountAmount + couponAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
+    <p class="discount-total txt-over-hide" v-else><span>已优惠￥{{ discountAmount | formatAmount }}</span><span class="total-pay">合计<span class="price">￥{{ payAmount | formatAmount }}</span></span></p>
 
     <a class="btn-submit" @click="orderSubmit">提交订单</a>
   </section>
@@ -189,7 +189,7 @@ export default {
     return {
       serviceId: '',
       serviceName: '',
-      isActivity: '',
+      isActivity: '0',
       serviceList: [],
       lastAddressId: '',
       ServiceTypeRules: [], // 原始活动数据
@@ -224,7 +224,7 @@ export default {
       this.OrderInfo.ServiceContent = '';
     }
 
-    this.lastAddressId = this.OrderInfo.Address ? this.OrderInfo.Address.Id : '';
+    this.lastAddressId = this.OrderInfo.Address ? this.OrderInfo.Address.Id + '' : '';
     this.getUserAddress(() => {
       // 从app活动页分享到微信等会带有ServiceId的参数
       let threeIdFromUrl = this.valueFromUrl('ServiceId');
@@ -244,7 +244,7 @@ export default {
         this.isActivity = this.$route.query.isActivity || '0';
 
         // serviceId或isActivity或address id不同则重新获取价格信息
-        if (oldId !== this.serviceId || oldIsActivity !== this.isActivity || (this.lastAddressId !== '' && this.lastAddressId != this.DefaultAddressId)) {
+        if (oldId !== this.serviceId || oldIsActivity !== this.isActivity || (this.lastAddressId && this.lastAddressId != this.DefaultAddressId) || this.serviceList.length == 0) {
           // 判断是否为活动id
           if (this.isActivity == '1') {
             this.getActivityServiceDetail();
@@ -266,6 +266,7 @@ export default {
       return result ? decodeURIComponent(result[2]) : null;
     },
     getServiceDetail() {
+      this.serviceList = [];
       this.isLoading = true;
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
@@ -307,6 +308,7 @@ export default {
       });
     },
     getActivityServiceDetail() {
+      this.serviceList = [];
       this.isLoading = true;
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
@@ -445,6 +447,7 @@ export default {
             } else {
               this.OrderInfo.Address = res.data.Body[0];
             }
+            this.$store.commit('SetDefaultAddressId', this.OrderInfo.Address.Id);
           } else {
             this.OrderInfo.Address = null;
           }
@@ -1027,7 +1030,6 @@ export default {
   bottom: 0;
   left: 0;
   transform: translateZ(0);
-  -webkit-overflow-scroll: touch;
   width: 100%;
   height: 1.6rem;
   line-height: 1.6rem;
@@ -1035,10 +1037,7 @@ export default {
   background-color: #fff;
   .discount-total
   {
-    width: 1px;
-    -webkit-flex: 1;
-    flex: 1;
-    flex-shrink: 0;
+    display: inline-block;
     padding-left: 0.413333rem;
     padding-right: 0.44rem;
     .total-pay
@@ -1054,10 +1053,11 @@ export default {
   }
   .btn-submit
   {
-    display: block;
+    -webkit-flex-shrink: 0;
+    flex-shrink: 0;
+    display: inline-block;
     width: 3.36rem;
     height: 100%;
-    line-height: 1.6rem;
     background-color: #f66165;
     color: #fff;
     text-align: center;

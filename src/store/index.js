@@ -185,6 +185,7 @@ export default new Vuex.Store({
       return state.OpenId = data;
     },
     SetDefaultAddressId(state, data = '') {
+      data = data + '';
       Common.setCookie('ZJSH_WX_DefaultAddressId', data, 30, '/');
       return state.DefaultAddressId = data;
     },
