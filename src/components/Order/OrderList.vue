@@ -87,6 +87,7 @@ export default {
       orderTitleForConfirm: '', // 要评价的订单title
       isEvaluate: '0',
       isConfirm: '0',
+      isMounted: true,
       isLoading: false,
       loadingBgStyle: '1',
       touchStartX: 0,
@@ -169,7 +170,12 @@ export default {
       this.orderNowList.splice(0);
       this.orderHistoryList.splice(0);
       this.openLogin();
-    } else {
+    } else if(this.isMounted) {
+      // 每次都重新获取订单
+      this.orderNowPageIndex = 1;
+      this.orderHistoryPageIndex = 1;
+      this.isMounted = false;
+    } else if(!this.isMounted) {
       // 每次都重新获取订单
       this.orderNowPageIndex = 1;
       this.getNowOrderList();

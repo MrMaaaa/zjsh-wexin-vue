@@ -15,7 +15,7 @@
 
     <div class="section-split"></div>
 
-    <router-link class="user-section flex-row" :to="{ name: 'user_nickname_edit', query: { name: userInfo.NickName } }">
+    <router-link class="user-section flex-row" :to="{ name: 'user_nickname_edit', query: { name: userInfo.NickName ? userInfo.NickName : '' } }">
       <div class="flex-row">
         <span class="section-name">昵称</span>
       </div>

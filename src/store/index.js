@@ -87,7 +87,7 @@ export default new Vuex.Store({
     ALERT_MSG: {
       NET_ERROR: '网络连接异常，请检查您的网络',
       SEND_CAPTCHA: '验证码发送成功，请注意查收',
-      PAY_SUCESS: '支付成功',
+      PAY_SUCCESS: '支付成功',
       PAY_ERROR: '支付失败',
       AMOUNT_ERROR: '请输入正确的金额',
       POSITION_ERROR: '定位失败，请开启定位或检查网络',

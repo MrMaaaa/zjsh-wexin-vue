@@ -21,7 +21,7 @@
 
   <div class="address-empty txt-normal" v-else>
     <img class="img-empty" src="../../assets/images/address_empty.png">
-    您还没有添加服务地址哦，快去<router-link class="txt-add" :to="{ name: 'address_add' }">新增</router-link>吧
+    您还没有添加服务地址哦，快去<router-link class="txt-add" :to="{ name: 'address_add', params: { isAddressAddedInfo: '1' } }">新增</router-link>吧
   </div>
 
   <div class="address-add">

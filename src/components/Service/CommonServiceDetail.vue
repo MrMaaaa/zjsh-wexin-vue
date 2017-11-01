@@ -255,7 +255,7 @@ export default {
         this.isLoading = false;
         this.txtLoading = '';
         this.bgLoading = '2';
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     subumitForWx() {
@@ -286,7 +286,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['IsLogin', 'AppName', 'CurrentPosition', 'CurrentPosition', 'ALERT_MSG']),
+    ...mapState(['IsLogin', 'CurrentPosition', 'ALERT_MSG']),
   },
   filters: {
     formatDeposit(str) {

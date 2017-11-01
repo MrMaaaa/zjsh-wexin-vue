@@ -454,7 +454,8 @@ export default {
       this.getErrandPrice();
     },
     getErrandPrice() {
-      if (this.addrData.sender.id && this.addrData.receiver.id && this.selData.date) {
+      if (this.addrData.sender.show && this.addrData.receiver.show && this.selData.date) {
+        this.isLoading = true;
         this.estimatedPrice = '';
         axios.post(API.GetPaoTuiPrice, qs.stringify({
           Token: this.Token,
@@ -473,6 +474,10 @@ export default {
           this.isLoading = false;
           this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
+      } else if (!this.addrData.sender.show) {
+        msg = '请选择寄件地址';
+      } else if (!this.addrData.receiver.show) {
+        msg = '请选择收件地址';
       }
     },
     submitOrder() {
@@ -510,13 +515,22 @@ export default {
         });
       } else {
         var msg = '';
-        if (!this.addrData.sender.show) msg = '请选择寄件地址';
-        else if (!this.addrData.receiver.show) msg = '请选择收件地址';
-        else if (!this.selData.date) msg = '请选择寄件时间';
-        else if (!this.selData.name) msg = '请选择物品名称';
-        else if (!this.selData.weight) msg = '请选择物品重量';
-        else if (!this.estimatedPrice) msg = '不提供跨城服务，请重新选择地址';
-        this.alert(msg);
+        if (!this.addrData.sender.show) {
+          msg = '请选择寄件地址';
+        } else if (!this.addrData.receiver.show) {
+          msg = '请选择收件地址';
+        } else if (!this.selData.date) {
+          msg = '请选择寄件时间';
+        } else if (!this.selData.name) {
+          msg = '请选择物品名称';
+        } else if (!this.selData.weight) {
+          msg = '请选择物品重量';
+        } else if (!this.estimatedPrice) {
+          this.getErrandPrice();
+        }
+        if (msg) {
+          this.alert(msg);
+        }
       }
     },
   },

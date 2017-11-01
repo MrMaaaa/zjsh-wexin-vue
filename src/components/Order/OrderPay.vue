@@ -376,7 +376,7 @@ export default {
       })).then(res => {
         this.isLoading = false;
         if(res.data.Meta.ErrorCode === '0') {
-          this.alert('支付成功', () => {
+          this.alert(this.ALERT_MSG.PAY_SUCCESS, () => {
             this.routeTo({
               name: 'order_pay_status',
               query: {
@@ -421,14 +421,16 @@ export default {
               },
               function(wx_res) {
                 if (wx_res.err_msg == "get_brand_wcpay_request:ok") {
-                  that.routeTo({
-                    name: 'order_pay_status',
-                    query: {
-                      id: that.orderId,
-                      type: '1',
-                      money: Number(price) + Number(balance),
-                    }
-                  }, true);
+                  that.alert(that.ALERT_MSG.PAY_SUCCESS, () => {
+                    that.routeTo({
+                      name: 'order_pay_status',
+                      query: {
+                        id: that.orderId,
+                        type: '1',
+                        money: Number(price) + Number(balance),
+                      }
+                    }, true);
+                  });
                 } else if (wx_res.err_msg == "get_brand_wcpay_request:cancel" || wx_res.err_msg == "get_brand_wcpay_request:fail") {
                   that.alert(that.ALERT_MSG.PAY_ERROR);
                 } else {
