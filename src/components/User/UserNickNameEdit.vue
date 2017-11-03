@@ -1,7 +1,7 @@
 <template>
 <div>
   <section class="name-input flex-row">
-    <span class="name">昵称</span><input class="input" ref="input" type="text" v-model="newNickName" placeholder="10个字符以内，支持中英文、数字"><img class="input-clr" @click="inputClear" src="../../assets/images/input_delete.png">
+    <span class="name">昵称</span><input class="input" ref="input" type="text" maxlength="10" v-model="newNickName" placeholder="10个字符以内，支持中英文、数字"><img class="input-clr" @click="inputClear" src="../../assets/images/input_delete.png">
   </section>
   <a class="btn" @click="updateNickName">保存修改</a>
 </div>

@@ -47,6 +47,7 @@ export default {
     this.orderId = this.$route.params.orderId;
     this.isLoading = true;
     this.selectedIndex = -1;
+    this.customReason = '';
     this.getReasonList();
   },
   methods: {
@@ -62,7 +63,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
     switchReason(item, index) {
@@ -92,7 +93,7 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.WARN_INFO.NET_ERROR : err.message);
+        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },
   },

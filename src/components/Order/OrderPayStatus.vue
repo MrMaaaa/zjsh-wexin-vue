@@ -69,7 +69,6 @@ export default {
         OrderId: this.orderId,
       })).then(res => {
         this.isLoading = false;
-        this.bgLoading = '2';
         if (res.data.Meta.ErrorCode === '0') {
           this.orderInfo = res.data.Body.Order;
 
@@ -88,8 +87,6 @@ export default {
         }
       }).catch(err => {
         this.isLoading = false;
-        this.txtLoading = '';
-        this.bgLoading = '2';
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
       });
     },

@@ -12,7 +12,7 @@
 
     <section class="super-discount" v-if="superDiscountList.Items.length > 0">
       <header class="discount-title">{{ superDiscountList.Title }}</header>
-      <div>
+      <!-- <div>
         <swiper :options="swiperOption" ref="mySwiper">
           <swiper-slide class="slide-item" @click.native="gotoOrderPlace(item)" :key="item.ServiceId" v-for="item in superDiscountList.Items">
             <img class="swiper-icon" :src="item.IconUrl">
@@ -27,7 +27,18 @@
           </swiper-slide>
           <div class="swiper-pagination" slot="pagination"></div>
         </swiper>
-      </div>
+      </div> -->
+      <ul class="discount-list flex-row">
+        <li class="list-item" v-for="item in superDiscountList.Items" @click="gotoOrderPlace(item)">
+          <header class="item-intro">
+            <img class="item-img" :src="item.IconUrl">
+            <p class="item-price">￥{{ item.SuperDiscountItem.Amount }}</p>
+          </header>
+          <div class="item-discount-desc">
+            <span class="desc-item" v-for="list in item.SuperDiscountItem.DiscountContent">{{ list }}</span>
+          </div>
+        </li>
+      </ul>
     </section>
 
     <section class="category clearning" :style="{ 'padding-bottom': recommend.ServiceId == '1' ? 0 : '1.173333rem'}" v-for="recommend in recommendList">
@@ -68,8 +79,8 @@ import { mapState } from 'vuex';
 import API from '../../config/backend';
 import axios from 'axios';
 import qs from 'qs';
-import { swiper, swiperSlide } from 'vue-awesome-swiper';
-require('swiper/dist/css/swiper.css');
+// import { swiper, swiperSlide } from 'vue-awesome-swiper';
+// require('swiper/dist/css/swiper.css');
 
 export default {
   name: 'index',
@@ -209,22 +220,22 @@ export default {
       })).then(res => {
         this.superDiscountList.Items.splice(0);
         if (res.data.Meta.ErrorCode === '0') {
-          let list = res.data.Body;
-          list.Items.forEach((value, index) => {
-            var type = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '2' : '';
-            var source = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '.jpg' : '.png';
-            value.IconUrl = require('../../../assets/static/images/super_discount' + type + '_' + index + source);
-          });
+          // let list = res.data.Body;
+          // list.Items.forEach((value, index) => {
+          //   var type = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '2' : '';
+          //   var source = (this.appName == 'name-tcjz' || this.appName == 'name-zjsh' || this.appName == 'name-ccjz') ? '.jpg' : '.png';
+          //   value.IconUrl = require('../../../assets/static/images/super_discount' + type + '_' + index + source);
+          // });
           // this.superDiscountList.Title = list.Title;
-          this.superDiscountList.Title = '最优惠';
-          list.Items.forEach((value, index) => {
-            if(value.ServiceName == '小时工') {
-              value.ServiceName += '3小时';
-            }
-            if(value.SuperDiscountItem.DiscountContent.length >= 0) {
-              this.superDiscountList.Items.push(value);
-            }
-          });
+          this.superDiscountList = res.data.Body;
+          // list.Items.forEach((value, index) => {
+          //   if(value.ServiceName == '小时工') {
+          //     value.ServiceName += '3小时';
+          //   }
+          //   if(value.SuperDiscountItem.DiscountContent.length >= 0) {
+          //     this.superDiscountList.Items.push(value);
+          //   }
+          // });
         }
       }).catch(err => {
         this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
@@ -290,10 +301,10 @@ export default {
       return this.$refs.mySwiper.swiper;
     }
   },
-  components: {
-    swiper,
-    swiperSlide
-  },
+  // components: {
+  //   swiper,
+  //   swiperSlide
+  // },
 }
 </script>
 
@@ -385,26 +396,25 @@ export default {
 }
 .super-discount
 {
-  -webkit-order: 1;
-  order: 1;
+  -webkit-order: 2;
+  order: 2;
   width: 100%;
-  margin-top: 0.266667rem;
+  margin: 0.266667rem 0 0;
   background-color: #fff;
   text-align: center;
   .discount-title
   {
     position: relative;
     display: inline-block;
-    height: 1.173333rem;
-    line-height: 1.173333rem;
-    margin: 0 auto;
+    line-height: 100%;
+    margin: 0.426667rem auto 0.066667rem;
     color: #000;
     font-size: 17px;
     &::before
     {
       content: '';
       position: absolute;
-      top: 0.586667rem;
+      top: 50%;
       left: -1.466667rem;
       display: block;
       width: 1.2rem;
@@ -415,7 +425,7 @@ export default {
     {
       content: '';
       position: absolute;
-      top: 0.586667rem;
+      top: 50%;
       right: -1.466667rem;
       display: block;
       width: 1.2rem;
@@ -423,82 +433,154 @@ export default {
       background-color: #eef2f5;
     }
   }
-  .slide-item
+  // .slide-item
+  // {
+  //   position: relative;
+  //   .slide-item-slot
+  //   {
+  //     position: absolute;
+  //     top: 0.466667rem;
+  //     left: 0.653333rem;
+  //     width: 55%;
+  //     color: #333639;
+  //     text-align: left;
+  //     .info-icon
+  //     {
+  //       width: 0.266667rem;
+  //       height: 0.266667rem;
+  //       margin-right: 0.106667rem;
+  //     }
+  //     .slot-title
+  //     {
+  //       display: block;
+  //       line-height: 100%;
+  //       font-size: 18px;
+  //     }
+  //     .slot-price
+  //     {
+  //       display: block;
+  //       line-height: 100%;
+  //       margin-top: 0.2rem;
+  //       color: #F56165;
+  //       font-size: 18px;
+  //       .price-symbol
+  //       {
+  //         display: inline-block;
+  //         line-height: 100%;
+  //         padding: 0.02rem 0;
+  //         font-size: 12px;
+  //         margin-left: 0.2rem;
+  //         vertical-align: bottom;
+  //       }
+  //       .price-slogon
+  //       {
+  //         display: inline-block;
+  //         height: 0.44rem;
+  //         padding: 0 0.15rem;
+  //         border-radius: 0.22rem;
+  //         background-color: #F56165;
+  //         color: #fff;
+  //         font-size: 10px;
+  //         vertical-align: middle;
+  //       }
+  //       .price-amount
+  //       {
+  //         line-height: 100%;
+  //         vertical-align: middle;
+  //       }
+  //     }
+  //     .slot-discount-info
+  //     {
+  //       width: 100%;
+  //       min-height: 1rem;
+  //       margin-top: 0.2rem;
+  //       color: #999;
+  //       font-size: 10px;
+  //       .info-item
+  //       {
+  //         display: block;
+  //         width: 100%;
+  //       }
+  //     }
+  //   }
+  //   .swiper-icon
+  //   {
+  //     box-sizing: border-box;
+  //     display: block;
+  //     width: 100%;
+  //     padding: 0 0.32rem 0.426667rem;
+  //   }
+  // }
+  .discount-list
   {
-    position: relative;
-    .slide-item-slot
+    -webkit-align-items: initial;
+    align-items: initial;
+    padding: 0 0.293333rem;
+    .list-item
     {
-      position: absolute;
-      top: 0.466667rem;
-      left: 0.653333rem;
-      width: 55%;
-      color: #333639;
-      text-align: left;
-      .info-icon
+      width: 100%;
+      &:not(:first-child)
       {
-        width: 0.266667rem;
-        height: 0.266667rem;
-        margin-right: 0.106667rem;
+        margin-left: 0.106667rem;
       }
-      .slot-title
+      .item-intro
       {
-        display: block;
-        line-height: 100%;
-        font-size: 18px;
-      }
-      .slot-price
-      {
-        display: block;
-        line-height: 100%;
-        margin-top: 0.2rem;
-        color: #F56165;
-        font-size: 18px;
-        .price-symbol
-        {
-          display: inline-block;
-          line-height: 100%;
-          padding: 0.02rem 0;
-          font-size: 12px;
-          margin-left: 0.2rem;
-          vertical-align: bottom;
-        }
-        .price-slogon
-        {
-          display: inline-block;
-          height: 0.44rem;
-          padding: 0 0.15rem;
-          border-radius: 0.22rem;
-          background-color: #F56165;
-          color: #fff;
-          font-size: 10px;
-          vertical-align: middle;
-        }
-        .price-amount
-        {
-          line-height: 100%;
-          vertical-align: middle;
-        }
-      }
-      .slot-discount-info
-      {
-        width: 100%;
-        min-height: 1rem;
-        margin-top: 0.2rem;
-        color: #999;
-        font-size: 10px;
-        .info-item
+        position: relative;
+        .item-img
         {
           display: block;
           width: 100%;
         }
+        .item-price
+        {
+          position: absolute;
+          right: 0;
+          bottom: 0;
+          height: 0.533333rem;
+          line-height: 0.533333rem;
+          padding: 0 0.2rem 0 0.4rem;
+          border-top-left-radius: 0.266667rem;
+          border-bottom-left-radius: 0.266667rem;
+          border-bottom-right-radius: 0.106667rem;
+          background: #f56165;
+          background: -webkit-linear-gradient(to right, #f56165, #f1a26e);
+          background: linear-gradient(to right, #f56165, #f1a26e);
+          color: #fff;
+          font-size: 11px;
+          &::before
+          {
+            content: '优惠后';
+            font-size: 9px;
+          }
+        }
       }
-    }
-    .swiper-icon
-    {
-      box-sizing: border-box;
-      display: block;
-      width: 100%;
-      padding: 0 0.32rem 0.426667rem;
+      .item-discount-desc
+      {
+        padding: 0.213333rem 0.106667rem 0.333333rem 0.106667rem;
+        text-align: left;
+        .desc-item
+        {
+          display: block;
+          color: #666;
+          font-size: 10px;
+          vertical-align: middle;
+          &::before
+          {
+            content: '';
+            display: inline-block;
+            width: 0.266667rem;
+            height: 0.266667rem;
+            margin-right: 0.106667rem;
+            background: url(../../assets/images/orders_pitch_on.png) no-repeat;
+            background-size: 100% 100%;
+            vertical-align: middle;
+          }
+          &:not(:first-child)
+          {
+            margin-top: 0.173333rem;
+          }
+        }
+      }
     }
   }
 }
@@ -626,35 +708,6 @@ export default {
         {
           background: transparent;
         }
-      }
-    }
-  }
-  .super-discount
-  {
-    -webkit-order: 1;
-    order: 1;
-    width: 100%;
-    margin-top: 0.266667rem;
-    background-color: #fff;
-    text-align: center;
-    .discount-title
-    {
-      // height: 1.173333rem;
-      // line-height: 1.173333rem;
-      height: auto;
-      line-height: 100%;
-      padding-top: 0.32rem;
-      padding-bottom: 0.173333rem;
-    }
-    .slide-item
-    {
-      position: relative;
-      .swiper-icon
-      {
-        box-sizing: border-box;
-        display: block;
-        width: 100%;
-        padding: 0 0.32rem 0.213333rem;
       }
     }
   }
@@ -845,33 +898,6 @@ export default {
 // 曹操家政样式
 .menu-router-view .index-wrapper.name-ccjz
 {
-  .super-discount
-  {
-    width: 100%;
-    background-color: #fff;
-    text-align: center;
-    .discount-title
-    {
-      // height: 1.173333rem;
-      // line-height: 1.173333rem;
-      height: auto;
-      line-height: 100%;
-      padding-top: 0.32rem;
-      padding-bottom: 0.173333rem;
-    }
-    .slide-item
-    {
-      position: relative;
-      .swiper-icon
-      {
-        box-sizing: border-box;
-        display: block;
-        width: 100%;
-        padding: 0 0.32rem 0.213333rem;
-      }
-    }
-
-  }
   .shortcut
   {
     -webkit-order: 1;

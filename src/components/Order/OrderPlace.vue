@@ -214,7 +214,7 @@ export default {
       },
       isLoading: true,
       bgLoading: '1',
-      txtLoading: '正在获取服务信息…',
+      txtLoading: '正在获取服务信息……',
     }
   },
   activated() {
