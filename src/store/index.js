@@ -194,7 +194,11 @@ export default new Vuex.Store({
     },
     SetCurrentPosition(state, data = '') {
       Common.setCookie('ZJSH_WX_Position', encodeURIComponent(JSON.stringify(data)), 30, '/');
-      return state.CurrentPosition = data;
+      if(data && data.Longitude && data.Latitude) {
+        state.CurrentPosition.Longitude = data.Longitude || '';
+        state.CurrentPosition.Latitude = data.Latitude || '';
+      }
+      return state.CurrentPosition;
     },
     SetIsLogin(state, data = '0') {
       return state.IsLogin = data;

@@ -271,8 +271,8 @@ export default {
       this.txtLoading = '正在获取服务信息……';
       axios.post(API.QueryServicePrice, qs.stringify({
         ServiceId: this.serviceId,
-        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
-        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : this.CurrentPosition.Longitude || '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : this.CurrentPosition.Latitude || '',
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -314,8 +314,8 @@ export default {
       axios.post(API.QueryActivityCommonServicePrice, qs.stringify({
         Token: this.Token,
         ActivityProductId: this.serviceId,
-        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
-        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : this.CurrentPosition.Longitude || '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : this.CurrentPosition.Latitude || '',
       })).then(res => {
         this.isLoading = false;
         this.txtLoading = '';
@@ -359,8 +359,8 @@ export default {
       axios.post(API.GetActivityEx, qs.stringify({
         Token: this.Token,
         ServiceId: this.OrderInfo.FourServiceId,
-        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : '',
-        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : '',
+        Longitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lng || '' : this.CurrentPosition.Longitude || '',
+        Latitude: this.OrderInfo.Address ? this.OrderInfo.Address.Address1Lat || '' : this.CurrentPosition.Latitude || '',
       })).then(res => {
         if (res.data.Meta.ErrorCode === '0') {
           // 活动信息清洗
@@ -619,7 +619,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
+    ...mapState(['Token', 'OpenId', 'IsLogin', 'AppName', 'CurrentPosition', 'OrderFrom', 'OrderInfo', 'CouponSelected', 'DefaultAddressId', 'ALERT_MSG']),
     // 总价
     totalPrice() {
       return Number(this.unitPrice) * Number(this.OrderInfo.Amount);
