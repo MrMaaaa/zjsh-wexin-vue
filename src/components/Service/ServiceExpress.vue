@@ -408,6 +408,14 @@ export default {
         this.addrData.sender.lng = addr.Address1Lng;
         this.addrData.sender.lat = addr.Address1Lat;
         this.addrData.sender.id = addr.Id;
+        if(this.addrData.receiver.id == this.addrData.sender.id) {
+          this.addrData.receiver.name = addr.Contact;
+          this.addrData.receiver.phone = addr.PhoneNumber;
+          this.addrData.receiver.addr = addr.Address1 + addr.Address2;
+          this.addrData.receiver.lng = addr.Address1Lng;
+          this.addrData.receiver.lat = addr.Address1Lat;
+          this.addrData.receiver.id = addr.Id;
+        }
       } else if (this.addrFlag == '2' && addr.Id) {
         this.addrData.receiver.show = true;
         this.addrData.receiver.name = addr.Contact;
@@ -416,8 +424,19 @@ export default {
         this.addrData.receiver.lng = addr.Address1Lng;
         this.addrData.receiver.lat = addr.Address1Lat;
         this.addrData.receiver.id = addr.Id;
+        if(this.addrData.sender.id == addr.Id) {
+          this.addrData.sender.name = addr.Contact;
+          this.addrData.sender.phone = addr.PhoneNumber;
+          this.addrData.sender.addr = addr.Address1 + addr.Address2;
+          this.addrData.sender.lng = addr.Address1Lng;
+          this.addrData.sender.lat = addr.Address1Lat;
+          this.addrData.sender.id = addr.Id;
+        }
       }
-      if (addr.Id) {
+      if(this.addrData.sender.id == this.addrData.receiver.id) {
+        this.estimatedPrice = '';
+        this.alert('地址相同！请新增一个地址');
+      } else if (addr.Id) {
         // 向百度发起jsonp请求
         let body = document.getElementsByTagName('body')[0];
         let script = document.createElement('script');
@@ -472,7 +491,7 @@ export default {
       }
     },
     submitOrder() {
-      if (this.selData.date != '' && this.selData.name != '' && this.selData.weight != '' && this.selData.way != '' && this.addrData.sender.show && this.addrData.receiver.show) {
+      if (this.selData.date != '' && this.selData.name != '' && this.selData.weight != '' && this.selData.way != '' && this.addrData.sender.show && this.addrData.receiver.show && this.addrData.sender.id != this.addrData.receiver.id) {
         this.isLoading = true;
         axios.post(API.CreateKdEOrder, qs.stringify({
           Token: this.Token,
@@ -486,15 +505,14 @@ export default {
         })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
-            this.alert('订单已提交，快递员将在2小时内上门取件', 1000);
-            setTimeout(() => {
+            this.alert('订单已提交，快递员将在2小时内上门取件', 1000, () => {
               this.$router.push({
                 name: 'express_order_detail',
                 params: {
                   orderId: res.data.Body.OrderId
                 }
               });
-            }, 1000);
+            });
           } else {
             this.alert(res.data.Meta.ErrorMsg);
           }
@@ -510,6 +528,7 @@ export default {
         else if (this.selData.name == '') msg = '请选择物品名称';
         else if (this.selData.weight == '') msg = '请选择物品重量';
         else if (this.selData.way == '') msg = '请选择付款方式';
+        else if (this.addrData.sender.id == this.addrData.receiver.id) msg = '地址相同！请新增一个地址';
         this.alert(msg);
       }
     },

@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="router-view">
   <div class="address-sel">
     <div class="address-item flex-row address-send" @click="selectAddress(1)">
       <div>
@@ -230,7 +230,7 @@ export default {
       },
       nameFlag: '-1', //选中的物品名称的index（非自定义）
       addrFlag: '0', //地址类型： 0 无；1 寄件地址；2 收件地址
-      estimatedPrice: '0',
+      estimatedPrice: '',
       isLoading: false,
     }
   },
@@ -442,6 +442,14 @@ export default {
         this.addrData.sender.lng = addr.Address1Lng;
         this.addrData.sender.lat = addr.Address1Lat;
         this.addrData.sender.id = addr.Id;
+        if(this.addrData.receiver.id == this.addrData.sender.id) {
+          this.addrData.receiver.name = addr.Contact;
+          this.addrData.receiver.phone = addr.PhoneNumber;
+          this.addrData.receiver.addr = addr.Address1 + addr.Address2;
+          this.addrData.receiver.lng = addr.Address1Lng;
+          this.addrData.receiver.lat = addr.Address1Lat;
+          this.addrData.receiver.id = addr.Id;
+        }
       } else if (this.addrFlag == '2' && addr.Id) {
         this.addrData.receiver.show = true;
         this.addrData.receiver.name = addr.Contact;
@@ -450,11 +458,25 @@ export default {
         this.addrData.receiver.lng = addr.Address1Lng;
         this.addrData.receiver.lat = addr.Address1Lat;
         this.addrData.receiver.id = addr.Id;
+        if(this.addrData.sender.id == addr.Id) {
+          this.addrData.sender.name = addr.Contact;
+          this.addrData.sender.phone = addr.PhoneNumber;
+          this.addrData.sender.addr = addr.Address1 + addr.Address2;
+          this.addrData.sender.lng = addr.Address1Lng;
+          this.addrData.sender.lat = addr.Address1Lat;
+          this.addrData.sender.id = addr.Id;
+        }
       }
-      this.getErrandPrice();
+      if (this.addrData.sender.id === this.addrData.receiver.id) {
+        this.alert('地址相同！请新增一个地址');
+      } else {
+        this.getErrandPrice();
+      }
     },
     getErrandPrice() {
-      if (this.addrData.sender.show && this.addrData.receiver.show && this.selData.date) {
+      if (this.addrData.sender.id === this.addrData.receiver.id) {
+        this.alert('地址相同！请新增一个地址');
+      } else if (this.addrData.sender.show && this.addrData.receiver.show && this.selData.date) {
         this.isLoading = true;
         this.estimatedPrice = '';
         axios.post(API.GetPaoTuiPrice, qs.stringify({
@@ -474,10 +496,6 @@ export default {
           this.isLoading = false;
           this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
         });
-      } else if (!this.addrData.sender.show) {
-        msg = '请选择寄件地址';
-      } else if (!this.addrData.receiver.show) {
-        msg = '请选择收件地址';
       }
     },
     submitOrder() {
@@ -498,13 +516,11 @@ export default {
         })).then(res => {
           this.isLoading = false;
           if (res.data.Meta.ErrorCode == '0') {
-            this.alert('订单已提交', () => {
-              this.$router.push({
-                name: 'order_pay',
-                params: {
-                  orderId: res.data.Body.OrderId
-                }
-              });
+            this.$router.push({
+              name: 'order_pay',
+              params: {
+                orderId: res.data.Body.OrderId
+              }
             });
           } else {
             this.alert(res.data.Meta.ErrorMsg);
@@ -541,6 +557,11 @@ export default {
 </script>
 
 <style scoped>
+.router-view
+{
+  box-sizing: border-box;
+  padding-bottom: 3rem;
+}
 .address-sel
 {
   background-color: #fff;
