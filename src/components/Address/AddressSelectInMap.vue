@@ -180,8 +180,10 @@ export default {
           if(local.getStatus() == BMAP_STATUS_SUCCESS) {
             for(let i = 0; i < results.getCurrentNumPois(); i++) {
               let addr = results.getPoi(i);
-              addr.address = that.fixAddress(addr.address, addr.city, addr.province);
-              that.inputResult.push(addr);
+              if(addr.city && addr.province) {
+                addr.address = that.fixAddress(addr.address, addr.city, addr.province);
+                that.inputResult.push(addr);
+              }
             }
           }
         }

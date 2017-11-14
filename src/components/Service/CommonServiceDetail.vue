@@ -290,7 +290,7 @@ export default {
   },
   filters: {
     formatDeposit(str) {
-      return str ? str + '元' : '/';
+      return str ? str + '元起' : '/';
     }
   }
 }

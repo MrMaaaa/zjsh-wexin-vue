@@ -499,7 +499,7 @@ export default {
           ReceiverAddressId: this.addrData.receiver.id,
           GoodsName: this.selData.name,
           PayType: this.selData.way,
-          OrderFrom: '210',
+          OrderFrom: this.OrderFrom,
           ServiceTime: this.selData.date,
           GoodsWeight: this.selData.weight
         })).then(res => {
@@ -534,7 +534,7 @@ export default {
     },
   },
   computed: {
-    ...mapState(['Token', 'IsLogin', 'SelectedAddress', 'ALERT_MSG']),
+    ...mapState(['Token', 'OrderFrom', 'IsLogin', 'SelectedAddress', 'ALERT_MSG']),
   }
 }
 </script>
