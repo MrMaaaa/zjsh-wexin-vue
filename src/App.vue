@@ -5,84 +5,60 @@
       <router-view class="router-view"></router-view>
     </keep-alive>
     <!-- </transition> -->
-
-    <div class="new-user-coupon" v-if="isShowNewUserCoupon === '1'">
-      <div class="wrapper"></div>
-
-      <div class="coupon">
-        <img class="img-coupon" @click="routerToNewUser" src="./assets/images/bg_detail.png">
-
-        <img class="btn-close" @click="isShowNewUserCoupon = '0'" src="./assets/images/coupon_close.png">
-      </div>
-    </div>
-
-    <warn-info :warn-msg="AlertCfg.Msg" :timeout="AlertCfg.Timout" :callback="AlertCfg.Callback" :is-warn="AlertCfg.Status"></warn-info>
-
-    <m-login id="module_login"></m-login>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import MLogin from './components/Plugs/m-login.vue';
-import API from './config/backend';
 import axios from 'axios';
-import qs from 'qs';
-import Common from './config/common';
+import Utils from './config/utils.js';
 
 export default {
   name: 'app',
   data() {
     return {
-      title: '',
-      isShowNewUserCoupon: '0',
     }
   },
   created() {
-    document.querySelector('body').addEventListener('touchmove', function(e) {
-      if (!document.querySelector('#app').contains(e.target)) {
-        e.preventDefault();
-      }
-    });
-
     this.getPosition();
     this.getAppName();
 
     // 如果是微信浏览器下跳转到微信页面
-    if(!this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
+    if(!Utils.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
       window.location.replace('https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=' + encodeURIComponent(window.location.href) + '&response_type=code&scope=snsapi_base#wechat_redirect');
     }
 
-    if(this.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
+    if(Utils.valueFromUrl('code') && navigator.userAgent.toLowerCase().match(/MicroMessenger/i) == "micromessenger") {
       // this.wxConfig();
       // 为了防止页面刷新导致openid丢失，需要保存起来，有效期1天
-      if (this.OpenId == '') {
-        this.$store.commit('SetOpenId', Common.getCookie('ZJSH_WX_OpenId'));
+      if (this.OpenId === '') {
+        this.$store.commit('SetOpenId', Utils.read('ZJSH_WX_OpenId'));
       }
     }
 
     // 从缓存中获取数据
-    this.$store.commit('SetToken', Common.getCookie('ZJSH_WX_Token'));
-    this.$store.commit('SetUserId', Common.getCookie('ZJSH_WX_UserId'));
-    this.$store.commit('SetDefaultAddressId', Common.getCookie('ZJSH_WX_DefaultAddressId'));
+    this.$store.commit('SetToken', Utils.read('ZJSH_WX_Token'));
+    this.$store.commit('SetUserId', Utils.read('ZJSH_WX_UserId'));
+    this.$store.commit('SetDefaultAddressId', Utils.read('ZJSH_WX_DefaultAddressId'));
 
     // 设置全局请求头
     axios.defaults.headers.common['zjsh_version'] = this.zjsh_version;
     axios.defaults.headers.common['Content-Type'] = 'application/x-www-form-urlencoded';
-    axios.defaults.timeout = '30000'; // 设置超时时间
+    axios.defaults.timeout = 30000; // 设置超时时间
 
     // 设置拦截器，当接口返回2004时打开登录
     axios.interceptors.response.use(response => {
-      if (JSON.parse(response.request.response).Meta.ErrorCode === "2004") {
-        this.$store.commit('SetIsLogin', '0');
-        this.$store.commit('SetToken', '');
-        this.$store.commit('SetUserId', '');
-        this.$store.commit('SetDefaultAddressId', '');
-        this.$store.commit('SetCurrentPosition', '');
-
-        // 过滤掉不需要打开登录的页面
-        if (this.interceptorsExceptList.indexOf(' ' + this.$route.name + ' ') == -1) {
-          this.openLogin();
+      if (JSON.parse(response.request.response).Meta.ErrorCode === '2004') {
+        this.$store.dispatch('Logout');
+        // 如果上一个路径不是登录,则在接口返回2004进入登录页面
+        if (this.AutoToLogin === '1' && ' black_friday sf_activity qianneizhu one_recharge one_recharge_index one_recharge_order user index activity service_detail new_user_coupon express errand user_about user_connect_us '.indexOf(' ' + this.$route.name + ' ') === -1) {
+          this.$store.commit('SetAutoToLogin', '0');
+          this.$router.push({
+            name: 'login'
+          });
+        } else if(this.$route.name !== 'login') {
+          // 无需跳转则AutoToLogin重置为1
+          this.$store.commit('SetAutoToLogin', '1');
         }
       }
       return response;
@@ -95,15 +71,16 @@ export default {
   },
   mounted() {
     if (window.parent === window.self) {
-      if (this.valueFromUrl('code')) {
-        this.getOpenId();
+      let code = Utils.valueFromUrl('code');
+      if (code !== '') {
+        this.getOpenId(code);
       }
     }
 
-    window.handleAppPushEvent = (data) => {
+    window.handleAppPushEvent = data => {
       let j = data;
       if (j) {
-        this.isShowNewUserCoupon = '0';
+        this.isOpenBanner = '0';
         alert(j);
         j = JSON.parse(j);
         if (j.Type == '0') {} else if (j.Type == '1') {
@@ -158,49 +135,33 @@ export default {
     }
   },
   methods: {
-    valueFromUrl(key) {
-      var url = window.location.search;
-      var reg = new RegExp("(^|&)" + key + "=([^&]*)(&|$)");
-      var result = url.substr(1).match(reg);
-      return result ? decodeURIComponent(result[2]) : null;
-    },
-    getOpenId() {
-      // 从url中提取code
-      let code = this.valueFromUrl('code');
-      axios.post(API.GetWxpayOpenId, qs.stringify({
-        Token: this.Token,
-        WxCode: code,
-      })).then(res => {
-        if (res.data.Meta.ErrorCode === '0') {
-          this.$store.commit('SetOpenId', res.data.Body.OpenId);
-        } else {
-          // res.data.Meta.ErrorCode != '2004' && this.alert(res.data.Meta.ErrorMsg);
-        }
-      }).catch(err => {
-        this.alert(this.$store.state.IS_DEBUG === '0' ? this.ALERT_MSG.NET_ERROR : err.message);
-      });
+    getOpenId(WxCode) {
+      this.$store.dispatch('GetWxpayOpenId', {
+          WxCode
+        })
+        .then(res => {})
+        .catch(err => {});
     },
     getPosition() {
-      if(Common.getCookie('ZJSH_WX_Position')) {
-        this.$store.commit('SetCurrentPosition', JSON.parse(decodeURIComponent(Common.getCookie('ZJSH_WX_Position'))));
+      if (Utils.read('ZJSH_WX_Position')) {
+        this.$store.commit('SetCurrentPosition', JSON.parse(decodeURIComponent(Utils.read('ZJSH_WX_Position'))));
       }
-      let that = this;
       var geolocation = new BMap.Geolocation();
-      geolocation.getCurrentPosition(function(result) {
-        if (this.getStatus() == BMAP_STATUS_SUCCESS) {
-          that.$store.commit('SetCurrentPosition', {
+      geolocation.getCurrentPosition(result => {
+        if (geolocation.getStatus() == window.BMAP_STATUS_SUCCESS) {
+          this.$store.commit('SetCurrentPosition', {
             Longitude: result.point.lng,
             Latitude: result.point.lat,
           });
         } else {
-          that.alert(that.ALERT_MSG.POSITION_ERROR);
+          this.$alert(this.ALERT_MSG.POSITION_ERROR);
         }
       }, {
         enableHighAccuracy: true
       });
     },
     getAppName() {
-      let name = this.valueFromUrl('utm_term') || '助家生活';
+      let name = Utils.valueFromUrl('utm_term') || '助家生活';
       name = decodeURIComponent(name);
       var titles = this.$store.state.ROUTER_TO_TITLE;
       titles['index'] = name;
@@ -210,23 +171,21 @@ export default {
       this.$store.commit('SetOrderFrom', name);
     },
     verifyToken() {
-      axios.post(API.VerifyToken, qs.stringify({
-        Token: this.Token,
-      })).then(res => {
-        if (res.data.Meta.ErrorCode === '0') {
+      this.$store.dispatch('VerifyToken')
+        .then(res => {
           this.getAppDeviceId();
           this.$store.commit('SetIsLogin', '1');
           this.saveUserInfo();
-        } else {
-          if((this.$route.name == 'index' || this.$route.name == 'service_detail' || this.$route.name == 'errand' || this.$route.name == 'express') && !document.getElementById('module_login').classList.contains('active')) {
-            this.isShowNewUserCoupon = '1';
+        })
+        .catch(err => {
+          if ((this.$route.name === 'index' || this.$route.name == 'service_detail' || this.$route.name === 'errand' || this.$route.name === 'express')) {
+            this.isOpenBanner = '1';
           }
-        }
-      });
+        });
     },
     getAppDeviceId() {
       var that = this;
-      if (browser.versions.iPhone || browser.versions.iPad || browser.versions.ios) {
+      if (this.IsIos) {
         function setupWebViewJavascriptBridge(callback) {
           if (window.WebViewJavascriptBridge) {
             return callback(WebViewJavascriptBridge);
@@ -243,27 +202,23 @@ export default {
             document.documentElement.removeChild(WVJBIframe)
           }, 0)
         }
-        setupWebViewJavascriptBridge(function(bridge) {
+        setupWebViewJavascriptBridge(bridge => {
           bridge.callHandler('iosGetAppDeviceId',
-            function(response) {
-              axios.post(API.UpdatePushDeviceID, qs.stringify({
-                PushDeviceId: response,
-                DeviceType: that.OrderFrom,
-                Token: that.Token,
-              })).then(res => {}).catch(err => {});
+            PushDeviceId => {
+              this.$store.dispatch('UpdatePushDeviceID', {
+                  PushDeviceId
+                })
+                .then(res => {})
+                .catch(err => {});
             }
           );
         });
       }
     },
     saveUserInfo() {
-      axios.post(API.GetUserInfo, qs.stringify({
-        Token: this.Token
-      })).then(res => {
-        if (res.data.Meta.ErrorCode === '0') {
-          this.$store.commit('SetUserInfo', res.data.Body.Info);
-        }
-      });
+      this.$store.dispatch('GetUserInfo')
+        .then(res => {})
+        .catch(err => {});
     },
     wxConfig() {
       // wx.config({
@@ -286,18 +241,9 @@ export default {
       //   }
       // });
     },
-    routerToNewUser() {
-      this.isShowNewUserCoupon = '0';
-      this.$router.push({
-        name: 'new_user_coupon',
-      });
-    },
   },
   computed: {
-    ...mapState(['Token', 'OpenId', 'zjsh_version', 'interceptorsExceptList', 'OrderFrom', 'ALERT_MSG', 'AlertCfg', 'AlertCallback']),
-  },
-  components: {
-    MLogin
+    ...mapState(['Token', 'OpenId', 'AutoToLogin', 'IsIos', 'IsAndroid', 'zjsh_version', 'OrderFrom', 'ALERT_MSG']),
   },
 }
 </script>
@@ -348,72 +294,4 @@ export default {
     transform: translate3d(-100%,0,0);
   }
 }*/
-.new-user-coupon
-{
-  position: fixed;
-  top: 0;
-  left: 0;
-  transform: translateZ(0);
-  z-index: 99999;
-  width: 100%;
-  height: 100%;
-}
-.new-user-coupon .wrapper
-{
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,.6);
-}
-.new-user-coupon .coupon
-{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80%;
-  height: auto;
-}
-.new-user-coupon .coupon .img-coupon
-{
-  width: 100%;
-}
-.new-user-coupon .btn-close
-{
-  position: absolute;
-  top: -0.333333rem;
-  right: -0.333333rem;
-  width: 0.666667rem;
-  height: auto;
-}
-#module_login
-{
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 99999;
-  transform: translateZ(0) translateY(100%);
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-  transition: all .5s;
-  opacity: 0;
-}
-#module_login::after
-{
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 9999;
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-color: #fff;
-}
-#module_login.active
-{
-  transform: translateY(0);
-  opacity: 1;
-  transition: all .5s;
-}
 </style>

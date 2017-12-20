@@ -27,7 +27,7 @@ li
 {
   list-style: none;
 }
-a, button
+html, body, ul, ol, li, td, th, textarea, input, p, span, a, button, i, div, header, nav, hgroup, section, article, aside, caption, figcaption, figure, footer
 {
   outline: none;
   text-decoration: none;
@@ -35,8 +35,9 @@ a, button
   -webkit-tap-highlight-color: transparent;
   star:expression_r(this.onFocus=this.blur());
 }
-input
+input, textarea
 {
+  padding: 0;
   border: none !important;
   outline: none !important;
 }

@@ -32,6 +32,13 @@ module.exports = {
 				img: imgUrl + 'standard-xsg-6.png'
 			}]
 		],
+		suggestion: [{
+			head: '服务面积',
+			body: ['小于60m²', '60-90m²', '90-120m²']
+		}, {
+			head: '参考时长',
+			body: ['2-3小时', '3-4小时', '4小时以上']
+		}],
 		price: '',
 		process: '',
 		assurance: [{

@@ -3,53 +3,20 @@ import App from './App';
 import router from './router';
 import 'mint-ui/lib/style.css';
 import store from './store';
-// 引入需要全局注册的组件
-import WarnInfo from './components/Plugs/warn-info.vue';
-import MDialog from './components/Plugs/m-dialog.vue';
-import MLoading from './components/Plugs/m-loading.vue';
-import { Picker } from 'mint-ui'
+
+import { Picker } from 'mint-ui';
+
+import Alert from './components/common/Alert';
+import Dialog from './components/common/Dialog';
+import Loading from './components/common/Loading';
+
+Vue.prototype.$alert = Alert;
+Vue.prototype.$dialog = Dialog;
+Vue.prototype.$loading = Loading;
 
 Vue.config.productionTip = false;
 
-// 在实例化之前注册组件
-Vue.component('warn-info', WarnInfo);
-Vue.component('m-dialog', MDialog);
-Vue.component('m-loading', MLoading);
 Vue.component(Picker.name, Picker);
-
-// 全局mixin
-Vue.mixin({
-  methods: {
-    // 用于显示文本（一般用于接口的结果显示）
-    alert(alertMsg, alertTimeout=1500, alertCallback) {
-      this.$store.dispatch('SetAlertCfg', {
-        alertMsg,
-        alertTimeout: typeof alertTimeout == 'function' ? 1500 : alertTimeout,
-        alertCallback: typeof alertTimeout == 'function' ? alertTimeout : alertCallback,
-      });
-    },
-    // 弹出登录
-    openLogin(callback = null, routerName = '') {
-      this.$store.commit('SetIsOpenLogin', '1');
-      var login = document.getElementById('module_login');
-      login.setAttribute('title', document.title);
-      login.classList.add('active');
-      if (callback && typeof callback == 'function') {
-        this.$store.commit('SetLoginCallbackCfg', {
-          callback,
-          routerName
-        });
-      }
-      var WVJBIframe = document.createElement('iframe');
-      document.title = '登录';
-      WVJBIframe.style.display = 'none';
-      document.documentElement.appendChild(WVJBIframe);
-      setTimeout(function() {
-        document.documentElement.removeChild(WVJBIframe)
-      }, 0);
-    },
-  }
-});
 
 new Vue({
   el: '#app',

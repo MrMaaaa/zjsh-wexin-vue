@@ -1,85 +1,49 @@
 import Vue from 'vue';
 import Router from 'vue-router';
 
-// import Menu from '@/components/Menu';
-// import Index from '@/components/Index/Index';
-// import Activity from '@/components/Activity/Activity';
-// import AllService from '@/components/Service/AllService';
-// import ServiceDetail from '@/components/Service/CommonServiceDetail';
-// import RecommendMoreServiceDetail from '@/components/Service/CommonRecommendMoreServiceDetail';
-// import ServiceExpress from '@/components/Service/ServiceExpress';
-// import ServiceErrand from '@/components/Service/ServiceErrand';
-// import ServiceExpressDetail from '@/components/Service/ServiceExpressDetail';
-// import ServiceErrandDetail from '@/components/Service/ServiceErrandDetail';
-// import NewUserCoupon from '@/components/Activity/NewUserCoupon/NewUserCoupon';
-// import AddressAdd from '@/components/Address/AddressAdd';
-// import AddressList from '@/components/Address/AddressList';
-// import AddressEdit from '@/components/Address/AddressEdit';
-// import AddressSelectInMap from '@/components/Address/AddressSelectInMap';
-// import About from '@/components/Index/About';
-// import ConnectUs from '@/components/Index/ConnectUs';
-// import OrderList from '@/components/Order/OrderList';
-// import OrderPlace from '@/components/Order/OrderPlace';
-// import OrderDetail from '@/components/Order/OrderDetail';
-// import OrderComplaintReason from '@/components/Order/OrderComplaintReason';
-// import OrderCancelReason from '@/components/Order/OrderCancelReason';
-// import OrderPayStatus from '@/components/Order/OrderPayStatus';
-// import OrderAddPay from '@/components/Order/OrderAddPay';
-// import OrderPay from '@/components/Order/OrderPay';
-// import OrderServiceTime from '@/components/Order/OrderServiceTime';
-// import OrderCouponSelect from '@/components/Order/OrderCouponSelect';
-// import User from '@/components/User/User';
-// import UserCoupon from '@/components/User/UserCoupon';
-// import UserInfoEdit from '@/components/User/UserInfoEdit';
-// import UserBalance from '@/components/User/UserBalance';
-// import UserNickNameEdit from '@/components/User/UserNickNameEdit';
-// // 活动
-// import BlackFriday from '@/components/Activity/BlackFriday/BlackFriday';
-// import SFActivity from '@/components/Activity/SFActivity/SFActivity';
-// import QianNeiZhu from '@/components/Activity/QianNeiZhu/QianNeiZhu';
-// import OneRecharge from '@/components/Activity/OneRecharge/Introduction';
-// import OneRechargeIndex from '@/components/Activity/OneRecharge/OneRecharge';
-// import OneRechargeOrder from '@/components/Activity/OneRecharge/RechargeDetail';
-
-const Menu = () => import('@/components/Menu');
-const Index = () => import('@/components/Index/Index');
-const Activity = () => import('@/components/Activity/Activity');
-const AllService = () => import('@/components/Service/AllService');
-const ServiceDetail = () => import('@/components/Service/CommonServiceDetail');
-const RecommendMoreServiceDetail = () => import('@/components/Service/CommonRecommendMoreServiceDetail');
-const ServiceExpress = () => import('@/components/Service/ServiceExpress');
-const ServiceErrand = () => import('@/components/Service/ServiceErrand');
-const ServiceExpressDetail = () => import('@/components/Service/ServiceExpressDetail');
-const ServiceErrandDetail = () => import('@/components/Service/ServiceErrandDetail');
-const NewUserCoupon = () => import('@/components/Activity/NewUserCoupon/NewUserCoupon');
-const AddressAdd = () => import('@/components/Address/AddressAdd');
-const AddressList = () => import('@/components/Address/AddressList');
-const AddressEdit = () => import('@/components/Address/AddressEdit');
-const AddressSelectInMap = () => import('@/components/Address/AddressSelectInMap');
-const About = () => import('@/components/Index/About');
-const ConnectUs = () => import('@/components/Index/ConnectUs');
-const OrderList = () => import('@/components/Order/OrderList');
-const OrderPlace = () => import('@/components/Order/OrderPlace');
-const OrderDetail = () => import('@/components/Order/OrderDetail');
-const OrderComplaintReason = () => import('@/components/Order/OrderComplaintReason');
-const OrderCancelReason = () => import('@/components/Order/OrderCancelReason');
-const OrderPayStatus = () => import('@/components/Order/OrderPayStatus');
-const OrderAddPay = () => import('@/components/Order/OrderAddPay');
-const OrderPay = () => import('@/components/Order/OrderPay');
-const OrderServiceTime = () => import('@/components/Order/OrderServiceTime');
-const OrderCouponSelect = () => import('@/components/Order/OrderCouponSelect');
-const User = () => import('@/components/User/User');
-const UserCoupon = () => import('@/components/User/UserCoupon');
-const UserInfoEdit = () => import('@/components/User/UserInfoEdit');
-const UserBalance = () => import('@/components/User/UserBalance');
-const UserNickNameEdit = () => import('@/components/User/UserNickNameEdit');
+const Menu = () => import('@/pages/Menu');
+const Index = () => import('@/pages/Index/Index');
+const Login = () => import('@/pages/Login/Login');
+const Activity = () => import('@/pages/Activity/Activity');
+const AllService = () => import('@/pages/Service/AllService');
+const ServiceDetail = () => import('@/pages/Service/CommonServiceDetail');
+const RecommendMoreServiceDetail = () => import('@/pages/Service/CommonRecommendMoreServiceDetail');
+const ServiceExpress = () => import('@/pages/Service/ServiceExpress');
+const ServiceErrand = () => import('@/pages/Service/ServiceErrand');
+const ServiceExpressDetail = () => import('@/pages/Service/ServiceExpressDetail');
+const ServiceErrandDetail = () => import('@/pages/Service/ServiceErrandDetail');
+const NewUserCoupon = () => import('@/pages/Activity/NewUserCoupon/NewUserCoupon');
+const AddressAdd = () => import('@/pages/Address/AddressAdd');
+const AddressList = () => import('@/pages/Address/AddressList');
+const AddressEdit = () => import('@/pages/Address/AddressEdit');
+const AddressSelectInMap = () => import('@/pages/Address/AddressSelectInMap');
+const About = () => import('@/pages/Index/About');
+const ConnectUs = () => import('@/pages/Index/ConnectUs');
+const OrderList = () => import('@/pages/Order/OrderList');
+const OrderPlace = () => import('@/pages/Order/OrderPlace');
+const OrderDetail = () => import('@/pages/Order/OrderDetail');
+const OrderRechargeDetail = () => import('@/pages/Order/OrderRechargeDetail');
+const OrderComplaintReason = () => import('@/pages/Order/OrderComplaintReason');
+const OrderCancelReason = () => import('@/pages/Order/OrderCancelReason');
+const OrderPayStatus = () => import('@/pages/Order/OrderPayStatus');
+const OrderAddPay = () => import('@/pages/Order/OrderAddPay');
+const OrderPay = () => import('@/pages/Order/OrderPay');
+const OrderServiceTime = () => import('@/pages/Order/OrderServiceTime');
+const OrderSpecialDemand = () => import('@/pages/Order/OrderSpecialDemand');
+const OrderCouponSelect = () => import('@/pages/Order/OrderCouponSelect');
+const User = () => import('@/pages/User/User');
+const UserCoupon = () => import('@/pages/User/UserCoupon');
+const UserInfoEdit = () => import('@/pages/User/UserInfoEdit');
+const UserBalance = () => import('@/pages/User/UserBalance');
+const UserNickNameEdit = () => import('@/pages/User/UserNickNameEdit');
+const UserMessage = () => import('@/pages/User/UserMessage');
+const UserMessageDetail = () => import('@/pages/User/UserMessageDetail');
 // 活动
-const BlackFriday = () => import('@/components/Activity/BlackFriday/BlackFriday');
-const SFActivity = () => import('@/components/Activity/SFActivity/SFActivity');
-const QianNeiZhu = () => import('@/components/Activity/QianNeiZhu/QianNeiZhu');
-const OneRecharge = () => import('@/components/Activity/OneRecharge/Introduction');
-const OneRechargeIndex = () => import('@/components/Activity/OneRecharge/OneRecharge');
-const OneRechargeOrder = () => import('@/components/Activity/OneRecharge/RechargeDetail');
+const BlackFriday = () => import('@/pages/Activity/BlackFriday/BlackFriday');
+const SFActivity = () => import('@/pages/Activity/SFActivity/SFActivity');
+const QianNeiZhu = () => import('@/pages/Activity/QianNeiZhu/QianNeiZhu');
+const OneRecharge = () => import('@/pages/Activity/OneRecharge/Introduction');
+const OneRechargeIndex = () => import('@/pages/Activity/OneRecharge/OneRecharge');
 
 import store from '../store/index';
 
@@ -136,10 +100,6 @@ let router = new Router({
     name: 'one_recharge_index',
     component: OneRechargeIndex,
   }, {
-    path: '/activity/one_recharge/order/:out_trade_no',
-    name: 'one_recharge_order',
-    component: OneRechargeOrder,
-  }, {
     path: '/menu/index/all_service',
     name: 'all_service',
     component: AllService
@@ -152,6 +112,10 @@ let router = new Router({
     name: 'recommend_more',
     component: RecommendMoreServiceDetail
   }, {
+    path: '/login',
+    name: 'login',
+    component: Login
+  }, {
     path: '/menu/order/order_place',
     name: 'order_place',
     component: OrderPlace
@@ -159,6 +123,10 @@ let router = new Router({
     path: '/order/order_detail/:orderId',
     name: 'order_detail',
     component: OrderDetail
+  }, {
+    path: '/order/order_recharge_detail/:out_trade_no',
+    name: 'order_recharge_detail',
+    component: OrderRechargeDetail
   }, {
     path: '/order/order_complaint_reason/:orderId',
     name: 'order_complaint_reason',
@@ -183,6 +151,10 @@ let router = new Router({
     path: '/order/order_service_time',
     name: 'order_service_time',
     component: OrderServiceTime
+  }, {
+    path: '/order/order_special_demand/:serviceId',
+    name: 'order_special_demand',
+    component: OrderSpecialDemand
   }, {
     path: '/order/order_coupon_select',
     name: 'order_coupon_select',
@@ -232,6 +204,14 @@ let router = new Router({
     name: 'user_coupon',
     component: UserCoupon,
   }, {
+    path: '/user/user_message',
+    name: 'user_message',
+    component: UserMessage,
+  }, {
+    path: '/user/user_message/detail',
+    name: 'user_message_detail',
+    component: UserMessageDetail,
+  }, {
     path: '/address',
     redirect: '/address/address_list'
   }, {
@@ -264,74 +244,15 @@ let router = new Router({
 });
 
 router.beforeEach((to, from, next) => {
-  // 设置微信分享
-  // wx.config({
-  //   debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
-  //   appId: '', // 必填，公众号的唯一标识
-  //   timestamp: '', // 必填，生成签名的时间戳
-  //   nonceStr: '', // 必填，生成签名的随机串
-  //   signature: '', // 必填，签名，见附录1
-  //   jsApiList: ['onMenuShareTimeline', 'onMenuShareAppMessage', 'onMenuShareQQ', 'onMenuShareWeibo', 'onMenuShareQZone'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
-  // });
-  // // 分享到朋友圈
-  // wx.onMenuShareTimeline({
-  //   title: '我已经领取了188元红包，你还没领吗', // 分享标题
-  //   link: 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=https%3A%2F%2Fwap.zhujiash.com%2Fpaylinks%2Findex.html&response_type=code&scope=snsapi_base#wechat_redirect', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-  //   imgUrl: '', // 分享图标
-  //   success: function() {
-  //     // 用户确认分享后执行的回调函数
-  //     store.dispatch('SetAlert', {
-  //       alertMsg: '分享成功',
-  //       alertTimeout: 1000,
-  //     });
-  //   },
-  //   cancel: function() {
-  //     // 用户取消分享后执行的回调函数
-  //   }
-  // });
-  // wx.onMenuShareAppMessage({
-  //   title: '我已经领取了188元红包，你还没领吗', // 分享标题
-  //   desc: '小时工，新房开荒，家电拆洗，同城跑腿…全品类生活服务极速上门，不满意包退！', // 分享描述
-  //   link: 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxf88cbf4dba349e56&redirect_uri=https%3A%2F%2Fwap.zhujiash.com%2Fpaylinks%2Findex.html&response_type=code&scope=snsapi_base#wechat_redirect', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-  //   imgUrl: '', // 分享图标
-  //   type: '', // 分享类型,music、video或link，不填默认为link
-  //   dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
-  //   success: function() {
-  //     // 用户确认分享后执行的回调函数
-  //     store.dispatch('SetAlert', {
-  //       alertMsg: '分享成功',
-  //       alertTimeout: 1000,
-  //     });
-  //   },
-  //   cancel: function() {
-  //     // 用户取消分享后执行的回调函数
-  //   }
-  // });
   var ROUTER_TO_TITLE = store.state.ROUTER_TO_TITLE;
 
   // 对不同的路由设置不同的title
-  var login = document.getElementById('module_login');
-  if (login && login.classList.contains('active')) {
-    store.commit('SetLoginCallbackCfg', {
-      callback: null,
-      routerName: ''
-    });
-    login && login.classList.remove('active');
-    document.title = ROUTER_TO_TITLE[from.name] || ROUTER_TO_TITLE['index'];
-
-    // input失去焦点
-    let inputs = document.getElementsByTagName('input');
-    for (let i = 0; i < inputs.length; i++) {
-      inputs[i].blur();
-    }
-
-    // 阻止路由跳转
-    next(false);
-  } else if(document.querySelector('body').classList.contains('easemobim-mobile-body')) {
+  if (document.querySelector('body').classList.contains('easemobim-mobile-body')) {
     // 关闭客服窗口
     document.querySelector('html').classList.remove('easemobim-mobile-html');
     document.querySelector('body').classList.remove('easemobim-mobile-body');
     document.querySelector('iframe.easemobim-chat-panel').classList.add('easemobim-minimized');
+    document.querySelector('.easemobim-prompt-wrapper').style.display = 'none';
     next(false);
   } else {
     document.title = ROUTER_TO_TITLE[to.name] || ROUTER_TO_TITLE['index'];

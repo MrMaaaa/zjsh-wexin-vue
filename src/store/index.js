@@ -1,6 +1,10 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
-import Common from '../config/common';
+import actions from './actions';
+import {
+  read,
+  write
+} from '../config/utils.js';
 
 Vue.use(Vuex);
 
@@ -12,17 +16,23 @@ export default new Vuex.Store({
 
     IS_DEBUG: '1', // 是否开启debug模式，该模式下会显示正常报错（而不是“网络错误”），其他功能待添加
 
-    // 这个字符串中的路由的name不会被拦截器拦截
-    interceptorsExceptList: ' black_friday sf_activity qianneizhu one_recharge one_recharge_index one_recharge_order user index activity service_detail new_user_coupon express errand user_about user_connect_us ',
+    IsIos: browser.versions.iPhone || browser.versions.iPad || browser.versions.ios,
+    IsAndroid: browser.versions.android,
 
     Token: '',
     UserId: '',
-    OpenId: '',// 微信用户标识
+    OpenId: '', // 微信用户标识
+
+    // 首页小红点
+    Spots: {
+      Index: false,
+      Activity: false,
+      Order: false,
+      User: false
+    },
 
     // 环信客服发送客户数据
     UserInfo: {
-      PhoneNumber: '',
-      NickName: '',
     },
 
     // 位置信息
@@ -34,8 +44,8 @@ export default new Vuex.Store({
     // 是否登录，该属性会在登陆成功后、接口未返回2004时设为1，主动登出设为0，需要注意，由于该参数需要在verifyToken接口返回数据后才会修改，因此在某些页面中该参数将未必能及时修改状态，因此不要全部依赖该参数来进行登录状态的判断
     IsLogin: '0',
 
-    // 是否弹出登录窗口
-    IsOpenLogin: '0',
+    // 是否是自动跳转到登录页
+    AutoToLogin: '1',
 
     // 下单页选择的地址
     DefaultAddressId: '',
@@ -83,6 +93,8 @@ export default new Vuex.Store({
       Tag: ''
     },
 
+    IsLinkToLogin: true, // 是否在接口返回未登录后跳转到登录页
+
     // 错误&提示信息
     ALERT_MSG: {
       NET_ERROR: '网络连接异常，请检查您的网络',
@@ -93,6 +105,7 @@ export default new Vuex.Store({
       POSITION_ERROR: '定位失败，请开启定位或检查网络',
       CAPTCHA_EMPTY: '请输入验证码',
       ADDRESS_EMPTY: '请选择服务地址',
+      DEMAND_EMPTY: '请选择您的需求',
       DATETIME_EMPTY: '请选择服务时间',
       NAME_EMPTY: '请填写您的姓名',
       SEX_EMPTY: '请选择您的性别',
@@ -111,16 +124,19 @@ export default new Vuex.Store({
       black_friday: '超级星期五',
       sf_activity: '一字不写发快递',
       qianneizhu: '钱内助',
+      all_service: '全部分类',
       service_detail: '服务详情',
       recommend_more: '更多',
       order_place: '提交订单',
       order_detail: '订单详情',
       order_complaint_reason: '投诉理由',
       order_cancel_reason: '取消理由',
-      order_pay_status: '订单状态',
+      order_pay_status: '支付信息',
+      order_recharge_detail: '充值信息',
       order_add_pay: '增加服务',
       order_pay: '订单支付',
       order_service_time: '选择服务时间',
+      order_special_demand: '选择您的需求',
       order_coupon_select: '使用红包',
       login: '登录',
       express: '顺丰速运',
@@ -131,24 +147,12 @@ export default new Vuex.Store({
       user_about: '关于我们',
       user_connect_us: '联系我们',
       user_coupon: '我的红包',
+      user_message: '消息中心',
+      user_message_detail: '消息详情',
       address_list: '服务地址',
       address_add: '添加服务地址',
       address_edit: '修改服务地址',
       address_select: '选择你的位置',
-    },
-
-    // 全局弹框配置
-    AlertCfg: {
-      Msg: '', // 弹出信息
-      Timeout: '1000', // 弹框持续时间
-      Status: '0', // 弹框状态：0:隐藏，1:显示
-      Callback: null, // 弹框关闭回调
-    },
-
-    // 登录成功回调函数
-    LoginCallbackCfg: {
-      RouterName: '',
-      Callback: null,
     },
   },
   mutations: {
@@ -156,45 +160,38 @@ export default new Vuex.Store({
       return state.IsWxBrowser = data;
     },
     SetAppName(state, data = '助家生活') {
-      Common.setCookie('ZJSH_WX_AppName', encodeURIComponent(data), 30, '/');
+      write('ZJSH_WX_AppName', encodeURIComponent(data));
       return state.AppName = data;
     },
-    // SetAPI(state, data) {
-    //   let api = '';
-    //   if(data === '0') {
-    //     api = 'http://192.168.1.191:3001/';
-    //   } else if(data === '1') {
-    //     api = 'http://copen.homepaas.com/';
-    //   } else if(data === '2') {
-    //     api = 'https://copen.zhujiash.com/';
-    //   } else if(data === '3') {
-    //     api = 'http://copen.zhujiash.com/';
-    //   }
-    //   return state.API = api;
-    // },
     SetToken(state, data = '') {
-      Common.setCookie('ZJSH_WX_Token', data, 30, '/');
+      write('ZJSH_WX_Token', data);
       return state.Token = data;
     },
     SetUserId(state, data = '') {
-      Common.setCookie('ZJSH_WX_UserId', data, 30, '/');
+      write('ZJSH_WX_UserId', data);
       return state.UserId = data;
     },
     SetOpenId(state, data = '') {
-      Common.setCookie('ZJSH_WX_OpenId', data, 1, '/');
+      write('ZJSH_WX_OpenId', data, 1, '/');
       return state.OpenId = data;
+    },
+    SetSpots(state, data = {}) {
+      Object.keys(data).forEach(value => {
+        state.Spots[value] = data[value];
+      });
+      return state.Spots;
     },
     SetDefaultAddressId(state, data = '') {
       data = data + '';
-      Common.setCookie('ZJSH_WX_DefaultAddressId', data, 30, '/');
+      write('ZJSH_WX_DefaultAddressId', data);
       return state.DefaultAddressId = data;
     },
-    SetUserInfo(state, data) {
+    SetUserInfo(state, data = {}) {
       return state.UserInfo = data;
     },
     SetCurrentPosition(state, data = '') {
-      Common.setCookie('ZJSH_WX_Position', encodeURIComponent(JSON.stringify(data)), 30, '/');
-      if(data && data.Longitude && data.Latitude) {
+      write('ZJSH_WX_Position', encodeURIComponent(JSON.stringify(data)));
+      if (data && data.Longitude && data.Latitude) {
         state.CurrentPosition.Longitude = data.Longitude || '';
         state.CurrentPosition.Latitude = data.Latitude || '';
       }
@@ -203,8 +200,8 @@ export default new Vuex.Store({
     SetIsLogin(state, data = '0') {
       return state.IsLogin = data;
     },
-    SetIsOpenLogin(state, data = '0') {
-      return state.IsOpenLogin = data;
+    SetAutoToLogin(state, data = '0') {
+      return state.AutoToLogin = data;
     },
     SetOrderFrom(state, data = '助家生活') {
       var orderFrom = '210';
@@ -233,36 +230,12 @@ export default new Vuex.Store({
     SetAddressAddedInfo(state, data) {
       return state.AddressAddedInfo = data;
     },
+    SetIsLinkToLogin(state, data) {
+      return state.IsLinkToLogin = !!data;
+    },
     SetROUTER_TO_TITLE(state, data) {
       return state.ROUTER_TO_TITLE = data;
     },
-    SetLoginCallbackCfg(state, data) {
-      return state.LoginCallbackCfg = {
-        Callback: data.callback || null,
-        RouterName: data.routerName || '',
-      }
-    },
-    InitAlertCallback(state) {
-      return state.AlertCfg.Callback = null;
-    },
   },
-  actions: {
-    SetAlertCfg(context, data) {
-      context.state.AlertCfg.Msg = data.alertMsg;
-      context.state.AlertCfg.Timeout = parseInt(data.alertTimeout);
-      context.state.AlertCfg.Callback = data.alertCallback;
-
-      if(context.state.AlertCfg.Msg) {
-        context.state.AlertCfg.Status = '1';
-      }
-      setTimeout(() => {
-        context.state.AlertCfg.Msg = '';
-        context.state.AlertCfg.Status = '0';
-
-        // 如果弹框因为点击遮罩而关闭，则不执行回调
-        context.state.AlertCfg.Callback && context.state.AlertCfg.Callback();
-        context.state.AlertCfg.Callback = null;
-      }, context.state.AlertCfg.Timeout);
-    }
-  }
+  actions
 });
