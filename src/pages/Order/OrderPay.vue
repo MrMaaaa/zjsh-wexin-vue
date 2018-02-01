@@ -111,6 +111,7 @@ export default {
   data() {
     return {
       orderId: '',
+      isSameOrderId: false, // 是否为同一个id，true：自动选择红包，false：不自动选择
       balance: '0', // 余额
       discountAmount: 0, // 活动折扣金额
       orderDetail: null,
@@ -165,15 +166,19 @@ export default {
     }
   },
   activated() {
-    this.orderId = this.$route.params.orderId;
     // 需要先设置红包为不可用，避免上一次的红包带来的错误
-    this.$store.commit('SetCouponSelected', {
-      NoUse: '1',
-    });
+    if (this.orderId !== this.$route.params.orderId) {
+      this.isSameOrderId = false;
+      this.$store.commit('SetCouponSelected', {
+        NoUse: '1',
+      });
+    } else {
+      this.isSameOrderId = true;
+    }
+
+    this.orderId = this.$route.params.orderId;
 
     window.clearInterval(this.interval);
-    this.getOrderDetail();
-    this.getUserSettlement();
     this.isBalancePay = '0';
     this.isWxPay = '0';
     this.isZfbPay = '0';
@@ -187,6 +192,9 @@ export default {
         message: false
       }
     };
+
+    // 先获取余额，再获取订单信息
+    this.getUserSettlement();
   },
   methods: {
     getOrderDetail() {
@@ -217,6 +225,7 @@ export default {
                 if (this.countdownTime <= 1) {
                   // 支付倒计时结束
                   window.clearInterval(this.interval);
+                  this.isExit = true;
                   this.routeTo({
                     name: 'order_detail',
                     params: {
@@ -234,7 +243,9 @@ export default {
             // 订金不参与活动与红包
             if (!this.orderDetail.DepositInfo || this.orderDetail.DepositInfo.DepositIsPayOff == '1') {
               this.getServiceActivity(this.orderDetail.TotalPrice);
-              this.getCouponList(this.orderDetail.Service.ServiceId);
+              if (!this.isSameOrderId) {
+                this.getCouponList(this.orderDetail.Service.ServiceId);
+              }
             }
           }
         })
@@ -290,6 +301,8 @@ export default {
               }
             }
           }
+
+          this.getOrderDetail();
         })
         .catch(err => {
           this.$alert(err.message || err.ErrorMsg);
@@ -530,7 +543,7 @@ export default {
           isBalancePay: '0',
         }
       } else {
-        if(Number(this.balance) < Number(this.orderDetail ? this.orderDetail.PayAmount : 0)) {
+        if(this.balance < this.payAmount) {
           return {
             isMultiple: '1',
             isBalancePay: '1',
@@ -604,6 +617,7 @@ export default {
         return Number((this.totalPayAmount - this.balanceAmount).toFixed(2));
       }
     },
+    // 支付需要的余额
     balanceAmount() {
       if(this.isBalancePay == '1' && this.isZfbPay == '0' && this.isWxPay == '0') {
         // 只用余额

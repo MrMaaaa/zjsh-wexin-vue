@@ -81,7 +81,6 @@ export default {
       let j = data;
       if (j) {
         this.isOpenBanner = '0';
-        alert(j);
         j = JSON.parse(j);
         if (j.Type == '0') {} else if (j.Type == '1') {
           switch (j.AppViewId) {

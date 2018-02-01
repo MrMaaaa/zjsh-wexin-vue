@@ -174,14 +174,23 @@ export default {
     }
   },
   activated() {
-    var that = this;
+    let that = this;
     this.ischanged++;
     // 当服务id不同时刷新数据
     let oldId = this.threeId;
     this.threeId = this.$route.params.id;
     this.pageData = ServiceInfo[this.threeId];
+
     document.title = this.pageData.title;
-    if(oldId !== this.threeId) {
+    // 解决ios下无法刷新title的问题
+    let iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 0);
+
+    if (oldId !== this.threeId) {
       this.serviceList.splice(0);
       this.getServicePrice();
     }

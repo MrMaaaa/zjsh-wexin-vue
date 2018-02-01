@@ -2,9 +2,9 @@
 <div class="textarea-wrapper" @click="onFocus($event)">
   <div class="textarea" :class="[textareaClasses]" :style="textareaStyle" contenteditable="true" ref="textarea" @input="onInput($event)" @focus="onFocus($event)" @blur="onBlur($event)">
   </div>
-  <div class="placeholder-wrapper">
-    <span class="placeholder" :class="[placeholderClasses]" :style="placeholderStyle" v-if="mPlaceholder && mText === '' && !isFocus">{{ mPlaceholder }}</span>
-    <slot class="placeholder" name="placeholder" v-if="mText === '' && !isFocus"></slot>
+  <div class="placeholder-wrapper" v-if="mText === '' && !isFocus">
+    <span class="placeholder" :class="[placeholderClasses]" :style="placeholderStyle" v-if="mPlaceholder">{{ mPlaceholder }}</span>
+    <slot class="placeholder" name="placeholder" v-else></slot>
   </div>
 </div>
 </template>
@@ -16,6 +16,9 @@ export default {
     return {
       isFocus: false
     }
+  },
+  activated() {
+    this.isFocus = false;
   },
   props: {
     mText: {

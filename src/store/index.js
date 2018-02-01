@@ -144,6 +144,8 @@ export default new Vuex.Store({
       errand: '同城跑腿',
       errand_order_detail: '订单详情',
       new_user_coupon: '新手红包',
+      user_info_edit: '我的信息',
+      user_nickname_edit: '修改昵称',
       user_about: '关于我们',
       user_connect_us: '联系我们',
       user_coupon: '我的红包',
@@ -152,7 +154,7 @@ export default new Vuex.Store({
       address_list: '服务地址',
       address_add: '添加服务地址',
       address_edit: '修改服务地址',
-      address_select: '选择你的位置',
+      address_select: '选择你的位置'
     },
   },
   mutations: {

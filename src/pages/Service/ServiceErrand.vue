@@ -601,6 +601,8 @@ export default {
 
         if (this.errandType === '0') {
           this.estimatedPrice = '';
+          this.showData.date = '请选择';
+          this.selData.date = '';
           this.$alert('该订单暂时无法提供服务，请联系客服');
         }
       }

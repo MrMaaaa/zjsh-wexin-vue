@@ -48,6 +48,7 @@ export default {
   },
   activated() {
     this.captcha = '';
+
   },
   methods: {
     clearPhone() {
@@ -102,6 +103,10 @@ export default {
     },
     initStatus() {
       this.isCaptcha = false;
+      // 测试环境下无需点击获取验证码
+      if (window.location.host.indexOf(':3001') > -1) {
+        this.isCaptcha = true;
+      }
       if (this.lastPhoneNumber !== this.phoneNumber) {
         clearInterval(this.sendCaptchaInterval);
         this.isCountdown = false;

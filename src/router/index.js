@@ -256,6 +256,15 @@ router.beforeEach((to, from, next) => {
     next(false);
   } else {
     document.title = ROUTER_TO_TITLE[to.name] || ROUTER_TO_TITLE['index'];
+
+    // 解决ios下无法刷新title的问题
+    let iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+    }, 0);
+
     next();
   }
 });

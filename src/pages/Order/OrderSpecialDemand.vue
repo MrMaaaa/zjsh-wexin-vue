@@ -11,7 +11,7 @@
         </span>
         <span class="item-name" v-if="!value.isDatetime">{{ value.name }}</span>
         <img class="icon-select selected" src="../../assets/images/order_selected.png">
-        <img class="icon-select no-selecte" src="../../assets/images/orders_choose.png">
+        <img class="icon-select no-select" src="../../assets/images/orders_choose.png">
       </a>
     </div>
   </section>
@@ -19,7 +19,7 @@
   <section class="demand">
     <header class="demand-title">备注留言</header>
 
-    <textarea class="demand-remarks" v-model="demand && demand.customeRemarks" :placeholder="demand.remarks"></textarea>
+    <textarea class="demand-remarks" v-model="demand.customeRemarks" :placeholder="demand.remarks"></textarea>
   </section>
 
   <div class="btn">
@@ -36,7 +36,7 @@ export default {
   name: 'order_special_demand',
   data() {
     return {
-      demand: null
+      demand: {}
     }
   },
   activated() {
@@ -132,7 +132,7 @@ $color_text_light: #666;
     {
       .list-item
       {
-        .no-selecte
+        .no-select
         {
           display: block;
         }
@@ -182,7 +182,7 @@ $color_text_light: #666;
         {
           display: block;
         }
-        .no-selecte
+        .no-select
         {
           display: none;
         }
@@ -204,7 +204,7 @@ $color_text_light: #666;
       {
         display: none;
       }
-      .no-selecte
+      .no-select
       {
         display: none;
       }

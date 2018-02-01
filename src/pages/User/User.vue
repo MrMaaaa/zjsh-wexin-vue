@@ -201,6 +201,7 @@ export default {
       } else if (newValue === '0') {
         this.balance = '0';
         this.couponCount = 0;
+        this.unreadMessageCount = 0;
       }
     }
   }
