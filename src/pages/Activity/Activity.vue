@@ -63,6 +63,8 @@ export default {
         this.$router.push({
           name: 'errand',
         });
+      } else if(item.ObjectApns.Title.indexOf('新春通知') > -1) {
+        window.location.href = item.ObjectApns.Url;
       }
     }
   },

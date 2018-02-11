@@ -35,9 +35,13 @@ export default {
     },
     routerToBanner() {
       this.close();
-      this.$router.push({
-        name: Utils.urlToRoute(this.url),
-      });
+      if (this.url.indexOf('activity/notify/index.html') > -1) {
+        window.location.href = this.url;
+      } else {
+        this.$router.push({
+          name: Utils.urlToRoute(this.url),
+        });
+      }
     }
   }
 }
