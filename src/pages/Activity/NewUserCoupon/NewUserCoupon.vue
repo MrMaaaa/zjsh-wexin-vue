@@ -294,7 +294,7 @@ export default {
     ...mapState(['ALERT_MSG']),
     isPhoneNumber() {
       //判断手机号是否正确
-      return /^1[34578]\d{9}$/.test(this.phoneNumber);
+      return /^1[345789]\d{9}$/.test(this.phoneNumber);
     }
   },
   filters: {

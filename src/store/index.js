@@ -132,6 +132,7 @@ export default new Vuex.Store({
       order_complaint_reason: '投诉理由',
       order_cancel_reason: '取消理由',
       order_pay_status: '支付信息',
+      order_recharge: '首充专享',
       order_recharge_detail: '充值信息',
       order_add_pay: '增加服务',
       order_pay: '订单支付',

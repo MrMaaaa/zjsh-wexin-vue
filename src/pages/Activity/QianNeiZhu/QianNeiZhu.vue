@@ -1,7 +1,8 @@
 <template>
 <div>
   <div class="wrapper">
-    <img class="bg-main" src="../../../../assets/static/images/activity/qnz_bg.png">
+    <!-- 下次修改图片修改参数 -->
+    <img class="bg-main" src="../../../../assets/static/images/activity/qnz_bg.png?v=100">
 
     <div class="click" @click="checkPhoneNumber"></div>
   </div>

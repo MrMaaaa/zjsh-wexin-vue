@@ -160,7 +160,7 @@ export default {
         this.$alert(this.ALERT_MSG.NAME_EMPTY);
       } else if (this.AddressAddedInfo.PhoneNumber === '') {
         this.$alert(this.ALERT_MSG.PHONE_EMPTY);
-      } else if (!/^1[3|4|5|7|8][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber)) {
+      } else if (!/^1[3|4|5|7|8|9][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber)) {
         this.$alert(this.ALERT_MSG.PHONE_ERROR);
       } else if (this.AddressAddedInfo.Address1 === '') {
         this.$alert(this.ALERT_MSG.ADDRESS_EMPTY);
@@ -231,7 +231,7 @@ export default {
   },
   computed: {
     isSaved() {
-      if(this.AddressAddedInfo.Contact && /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber) && this.AddressAddedInfo.Address1 && this.AddressAddedInfo.Address1Lng && this.AddressAddedInfo.Address1Lat && this.AddressAddedInfo.Address2) {
+      if(this.AddressAddedInfo.Contact && /^1[3|4|5|7|8|9][0-9]\d{8}$/.test(this.AddressAddedInfo.PhoneNumber) && this.AddressAddedInfo.Address1 && this.AddressAddedInfo.Address1Lng && this.AddressAddedInfo.Address1Lat && this.AddressAddedInfo.Address2) {
         return true;
       } else {
         return false;

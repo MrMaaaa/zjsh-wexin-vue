@@ -350,7 +350,7 @@ export default {
       .then(res => {
         this.$loading.close();
         this.orderStatus = res;
-        let reg = /1[3|4|5|7|8][0-9]\d{8}/ig;
+        let reg = /1[3|4|5|7|8|9][0-9]\d{8}/ig;
         this.orderStatus.DateStatus.forEach(value => {
           value.Status.forEach(val => {
             if (reg.test(val.Description)) {

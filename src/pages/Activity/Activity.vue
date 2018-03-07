@@ -1,7 +1,7 @@
 <template>
 <div>
   <div class="activity-list">
-    <router-link class="list-item" v-if="IsLogin == '0'" :to="{ name: 'new_user_coupon' }"><img src="../../../assets/static/images/activity/new_user_coupon.png"></router-link>
+    <router-link class="list-item" v-if="IsLogin == '0'" :to="{ name: 'new_user_coupon' }"><img src="../../../assets/static/images/activity/new_user_coupon.jpg"></router-link>
     <a class="list-item" v-for="item in activityList" @click="routeTo(item)"><img :src="item.ImageUrl"></a>
   </div>
 </div>

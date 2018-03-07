@@ -634,7 +634,13 @@ export default {
       {
         .item-img
         {
+          padding: 0;
           background: transparent;
+          img
+          {
+            width: 100%;
+            height: 100%;
+          }
         }
       }
     }

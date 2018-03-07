@@ -135,7 +135,7 @@ export default {
   computed: {
     ...mapState(['AppName', 'IsIos', 'ALERT_MSG']),
     isPhone() {
-      return /^1[3|4|5|7|8][0-9]\d{8}$/.test(this.phoneNumber);
+      return /^1[3|4|5|7|8|9][0-9]\d{8}$/.test(this.phoneNumber);
     },
     isSubmit() {
       if(this.isPhone && this.captcha && this.captcha.length == 4) {

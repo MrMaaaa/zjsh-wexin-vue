@@ -1,6 +1,6 @@
 <template>
 <div class="router-view">
-  <img class="img-bg" src="https://wap.zhujiash.com/activity/Recharge/static/img/recharge-bg.0c9697b.png">
+  <img class="img-bg" src="../../../../assets/static/images/activity/recharge_bg.png">
 
   <router-link :to="{ path: 'one_recharge/index' }" class="btn-receive"></router-link>
 </div>
